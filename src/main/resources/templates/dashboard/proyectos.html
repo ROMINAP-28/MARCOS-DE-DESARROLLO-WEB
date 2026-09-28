@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -29,9 +28,15 @@
         <aside class="dashboard-sidebar bg-white border-end">
             <div class="sidebar-profile">
                 <div class="user-avatar">{{ iniciales }}</div>
+
                 <div class="min-w-0">
-                    <div class="fw-semibold text-truncate">{{ usuario }}</div>
-                    <small class="text-secondary">Usuario</small>
+                    <div class="fw-semibold text-truncate">
+                        {{ usuario }}
+                    </div>
+
+                    <small class="text-secondary">
+                        Usuario
+                    </small>
                 </div>
             </div>
 
@@ -40,46 +45,58 @@
             <nav class="nav flex-column dashboard-nav"
                  aria-label="Navegación principal">
 
-                <a class="nav-link" th:href="@{/dashboard}">
+                <a class="nav-link"
+                   th:href="@{/dashboard}">
                     <i class="bi bi-grid-1x2"></i>
                     <span>Dashboard</span>
                 </a>
 
-                <a class="nav-link active" th:href="@{/proyectos}"
+                <a class="nav-link active"
+                   th:href="@{/proyectos}"
                    aria-current="page">
                     <i class="bi bi-folder"></i>
                     <span>Proyectos</span>
                 </a>
 
-                <a class="nav-link" th:href="@{/tareas}">
+                <a class="nav-link"
+                   th:href="@{/tareas}">
                     <i class="bi bi-check2-square"></i>
                     <span>Tareas</span>
                 </a>
 
-                <a class="nav-link" th:href="@{/equipo}">
+                <a class="nav-link"
+                   th:href="@{/equipo}">
                     <i class="bi bi-people"></i>
                     <span>Equipo</span>
                 </a>
 
-                <a class="nav-link" th:href="@{/reportes}">
+                <a class="nav-link"
+                   th:href="@{/reportes}">
                     <i class="bi bi-bar-chart"></i>
                     <span>Reportes</span>
                 </a>
 
-                <a class="nav-link" th:href="@{/configuracion}">
+                <a class="nav-link"
+                   th:href="@{/configuracion}">
                     <i class="bi bi-gear"></i>
                     <span>Configuración</span>
                 </a>
+
             </nav>
         </aside>
+
 
         <!-- Contenido principal de la página. -->
         <main class="dashboard-main flex-grow-1">
 
             <!-- Encabezado y acción para registrar proyectos. -->
             <section class="projects-heading">
+
                 <div>
-                    <h1 class="h3 fw-semibold mb-1">Mis proyectos</h1>
+                    <h1 class="h3 fw-semibold mb-1">
+                        Mis proyectos
+                    </h1>
+
                     <p class="text-secondary mb-0">
                         Organiza, administra y supervisa tus proyectos.
                     </p>
@@ -88,178 +105,315 @@
                 <button type="button"
                         class="btn btn-primary"
                         @click="abrirModal">
+
                     <i class="bi bi-plus-lg me-1"></i>
+
                     Nuevo proyecto
                 </button>
+
             </section>
+
 
             <!-- Indicadores de resumen de proyectos. -->
             <section class="row g-3 projects-summary"
                      aria-label="Resumen de proyectos">
 
                 <div class="col-6 col-xl-3">
+
                     <article class="card dashboard-stat-card h-100">
+
                         <div class="card-body">
-                            <p class="stat-label">Total de proyectos</p>
+
+                            <p class="stat-label">
+                                Total de proyectos
+                            </p>
+
                             <div class="stat-value text-primary">
                                 {{ proyectosFiltrados.length }}
                             </div>
-                            <small class="text-secondary">Registrados</small>
+
+                            <small class="text-secondary">
+                                Registrados
+                            </small>
+
                         </div>
+
                     </article>
+
                 </div>
 
+
                 <div class="col-6 col-xl-3">
+
                     <article class="card dashboard-stat-card h-100">
+
                         <div class="card-body">
-                            <p class="stat-label">En progreso</p>
+
+                            <p class="stat-label">
+                                En progreso
+                            </p>
+
                             <div class="stat-value text-primary">
                                 {{ contarEstado('En progreso') }}
                             </div>
-                            <small class="text-secondary">Actualmente activos</small>
+
+                            <small class="text-secondary">
+                                Actualmente activos
+                            </small>
+
                         </div>
+
                     </article>
+
                 </div>
 
+
                 <div class="col-6 col-xl-3">
+
                     <article class="card dashboard-stat-card h-100">
+
                         <div class="card-body">
-                            <p class="stat-label">Completados</p>
+
+                            <p class="stat-label">
+                                Completados
+                            </p>
+
                             <div class="stat-value text-success">
                                 {{ contarEstado('Completado') }}
                             </div>
-                            <small class="text-secondary">Finalizados</small>
+
+                            <small class="text-secondary">
+                                Finalizados
+                            </small>
+
                         </div>
+
                     </article>
+
                 </div>
 
+
                 <div class="col-6 col-xl-3">
+
                     <article class="card dashboard-stat-card h-100">
+
                         <div class="card-body">
-                            <p class="stat-label">Planificados</p>
+
+                            <p class="stat-label">
+                                Planificados
+                            </p>
+
                             <div class="stat-value text-warning">
                                 {{ contarEstado('Planificado') }}
                             </div>
-                            <small class="text-secondary">Pendientes de iniciar</small>
+
+                            <small class="text-secondary">
+                                Pendientes de iniciar
+                            </small>
+
                         </div>
+
                     </article>
+
                 </div>
+
             </section>
+
 
             <!-- Búsqueda y filtros del listado. -->
             <section class="card projects-toolbar">
+
                 <div class="card-body">
+
                     <div class="row g-3 align-items-center">
 
                         <div class="col-12 col-lg-6">
+
                             <label for="buscarProyecto"
                                    class="form-label visually-hidden">
                                 Buscar proyectos
                             </label>
+
                             <div class="input-group">
+
                                 <span class="input-group-text bg-white">
                                     <i class="bi bi-search"></i>
                                 </span>
+
                                 <input id="buscarProyecto"
                                        type="search"
                                        class="form-control"
                                        placeholder="Buscar por nombre o descripción..."
                                        v-model.trim="busqueda">
+
                             </div>
+
                         </div>
 
+
                         <div class="col-12 col-sm-6 col-lg-3">
+
                             <label for="filtroEstado"
                                    class="form-label visually-hidden">
                                 Filtrar por estado
                             </label>
+
                             <select id="filtroEstado"
                                     class="form-select"
                                     v-model="filtroEstado">
-                                <option value="">Todos los estados</option>
-                                <option value="Planificado">Planificado</option>
-                                <option value="En progreso">En progreso</option>
-                                <option value="Completado">Completado</option>
-                                <option value="Atrasado">Atrasado</option>
+
+                                <option value="">
+                                    Todos los estados
+                                </option>
+
+                                <option value="Planificado">
+                                    Planificado
+                                </option>
+
+                                <option value="En progreso">
+                                    En progreso
+                                </option>
+
+                                <option value="Completado">
+                                    Completado
+                                </option>
+
+                                <option value="Atrasado">
+                                    Atrasado
+                                </option>
+
                             </select>
+
                         </div>
 
+
                         <div class="col-12 col-sm-6 col-lg-3">
+
                             <label for="filtroPrioridad"
                                    class="form-label visually-hidden">
                                 Filtrar por prioridad
                             </label>
+
                             <select id="filtroPrioridad"
                                     class="form-select"
                                     v-model="filtroPrioridad">
-                                <option value="">Todas las prioridades</option>
-                                <option value="Alta">Alta</option>
-                                <option value="Media">Media</option>
-                                <option value="Baja">Baja</option>
+
+                                <option value="">
+                                    Todas las prioridades
+                                </option>
+
+                                <option value="Alta">
+                                    Alta
+                                </option>
+
+                                <option value="Media">
+                                    Media
+                                </option>
+
+                                <option value="Baja">
+                                    Baja
+                                </option>
+
                             </select>
+
                         </div>
+
                     </div>
+
                 </div>
+
             </section>
+
 
             <!-- Listado dinámico de proyectos. -->
             <section class="projects-list-section">
+
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h2 class="h5 fw-semibold mb-0">Listado de proyectos</h2>
+
+                    <h2 class="h5 fw-semibold mb-0">
+                        Listado de proyectos
+                    </h2>
+
                     <span class="text-secondary small">
                         {{ proyectosFiltrados.length }} resultado(s)
                     </span>
+
                 </div>
+
 
                 <div v-if="proyectosFiltrados.length > 0"
                      class="row g-3">
+
 
                     <div v-for="proyecto in proyectosFiltrados"
                          :key="proyecto.id"
                          class="col-12 col-xl-6">
 
+
                         <article class="card project-card h-100">
+
                             <div class="card-body">
+
 
                                 <div class="d-flex justify-content-between
                                             align-items-start gap-3 mb-2">
+
                                     <div class="min-w-0">
+
                                         <h3 class="h5 fw-semibold mb-1">
                                             {{ proyecto.nombre }}
                                         </h3>
+
                                         <p class="text-secondary small mb-0">
                                             {{ proyecto.descripcion }}
                                         </p>
+
                                     </div>
+
 
                                     <span class="badge"
                                           :class="claseEstado(proyecto.estado)">
+
                                         {{ proyecto.estado }}
+
                                     </span>
+
                                 </div>
 
+
                                 <div class="project-meta">
+
                                     <span>
                                         <i class="bi bi-person me-1"></i>
                                         {{ proyecto.responsable }}
                                     </span>
+
                                     <span>
                                         <i class="bi bi-people me-1"></i>
+
                                         {{ proyecto.integrantes.length }}
+
                                         integrante(s)
                                     </span>
+
                                 </div>
 
+
                                 <div class="mt-3">
+
                                     <div class="d-flex justify-content-between
                                                 align-items-center mb-2">
+
                                         <small class="fw-semibold">
                                             Progreso
                                         </small>
+
                                         <small class="fw-semibold">
                                             {{ proyecto.progreso }}%
                                         </small>
+
                                     </div>
+
 
                                     <div class="progress project-progress"
                                          role="progressbar"
@@ -267,106 +421,175 @@
                                          :aria-valuenow="proyecto.progreso"
                                          aria-valuemin="0"
                                          aria-valuemax="100">
+
                                         <div class="progress-bar"
                                              :style="{ width: proyecto.progreso + '%' }">
                                         </div>
+
                                     </div>
+
                                 </div>
 
+
                                 <div class="project-meta mt-3">
+
                                     <span>
                                         <i class="bi bi-calendar-event me-1"></i>
-                                        Inicio: {{ fechaLegible(proyecto.fechaInicio) }}
+
+                                        Inicio:
+                                        {{ fechaLegible(proyecto.fechaInicio) }}
                                     </span>
+
                                     <span>
                                         <i class="bi bi-calendar-check me-1"></i>
-                                        Fin: {{ fechaLegible(proyecto.fechaFin) }}
+
+                                        Fin:
+                                        {{ fechaLegible(proyecto.fechaFin) }}
                                     </span>
+
                                 </div>
+
 
                                 <div class="d-flex justify-content-between
                                             align-items-center mt-3 pt-3 border-top">
+
                                     <span class="badge"
                                           :class="clasePrioridad(proyecto.prioridad)">
+
                                         Prioridad {{ proyecto.prioridad }}
+
                                     </span>
 
+
                                     <div class="d-flex gap-2">
+
                                         <button type="button"
                                                 class="btn btn-sm btn-outline-primary"
                                                 @click="editarProyecto(proyecto)">
+
                                             <i class="bi bi-pencil me-1"></i>
+
                                             Editar
+
                                         </button>
+
 
                                         <button type="button"
                                                 class="btn btn-sm btn-outline-secondary"
                                                 @click="verProyecto(proyecto)">
+
                                             <i class="bi bi-eye me-1"></i>
+
                                             Ver
+
                                         </button>
+
                                     </div>
+
                                 </div>
+
                             </div>
+
                         </article>
+
                     </div>
+
                 </div>
 
+
                 <!-- Estado vacío cuando no hay coincidencias. -->
-                <div v-else class="card projects-empty">
+                <div v-else
+                     class="card projects-empty">
+
                     <div class="card-body text-center py-5">
+
                         <i class="bi bi-folder2-open empty-icon"></i>
-                        <h3 class="h5 mt-3">No se encontraron proyectos</h3>
+
+                        <h3 class="h5 mt-3">
+                            No se encontraron proyectos
+                        </h3>
+
                         <p class="text-secondary mb-3">
                             Prueba cambiando los filtros o registra un proyecto.
                         </p>
+
                         <button type="button"
                                 class="btn btn-primary"
                                 @click="abrirModal">
+
                             <i class="bi bi-plus-lg me-1"></i>
+
                             Crear proyecto
+
                         </button>
+
                     </div>
+
                 </div>
+
             </section>
+
         </main>
+
     </div>
+
 
     <!-- Vue.js: ventana modal flotante para crear o editar proyectos. -->
     <div v-if="mostrarModal"
          class="project-modal-backdrop"
          @click.self="cerrarModal">
 
+
         <section class="project-modal"
                  role="dialog"
                  aria-modal="true"
                  aria-labelledby="tituloModal">
 
+
             <div class="project-modal-header">
+
                 <div>
-                    <h2 id="tituloModal" class="h5 fw-semibold mb-1">
-                        {{ modoEdicion ? 'Editar proyecto' : 'Nuevo proyecto' }}
+
+                    <h2 id="tituloModal"
+                        class="h5 fw-semibold mb-1">
+
+                        {{ modoEdicion
+                            ? 'Editar proyecto'
+                            : 'Nuevo proyecto' }}
+
                     </h2>
+
                     <p class="text-secondary small mb-0">
                         Completa los datos de planificación y del equipo.
                     </p>
+
                 </div>
+
 
                 <button type="button"
                         class="btn-close"
                         aria-label="Cerrar"
                         @click="cerrarModal">
                 </button>
+
             </div>
+
 
             <!-- Vue.js: formulario reactivo con validación HTML. -->
             <form @submit.prevent="guardarProyecto">
+
                 <div class="project-modal-body">
 
+
                     <div class="mb-3">
-                        <label for="nombreProyecto" class="form-label">
+
+                        <label for="nombreProyecto"
+                               class="form-label">
+
                             Nombre del proyecto *
+
                         </label>
+
                         <input id="nombreProyecto"
                                type="text"
                                class="form-control"
@@ -374,144 +597,474 @@
                                placeholder="Ej. Plataforma de gestión académica"
                                v-model.trim="formulario.nombre"
                                required>
+
                     </div>
 
+
                     <div class="mb-3">
-                        <label for="descripcionProyecto" class="form-label">
+
+                        <label for="descripcionProyecto"
+                               class="form-label">
+
                             Descripción *
+
                         </label>
+
                         <textarea id="descripcionProyecto"
                                   class="form-control"
                                   rows="3"
                                   maxlength="500"
                                   placeholder="Describe el objetivo del proyecto..."
                                   v-model.trim="formulario.descripcion"
-                                  required>
-                        </textarea>
+                                  required></textarea>
+
                     </div>
 
+
                     <div class="row g-3 mb-3">
+
                         <div class="col-12 col-md-6">
-                            <label for="fechaInicio" class="form-label">
+
+                            <label for="fechaInicio"
+                                   class="form-label">
+
                                 Fecha de inicio *
+
                             </label>
+
                             <input id="fechaInicio"
                                    type="date"
                                    class="form-control"
                                    v-model="formulario.fechaInicio"
                                    required>
+
                         </div>
 
+
                         <div class="col-12 col-md-6">
-                            <label for="fechaFin" class="form-label">
+
+                            <label for="fechaFin"
+                                   class="form-label">
+
                                 Fecha de finalización *
+
                             </label>
+
                             <input id="fechaFin"
                                    type="date"
                                    class="form-control"
                                    :min="formulario.fechaInicio || undefined"
                                    v-model="formulario.fechaFin"
                                    required>
+
                         </div>
+
                     </div>
 
+
                     <div class="row g-3 mb-3">
+
                         <div class="col-12 col-md-6">
-                            <label for="prioridadProyecto" class="form-label">
+
+                            <label for="prioridadProyecto"
+                                   class="form-label">
+
                                 Prioridad *
+
                             </label>
+
                             <select id="prioridadProyecto"
                                     class="form-select"
                                     v-model="formulario.prioridad"
                                     required>
+
                                 <option disabled value="">
                                     Seleccionar prioridad
                                 </option>
-                                <option value="Alta">Alta</option>
-                                <option value="Media">Media</option>
-                                <option value="Baja">Baja</option>
+
+                                <option value="Alta">
+                                    Alta
+                                </option>
+
+                                <option value="Media">
+                                    Media
+                                </option>
+
+                                <option value="Baja">
+                                    Baja
+                                </option>
+
                             </select>
+
                         </div>
 
+
                         <div class="col-12 col-md-6">
-                            <label for="responsableProyecto" class="form-label">
+
+                            <label for="responsableProyecto"
+                                   class="form-label">
+
                                 Responsable *
+
                             </label>
+
                             <select id="responsableProyecto"
                                     class="form-select"
                                     v-model="formulario.responsable"
                                     required>
+
                                 <option disabled value="">
                                     Seleccionar responsable
                                 </option>
+
                                 <option v-for="persona in equipoDisponible"
                                         :key="persona"
                                         :value="persona">
+
                                     {{ persona }}
+
                                 </option>
+
                             </select>
+
                         </div>
+
                     </div>
 
+
                     <div class="mb-2">
-                        <label for="integrantesProyecto" class="form-label">
+
+                        <label for="integrantesProyecto"
+                               class="form-label">
+
                             Integrantes del proyecto
+
                         </label>
+
                         <select id="integrantesProyecto"
                                 class="form-select"
                                 v-model="formulario.integrantes"
                                 multiple
                                 size="4"
                                 aria-describedby="ayudaIntegrantes">
+
                             <option v-for="persona in equipoDisponible"
                                     :key="persona"
                                     :value="persona">
+
                                 {{ persona }}
+
                             </option>
+
                         </select>
-                        <div id="ayudaIntegrantes" class="form-text">
+
+
+                        <div id="ayudaIntegrantes"
+                             class="form-text">
+
                             Mantén presionada la tecla Ctrl para seleccionar
                             varios integrantes.
+
                         </div>
+
                     </div>
+
 
                     <div v-if="errorFormulario"
                          class="alert alert-danger mt-3 mb-0"
                          role="alert">
+
                         {{ errorFormulario }}
+
                     </div>
+
                 </div>
 
+
                 <div class="project-modal-footer">
+
                     <button type="button"
                             class="btn btn-outline-secondary"
                             @click="cerrarModal">
+
                         Cancelar
+
                     </button>
 
-                    <button type="submit" class="btn btn-primary">
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
                         <i class="bi bi-check2 me-1"></i>
-                        {{ modoEdicion ? 'Guardar cambios' : 'Crear proyecto' }}
+
+                        {{ modoEdicion
+                            ? 'Guardar cambios'
+                            : 'Crear proyecto' }}
+
                     </button>
+
                 </div>
+
             </form>
+
         </section>
+
     </div>
+
+
+    <!-- ========================================================= -->
+    <!-- MIEMBRO 3: DETALLE DEL PROYECTO                           -->
+    <!-- ========================================================= -->
+
+    <!--
+        Este bloque se agregó para que el botón "Ver"
+        pueda mostrar la información completa del proyecto
+        obtenida mediante la API REST.
+    -->
+    <div v-if="mostrarDetalle && detalleSeleccionado"
+         class="project-modal-backdrop"
+         @click.self="cerrarDetalle">
+
+
+        <section class="project-modal"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="detalleProyectoTitulo">
+
+
+            <div class="project-modal-header">
+
+                <div>
+
+                    <h2 id="detalleProyectoTitulo"
+                        class="h5 fw-semibold mb-1">
+
+                        {{ detalleSeleccionado.nombre }}
+
+                    </h2>
+
+                    <p class="text-secondary small mb-0">
+
+                        Detalle del proyecto
+
+                    </p>
+
+                </div>
+
+
+                <button type="button"
+                        class="btn-close"
+                        aria-label="Cerrar"
+                        @click="cerrarDetalle">
+
+                </button>
+
+            </div>
+
+
+            <div class="project-modal-body">
+
+                <div class="mb-3">
+
+                    <label class="form-label fw-semibold">
+                        Descripción
+                    </label>
+
+                    <p class="mb-0">
+                        {{ detalleSeleccionado.descripcion }}
+                    </p>
+
+                </div>
+
+
+                <div class="row g-3">
+
+
+                    <div class="col-12 col-md-6">
+
+                        <div class="border rounded p-3 h-100">
+
+                            <small class="text-secondary d-block">
+                                Estado
+                            </small>
+
+                            <span class="badge mt-1"
+                                  :class="claseEstado(detalleSeleccionado.estado)">
+
+                                {{ detalleSeleccionado.estado }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-12 col-md-6">
+
+                        <div class="border rounded p-3 h-100">
+
+                            <small class="text-secondary d-block">
+                                Prioridad
+                            </small>
+
+                            <span class="badge mt-1"
+                                  :class="clasePrioridad(detalleSeleccionado.prioridad)">
+
+                                {{ detalleSeleccionado.prioridad }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-12 col-md-6">
+
+                        <div class="border rounded p-3 h-100">
+
+                            <small class="text-secondary d-block">
+                                Responsable
+                            </small>
+
+                            <strong>
+                                {{ detalleSeleccionado.responsable }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-12 col-md-6">
+
+                        <div class="border rounded p-3 h-100">
+
+                            <small class="text-secondary d-block">
+                                Progreso
+                            </small>
+
+                            <strong>
+                                {{ detalleSeleccionado.progreso }}%
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-12 col-md-6">
+
+                        <div class="border rounded p-3 h-100">
+
+                            <small class="text-secondary d-block">
+                                Fecha de inicio
+                            </small>
+
+                            <strong>
+                                {{ fechaLegible(detalleSeleccionado.fechaInicio) }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-12 col-md-6">
+
+                        <div class="border rounded p-3 h-100">
+
+                            <small class="text-secondary d-block">
+                                Fecha de finalización
+                            </small>
+
+                            <strong>
+                                {{ fechaLegible(detalleSeleccionado.fechaFin) }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-12">
+
+                        <div class="border rounded p-3">
+
+                            <small class="text-secondary d-block mb-2">
+                                Integrantes
+                            </small>
+
+                            <div v-if="detalleSeleccionado.integrantes &&
+                                      detalleSeleccionado.integrantes.length > 0"
+                                 class="d-flex flex-wrap gap-2">
+
+                                <span v-for="integrante in detalleSeleccionado.integrantes"
+                                      :key="integrante"
+                                      class="badge text-bg-light border">
+
+                                    {{ integrante }}
+
+                                </span>
+
+                            </div>
+
+                            <span v-else
+                                  class="text-secondary">
+
+                                Sin integrantes registrados.
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <div class="project-modal-footer">
+
+                <button type="button"
+                        class="btn btn-secondary"
+                        @click="cerrarDetalle">
+
+                    Cerrar
+
+                </button>
+
+            </div>
+
+        </section>
+
+    </div>
+
 
     <!-- Vue.js: aviso de confirmación tras crear o editar. -->
     <div v-if="mensajeExito"
          class="project-toast alert alert-success shadow"
          role="status">
+
         <i class="bi bi-check-circle-fill me-2"></i>
+
         {{ mensajeExito }}
+
     </div>
+
 </div>
+
 
 <!-- Vue.js: framework reactivo. -->
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
+
 <!-- Vue.js: lógica independiente de la página. -->
 <script th:src="@{/js/proyectos.js}"></script>
+
 
 </body>
 </html>
