@@ -1,5 +1,5 @@
 
-/* Vue.js: inicializa la lógica interactiva de Proyectos. */
+/* Vue.js + API REST de Spring Boot. */
 const { createApp } = Vue;
 
 createApp({
@@ -10,108 +10,41 @@ createApp({
             filtroEstado: '',
             filtroPrioridad: '',
             mostrarModal: false,
+            mostrarDetalle: false,
+            detalleSeleccionado: null,
             modoEdicion: false,
             idEdicion: null,
             errorFormulario: '',
             mensajeExito: '',
-
-            // Datos de demostración hasta integrar la API REST.
-            equipoDisponible: [
-                'María López',
-                'Carlos Torres',
-                'Ana García',
-                'José Ramírez',
-                'Brayan Quispe'
-            ],
-
-            proyectos: [
-                {
-                    id: 1,
-                    nombre: 'Plataforma web colaborativa',
-                    descripcion: 'Sistema para organizar equipos, tareas y proyectos.',
-                    fechaInicio: '2026-09-10',
-                    fechaFin: '2026-10-30',
-                    prioridad: 'Alta',
-                    responsable: 'María López',
-                    integrantes: ['María López', 'Carlos Torres', 'Ana García'],
-                    estado: 'En progreso',
-                    progreso: 65
-                },
-                {
-                    id: 2,
-                    nombre: 'Sistema de inventario',
-                    descripcion: 'Aplicación para administrar productos y existencias.',
-                    fechaInicio: '2026-09-15',
-                    fechaFin: '2026-11-15',
-                    prioridad: 'Media',
-                    responsable: 'Carlos Torres',
-                    integrantes: ['Carlos Torres', 'José Ramírez'],
-                    estado: 'Planificado',
-                    progreso: 0
-                },
-                {
-                    id: 3,
-                    nombre: 'Portal de reportes',
-                    descripcion: 'Panel de consulta y generación de informes.',
-                    fechaInicio: '2026-08-01',
-                    fechaFin: '2026-09-20',
-                    prioridad: 'Baja',
-                    responsable: 'Ana García',
-                    integrantes: ['Ana García', 'Brayan Quispe'],
-                    estado: 'Completado',
-                    progreso: 100
-                }
-            ],
-
-            // Vue.js: modelo reactivo del formulario.
-            formulario: thisFormularioVacio()
+            cargando: true,
+            equipoDisponible: ['María López', 'Carlos Torres', 'Ana García', 'José Ramírez', 'Brayan Quispe'],
+            proyectos: [],
+            formulario: this.formularioVacio()
         };
     },
 
     computed: {
-        // Vue.js: filtra proyectos por búsqueda, estado y prioridad.
         proyectosFiltrados() {
             const termino = this.busqueda.toLowerCase();
-
             return this.proyectos.filter(proyecto => {
-                const coincideTexto =
-                    proyecto.nombre.toLowerCase().includes(termino) ||
-                    proyecto.descripcion.toLowerCase().includes(termino);
-
-                const coincideEstado =
-                    !this.filtroEstado ||
-                    proyecto.estado === this.filtroEstado;
-
-                const coincidePrioridad =
-                    !this.filtroPrioridad ||
-                    proyecto.prioridad === this.filtroPrioridad;
-
-                return coincideTexto && coincideEstado && coincidePrioridad;
+                const texto = `${proyecto.nombre} ${proyecto.descripcion}`.toLowerCase();
+                return texto.includes(termino) &&
+                    (!this.filtroEstado || proyecto.estado === this.filtroEstado) &&
+                    (!this.filtroPrioridad || proyecto.prioridad === this.filtroPrioridad);
             });
         },
 
-        // Vue.js: calcula las iniciales para el avatar del usuario.
         iniciales() {
-            return this.usuario
-                .trim()
-                .split(/\s+/)
-                .slice(0, 2)
-                .map(palabra => palabra.charAt(0).toUpperCase())
-                .join('');
+            return this.usuario.trim().split(/\s+/).slice(0, 2)
+                .map(p => p.charAt(0).toUpperCase()).join('');
         }
     },
 
-    methods: {
-        // Vue.js: abre el modal en modo de creación.
-        abrirModal() {
-            this.modoEdicion = false;
-            this.idEdicion = null;
-            this.formulario = this.formularioVacio();
-            this.errorFormulario = '';
-            this.mostrarModal = true;
-        },
+    mounted() {
+        this.cargarProyectos();
+    },
 
-        // Vue.js: devuelve un formulario limpio.
+    methods: {
         formularioVacio() {
             return {
                 nombre: '',
@@ -124,15 +57,52 @@ createApp({
             };
         },
 
-        // Vue.js: cierra el modal y limpia el mensaje de validación.
+        async cargarProyectos() {
+            this.cargando = true;
+
+            try {
+                const respuesta = await fetch('/api/miembro3/proyectos');
+
+                if (!respuesta.ok) {
+                    throw new Error('No se pudieron cargar los proyectos.');
+                }
+
+                this.proyectos = await respuesta.json();
+
+            } catch (error) {
+                this.errorFormulario = error.message;
+
+            } finally {
+                this.cargando = false;
+            }
+        },
+
+        abrirModal() {
+            this.modoEdicion = false;
+            this.idEdicion = null;
+            this.formulario = this.formularioVacio();
+            this.errorFormulario = '';
+            this.mostrarModal = true;
+        },
+
         cerrarModal() {
             this.mostrarModal = false;
             this.errorFormulario = '';
         },
 
-        // Vue.js: registra un proyecto o actualiza uno existente.
-        guardarProyecto() {
+        async guardarProyecto() {
             this.errorFormulario = '';
+
+            if (!this.formulario.nombre ||
+                !this.formulario.descripcion ||
+                !this.formulario.fechaInicio ||
+                !this.formulario.fechaFin ||
+                !this.formulario.prioridad ||
+                !this.formulario.responsable) {
+
+                this.errorFormulario = 'Completa todos los campos obligatorios.';
+                return;
+            }
 
             if (this.formulario.fechaFin < this.formulario.fechaInicio) {
                 this.errorFormulario =
@@ -140,135 +110,98 @@ createApp({
                 return;
             }
 
-            if (!this.formulario.nombre || !this.formulario.descripcion) {
-                this.errorFormulario =
-                    'Completa el nombre y la descripción del proyecto.';
-                return;
-            }
+            try {
+                const respuesta = await fetch('/api/miembro3/proyectos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(this.formulario)
+                });
 
-            if (!this.formulario.responsable || !this.formulario.prioridad) {
-                this.errorFormulario =
-                    'Selecciona una prioridad y un responsable.';
-                return;
-            }
-
-            if (this.modoEdicion) {
-                const indice = this.proyectos.findIndex(
-                    proyecto => proyecto.id === this.idEdicion
-                );
-
-                if (indice !== -1) {
-                    const proyectoAnterior = this.proyectos[indice];
-
-                    this.proyectos[indice] = {
-                        ...proyectoAnterior,
-                        ...this.formulario,
-                        integrantes: [...this.formulario.integrantes]
-                    };
+                if (!respuesta.ok) {
+                    throw new Error('No se pudo registrar el proyecto.');
                 }
 
-                this.mensajeExito = 'Proyecto actualizado correctamente.';
-            } else {
-                const nuevoProyecto = {
-                    id: Date.now(),
-                    ...this.formulario,
-                    integrantes: [...this.formulario.integrantes],
-                    estado: 'Planificado',
-                    progreso: 0
-                };
+                const nuevo = await respuesta.json();
 
-                this.proyectos.unshift(nuevoProyecto);
+                this.proyectos.unshift(nuevo);
+
+                this.cerrarModal();
+
                 this.mensajeExito = 'Proyecto creado correctamente.';
-            }
 
-            this.cerrarModal();
-            this.limpiarMensajeLuego();
+            } catch (error) {
+                this.errorFormulario = error.message;
+            }
         },
 
-        // Vue.js: prepara los datos de un proyecto para edición.
         editarProyecto(proyecto) {
             this.modoEdicion = true;
             this.idEdicion = proyecto.id;
-            this.errorFormulario = '';
 
             this.formulario = {
-                nombre: proyecto.nombre,
-                descripcion: proyecto.descripcion,
-                fechaInicio: proyecto.fechaInicio,
-                fechaFin: proyecto.fechaFin,
-                prioridad: proyecto.prioridad,
-                responsable: proyecto.responsable,
-                integrantes: [...proyecto.integrantes]
+                ...proyecto,
+                integrantes: [...(proyecto.integrantes || [])]
             };
+
+            this.errorFormulario =
+                'La edición de proyectos queda preparada para conectarse al CRUD de la base de datos del grupo.';
 
             this.mostrarModal = true;
         },
 
-        // Vue.js: muestra una vista informativa básica del proyecto.
-        verProyecto(proyecto) {
-            alert(
-                'Proyecto: ' + proyecto.nombre +
-                '\nEstado: ' + proyecto.estado +
-                '\nResponsable: ' + proyecto.responsable +
-                '\nProgreso: ' + proyecto.progreso + '%'
-            );
+        async verProyecto(proyecto) {
+            try {
+                const respuesta =
+                    await fetch('/api/miembro3/proyectos/' + proyecto.id);
+
+                if (!respuesta.ok) {
+                    throw new Error('No se pudo obtener el detalle.');
+                }
+
+                this.detalleSeleccionado = await respuesta.json();
+                this.mostrarDetalle = true;
+
+            } catch (error) {
+                this.errorFormulario = error.message;
+            }
         },
 
-        // Vue.js: cuenta los proyectos según su estado.
+        cerrarDetalle() {
+            this.mostrarDetalle = false;
+            this.detalleSeleccionado = null;
+        },
+
         contarEstado(estado) {
-            return this.proyectosFiltrados.filter(
-                proyecto => proyecto.estado === estado
-            ).length;
+            return this.proyectosFiltrados
+                .filter(p => p.estado === estado)
+                .length;
         },
 
-        // Bootstrap: aplica un color según el estado del proyecto.
         claseEstado(estado) {
-            const clases = {
+            return ({
                 'Planificado': 'text-bg-secondary',
                 'En progreso': 'text-bg-primary',
                 'Completado': 'text-bg-success',
                 'Atrasado': 'text-bg-danger'
-            };
-
-            return clases[estado] || 'text-bg-secondary';
+            })[estado] || 'text-bg-secondary';
         },
 
-        // Bootstrap: aplica un color según la prioridad.
         clasePrioridad(prioridad) {
-            const clases = {
+            return ({
                 'Alta': 'text-bg-danger',
                 'Media': 'text-bg-warning',
                 'Baja': 'text-bg-success'
-            };
-
-            return clases[prioridad] || 'text-bg-secondary';
+            })[prioridad] || 'text-bg-secondary';
         },
 
-        // Vue.js: convierte una fecha ISO en formato día/mes/año.
         fechaLegible(fecha) {
             if (!fecha) return 'Sin fecha';
 
             const [anio, mes, dia] = fecha.split('-');
-            return `${dia}/${mes}/${anio}`;
-        },
 
-        // Vue.js: limpia el mensaje de éxito al siguiente cambio de vista.
-        limpiarMensajeLuego() {
-            // El mensaje se mantiene visible hasta que se cierre manualmente
-            // o se implemente una notificación temporal en la siguiente etapa.
+            return `${dia}/${mes}/${anio}`;
         }
     }
 }).mount('#proyectosApp');
-
-// JavaScript: crea el modelo vacío inicial fuera de Vue.
-function thisFormularioVacio() {
-    return {
-        nombre: '',
-        descripcion: '',
-        fechaInicio: '',
-        fechaFin: '',
-        prioridad: '',
-        responsable: '',
-        integrantes: []
-    };
-}
