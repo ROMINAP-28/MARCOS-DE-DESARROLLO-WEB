@@ -1,0 +1,511 @@
+
+/*------------ESTILOS DEL DASHBOARD--------*/
+
+/* CSS: define colores y valores reutilizables para el dashboard. */
+:root {
+    --dash-primary: #2563eb;
+    --dash-primary-light: #eff6ff;
+    --dash-text: #1e293b;
+    --dash-muted: #64748b;
+    --dash-border: #e2e8f0;
+    --dash-background: #f5f7fb;
+    --dash-card: #ffffff;
+}
+
+/* CSS: establece el fondo y el color general del área privada. */
+body {
+    background: var(--dash-background);
+    color: var(--dash-text);
+}
+
+/* Bootstrap + CSS: organiza la estructura lateral y principal. */
+#dashboardApp {
+    padding: 0;
+    background: var(--dash-background);
+}
+
+/* CSS: ajusta la altura y distribución de las columnas del dashboard. */
+.dashboard-layout {
+    min-height: calc(100vh - 170px);
+    margin: 0;
+}
+
+/* CSS: define el aspecto de la barra lateral. */
+.dashboard-sidebar {
+    width: 250px;
+    flex: 0 0 250px;
+    padding: 24px 16px;
+    background: var(--dash-card);
+    border-right: 1px solid var(--dash-border);
+}
+
+/* CSS: alinea el avatar y los datos del usuario. */
+.sidebar-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 58px;
+    padding: 4px 8px 16px;
+}
+
+/* CSS: presenta un avatar circular con iniciales. */
+.user-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    border-radius: 50%;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+/* CSS: separa visualmente el perfil del menú. */
+.dashboard-sidebar hr {
+    margin: 4px 0 18px;
+    border-color: var(--dash-border);
+    opacity: 1;
+}
+
+/* CSS: organiza las opciones de navegación. */
+.dashboard-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Bootstrap + CSS: da forma uniforme a cada opción del menú. */
+.dashboard-nav .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    padding: 10px 12px;
+    border-radius: 9px;
+    color: #475569;
+    font-size: 0.94rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+/* CSS: resalta la opción al pasar el cursor. */
+.dashboard-nav .nav-link:hover {
+    background: #f1f5f9;
+    color: var(--dash-primary);
+}
+
+/* CSS: identifica la sección seleccionada en el menú. */
+.dashboard-nav .nav-link.active {
+    background: var(--dash-primary-light);
+    color: var(--dash-primary);
+    font-weight: 600;
+}
+
+/* Bootstrap Icons: alinea y unifica el tamaño de los iconos. */
+.dashboard-nav .bi {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 21px;
+    min-width: 21px;
+    font-size: 1.1rem;
+}
+
+/* CSS: configura el área principal y sus márgenes. */
+.dashboard-main {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 30px 32px;
+}
+
+/* CSS: establece jerarquía tipográfica para el saludo. */
+.dashboard-welcome h1 {
+    color: var(--dash-text);
+    font-size: clamp(1.4rem, 2vw, 1.85rem);
+    letter-spacing: -0.035em;
+}
+
+/* CSS: suaviza el texto secundario del saludo. */
+.dashboard-welcome p {
+    color: var(--dash-muted);
+    font-size: 0.96rem;
+}
+
+/* =========================================================
+   TARJETAS ESTADÍSTICAS
+   ========================================================= */
+
+/* Bootstrap + CSS: mejora el acabado de las tarjetas KPI. */
+.dashboard-stat-card {
+    min-height: 145px;
+    overflow: hidden;
+    border: 1px solid var(--dash-border);
+    border-radius: 12px;
+    background: var(--dash-card);
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.035);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+/* CSS: efecto sutil al pasar el cursor por una tarjeta. */
+.dashboard-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.07);
+}
+
+/* CSS: proporciona espacio interior a cada indicador. */
+.dashboard-stat-card .card-body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* CSS: diferencia el título del valor numérico. */
+.stat-label {
+    min-height: auto;
+    margin-bottom: 10px;
+    color: var(--dash-muted);
+    font-size: 0.88rem;
+    font-weight: 500;
+}
+
+/* CSS: destaca las cifras de los indicadores. */
+.stat-value {
+    margin: 0 0 5px;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+}
+
+/* CSS: mantiene discreta la descripción bajo cada indicador. */
+.dashboard-stat-card small {
+    color: var(--dash-muted);
+    font-size: 0.77rem;
+}
+
+/* =========================================================
+   PANELES INFERIORES
+   ========================================================= */
+
+/* CSS: define un estilo común para proyectos y tareas. */
+.dashboard-panel {
+    min-height: 290px;
+    border: 1px solid var(--dash-border);
+    border-radius: 12px;
+    background: var(--dash-card);
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.035);
+}
+
+/* CSS: alinea el encabezado de los paneles. */
+.dashboard-panel .card-header {
+    padding: 20px 20px 8px !important;
+    background: transparent;
+}
+
+/* CSS: mejora la jerarquía de los títulos de panel. */
+.dashboard-panel .card-header h2 {
+    color: var(--dash-text);
+    font-size: 1rem;
+    font-weight: 650;
+}
+
+/* CSS: uniformiza el espacio interior de los paneles. */
+.dashboard-panel .card-body {
+    padding: 12px 20px 20px;
+}
+
+/* =========================================================
+   LISTA DE PROYECTOS
+   ========================================================= */
+
+/* CSS: alinea el nombre, la barra y el porcentaje en una misma fila. */
+.dashboard-panel .project-row {
+    display: grid !important;
+    grid-template-columns: minmax(100px, 1fr) minmax(100px, 1.5fr) 42px;
+    align-items: center;
+    gap: 14px;
+    min-height: 55px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+/* CSS: elimina el borde de la última fila de proyectos. */
+.dashboard-panel .project-row:last-child {
+    border-bottom: 0;
+}
+
+/* CSS: controla el nombre del proyecto y evita desbordamientos. */
+.dashboard-panel .project-name {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    color: #334155;
+    font-size: 0.88rem;
+    font-weight: 500;
+}
+
+/* Bootstrap + CSS: configura el fondo de las barras de avance. */
+.dashboard-panel .project-progress {
+    width: 100%;
+    height: 9px;
+    overflow: hidden;
+    border-radius: 20px;
+    background: #e9eef5;
+}
+
+/* CSS: muestra el avance en azul con extremos redondeados. */
+.dashboard-panel .project-progress .progress-bar {
+    border-radius: 20px;
+    background: var(--dash-primary);
+}
+
+/* CSS: coloca el porcentaje al extremo derecho de cada fila. */
+.dashboard-panel .project-percentage {
+    color: #475569;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* =========================================================
+   TABLA DE TAREAS
+   ========================================================= */
+
+/* Bootstrap + CSS: mejora la lectura de la tabla. */
+.dashboard-task-table {
+    width: 100%;
+    margin-bottom: 0;
+    color: #334155;
+    font-size: 0.85rem;
+}
+
+/* CSS: distingue los encabezados de las filas de datos. */
+.dashboard-task-table thead th {
+    padding: 11px 10px;
+    border-bottom: 1px solid var(--dash-border);
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.77rem;
+    font-weight: 650;
+    white-space: nowrap;
+}
+
+/* CSS: mejora el espaciado y alineación de las celdas. */
+.dashboard-task-table tbody td {
+    padding: 12px 10px;
+    border-color: #edf1f5;
+    vertical-align: middle;
+}
+
+/* CSS: suaviza las filas alternadas de Bootstrap. */
+.dashboard-task-table.table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: #f8fafc;
+    color: #334155;
+}
+
+/* Bootstrap: unifica la presentación de las etiquetas de prioridad. */
+.dashboard-task-table .badge {
+    min-width: 62px;
+    padding: 6px 9px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+/* CSS: conserva la legibilidad de las tablas en paneles estrechos. */
+.dashboard-task-table td:first-child {
+    min-width: 130px;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+/* CSS: adapta el menú y el contenido a tabletas. */
+@media (max-width: 991.98px) {
+    .dashboard-sidebar {
+        width: 215px;
+        flex-basis: 215px;
+        padding: 20px 12px;
+    }
+
+    .dashboard-main {
+        padding: 24px 20px;
+    }
+
+    .dashboard-panel .project-row {
+        grid-template-columns: minmax(85px, 1fr) minmax(75px, 1.2fr) 38px;
+        gap: 9px;
+    }
+}
+
+/* CSS: transforma el menú lateral en una sección superior en móviles. */
+@media (max-width: 767.98px) {
+    .dashboard-layout {
+        min-height: auto;
+    }
+
+    .dashboard-sidebar {
+        width: 100%;
+        flex: 0 0 100%;
+        padding: 14px;
+        border-right: 0;
+        border-bottom: 1px solid var(--dash-border);
+    }
+
+    .sidebar-profile {
+        padding-bottom: 10px;
+    }
+
+    .dashboard-sidebar hr {
+        margin: 5px 0 10px;
+    }
+
+    .dashboard-nav {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 5px;
+    }
+
+    .dashboard-nav .nav-link {
+        min-height: 40px;
+        padding: 8px;
+        font-size: 0.84rem;
+    }
+
+    .dashboard-main {
+        padding: 22px 14px;
+    }
+
+    .dashboard-stat-card {
+        min-height: 125px;
+    }
+
+    .dashboard-stat-card .card-body {
+        padding: 15px;
+    }
+
+    .stat-value {
+        font-size: 1.7rem;
+    }
+
+    .dashboard-panel {
+        min-height: auto;
+    }
+}
+
+/* CSS: compacta los componentes en teléfonos pequeños. */
+@media (max-width: 380px) {
+    .dashboard-panel .project-row {
+        grid-template-columns: minmax(75px, 1fr) minmax(55px, 1fr) 34px;
+        gap: 6px;
+    }
+
+    .dashboard-panel .project-name,
+    .dashboard-panel .project-percentage {
+        font-size: 0.75rem;
+    }
+
+    .dashboard-task-table {
+        font-size: 0.75rem;
+    }
+}
+
+
+/* Dashboard: ocupa toda la altura visible de la ventana. */
+#dashboardApp {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Layout: permite que el menú y el contenido se estiren verticalmente. */
+.dashboard-layout {
+    flex: 1;
+    min-height: 100vh;
+    align-items: stretch;
+}
+
+/* Sidebar: ocupa toda la altura de la pantalla. */
+.dashboard-sidebar {
+    min-height: 100vh;
+    align-self: stretch;
+}
+
+/* Contenido principal: organiza las secciones verticalmente. */
+.dashboard-main {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* El saludo y las estadísticas mantienen su tamaño natural. */
+.dashboard-welcome,
+.dashboard-main > section[aria-label="Resumen de actividad"] {
+    flex-shrink: 0;
+}
+
+/* Los paneles inferiores se expanden y llenan el espacio restante. */
+.dashboard-main > section:last-child {
+    flex: 1;
+    min-height: 350px;
+    align-items: stretch;
+}
+
+/* Las columnas hacen que sus tarjetas ocupen toda la altura. */
+.dashboard-main > section:last-child > div {
+    display: flex;
+}
+
+/* Las tarjetas de proyectos y tareas llenan sus columnas. */
+.dashboard-panel {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* El contenido interior puede crecer dentro de cada tarjeta. */
+.dashboard-panel .card-body {
+    flex: 1;
+}
+
+/* Ajuste para pantallas medianas y pequeñas. */
+@media (max-width: 991.98px) {
+    .dashboard-layout,
+    .dashboard-sidebar,
+    .dashboard-main {
+        min-height: auto;
+    }
+
+    .dashboard-main > section:last-child {
+        flex: initial;
+    }
+
+    .dashboard-panel {
+        min-height: 290px;
+    }
+}
+
+/* Ajuste específico para teléfonos. */
+@media (max-width: 767.98px) {
+    .dashboard-main {
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .dashboard-main > section:last-child {
+        min-height: auto;
+    }
+
+    .dashboard-panel {
+        min-height: 250px;
+    }
+}

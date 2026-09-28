@@ -1,0 +1,778 @@
+
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipo | Gestión de Proyectos</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/equipo.css}">
+</head>
+
+<body class="bg-light">
+
+<div id="equipoApp" class="container-fluid p-0" v-cloak>
+    <div class="dashboard-layout d-flex">
+
+        <!-- Barra lateral: reutiliza las clases visuales del Dashboard. -->
+        <aside class="dashboard-sidebar bg-white border-end">
+            <div class="sidebar-profile">
+                <div class="user-avatar">{{ iniciales(usuario) }}</div>
+                <div class="min-w-0">
+                    <div class="fw-semibold text-truncate">{{ usuario }}</div>
+                    <small class="text-secondary">Usuario</small>
+                </div>
+            </div>
+
+            <hr>
+
+            <nav class="nav flex-column dashboard-nav"
+                 aria-label="Navegación principal">
+                <a class="nav-link" th:href="@{/dashboard}">
+                    <i class="bi bi-grid-1x2" aria-hidden="true"></i>
+                    <span>Dashboard</span>
+                </a>
+
+                <a class="nav-link" th:href="@{/proyectos}">
+                    <i class="bi bi-folder" aria-hidden="true"></i>
+                    <span>Proyectos</span>
+                </a>
+
+                <a class="nav-link" th:href="@{/tareas}">
+                    <i class="bi bi-check2-square" aria-hidden="true"></i>
+                    <span>Tareas</span>
+                </a>
+
+                <a class="nav-link active"
+                   th:href="@{/equipo}"
+                   aria-current="page">
+                    <i class="bi bi-people" aria-hidden="true"></i>
+                    <span>Equipo</span>
+                </a>
+
+                <a class="nav-link" th:href="@{/dashboard}">
+                    <i class="bi bi-bar-chart" aria-hidden="true"></i>
+                    <span>Reportes</span>
+                </a>
+
+                <a class="nav-link" th:href="@{/dashboard}">
+                    <i class="bi bi-gear" aria-hidden="true"></i>
+                    <span>Configuración</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Contenido principal del módulo Equipo. -->
+        <main class="dashboard-main flex-grow-1 equipo-main">
+
+            <header class="equipo-header d-flex justify-content-between
+                           align-items-center flex-wrap gap-3 mb-4">
+                <div>
+                    <div class="text-secondary small mb-1">
+                        Gestión / Equipo
+                    </div>
+                    <h1 class="h3 fw-semibold mb-1">Gestión del equipo</h1>
+                    <p class="text-secondary mb-0">
+                        Administra integrantes, roles, especialidades
+                        y participación en los proyectos.
+                    </p>
+                </div>
+
+                <button class="btn btn-primary"
+                        type="button"
+                        @click="abrirNuevoIntegrante">
+                    <i class="bi bi-person-plus me-1"></i>
+                    Agregar integrante
+                </button>
+            </header>
+
+            <!-- Resumen general del equipo. -->
+            <section class="row g-3 mb-4"
+                     aria-label="Resumen del equipo">
+
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <article class="card equipo-stat-card h-100">
+                        <div class="card-body d-flex align-items-center gap-3">
+                            <div class="equipo-stat-icon icon-blue">
+                                <i class="bi bi-people"></i>
+                            </div>
+                            <div>
+                                <div class="text-secondary small">
+                                    Integrantes
+                                </div>
+                                <div class="h3 fw-bold mb-0">
+                                    {{ integrantesFiltrados.length }}
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <article class="card equipo-stat-card h-100">
+                        <div class="card-body d-flex align-items-center gap-3">
+                            <div class="equipo-stat-icon icon-green">
+                                <i class="bi bi-person-check"></i>
+                            </div>
+                            <div>
+                                <div class="text-secondary small">Activos</div>
+                                <div class="h3 fw-bold mb-0">
+                                    {{ contarEstado('Activo') }}
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <article class="card equipo-stat-card h-100">
+                        <div class="card-body d-flex align-items-center gap-3">
+                            <div class="equipo-stat-icon icon-orange">
+                                <i class="bi bi-list-check"></i>
+                            </div>
+                            <div>
+                                <div class="text-secondary small">
+                                    Tareas asignadas
+                                </div>
+                                <div class="h3 fw-bold mb-0">
+                                    {{ totalTareasAsignadas }}
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <article class="card equipo-stat-card h-100">
+                        <div class="card-body d-flex align-items-center gap-3">
+                            <div class="equipo-stat-icon icon-purple">
+                                <i class="bi bi-diagram-3"></i>
+                            </div>
+                            <div>
+                                <div class="text-secondary small">
+                                    Especialidades
+                                </div>
+                                <div class="h3 fw-bold mb-0">
+                                    {{ especialidades.length }}
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <!-- Selección de proyecto y filtros del equipo. -->
+            <section class="card equipo-panel mb-4">
+                <div class="card-body">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-12 col-md-4">
+                            <label for="filtroProyecto"
+                                   class="form-label small fw-semibold">
+                                Proyecto
+                            </label>
+                            <select id="filtroProyecto"
+                                    class="form-select"
+                                    v-model="filtroProyecto">
+                                <option value="">Todos los proyectos</option>
+                                <option v-for="proyecto in proyectos"
+                                        :key="proyecto"
+                                        :value="proyecto">
+                                    {{ proyecto }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-md-8">
+                            <label for="buscarIntegrante"
+                                   class="form-label small fw-semibold">
+                                Buscar integrante
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input id="buscarIntegrante"
+                                       type="search"
+                                       class="form-control"
+                                       placeholder="Nombre, correo o especialidad..."
+                                       v-model="busqueda">
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label for="filtroRol"
+                                   class="form-label small fw-semibold">
+                                Rol
+                            </label>
+                            <select id="filtroRol"
+                                    class="form-select"
+                                    v-model="filtroRol">
+                                <option value="">Todos los roles</option>
+                                <option v-for="rol in roles"
+                                        :key="rol"
+                                        :value="rol">
+                                    {{ rol }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label for="filtroEspecialidad"
+                                   class="form-label small fw-semibold">
+                                Especialidad
+                            </label>
+                            <select id="filtroEspecialidad"
+                                    class="form-select"
+                                    v-model="filtroEspecialidad">
+                                <option value="">Todas las especialidades</option>
+                                <option v-for="especialidad in especialidades"
+                                        :key="especialidad"
+                                        :value="especialidad">
+                                    {{ especialidad }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label for="filtroEstado"
+                                   class="form-label small fw-semibold">
+                                Estado
+                            </label>
+                            <select id="filtroEstado"
+                                    class="form-select"
+                                    v-model="filtroEstado">
+                                <option value="">Todos los estados</option>
+                                <option v-for="estado in estados"
+                                        :key="estado"
+                                        :value="estado">
+                                    {{ estado }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Navegación entre las vistas del módulo. -->
+            <section class="card equipo-panel">
+                <div class="card-header bg-white border-bottom-0 pt-3 px-3">
+                    <ul class="nav nav-tabs equipo-tabs">
+                        <li class="nav-item">
+                            <button class="nav-link"
+                                    :class="{active: vista === 'integrantes'}"
+                                    @click="vista = 'integrantes'">
+                                <i class="bi bi-people me-1"></i>
+                                Integrantes
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link"
+                                    :class="{active: vista === 'especialidades'}"
+                                    @click="vista = 'especialidades'">
+                                <i class="bi bi-diagram-3 me-1"></i>
+                                Especialidades
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link"
+                                    :class="{active: vista === 'asignaciones'}"
+                                    @click="vista = 'asignaciones'">
+                                <i class="bi bi-list-task me-1"></i>
+                                Asignaciones
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link"
+                                    :class="{active: vista === 'actividad'}"
+                                    @click="vista = 'actividad'">
+                                <i class="bi bi-activity me-1"></i>
+                                Actividad
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card-body p-3">
+
+                    <!-- Vista de integrantes. -->
+                    <div v-if="vista === 'integrantes'">
+                        <div class="d-flex justify-content-between
+                                    align-items-center flex-wrap gap-2 mb-3">
+                            <div>
+                                <h2 class="h5 fw-semibold mb-1">
+                                    Integrantes del equipo
+                                </h2>
+                                <small class="text-secondary">
+                                    {{ integrantesFiltrados.length }}
+                                    integrante(s) encontrado(s)
+                                </small>
+                            </div>
+                            <button class="btn btn-outline-primary btn-sm"
+                                    @click="abrirNuevoIntegrante">
+                                <i class="bi bi-plus-lg me-1"></i>
+                                Incorporar miembro
+                            </button>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-12 col-xl-6"
+                                 v-for="integrante in integrantesFiltrados"
+                                 :key="integrante.id">
+                                <article class="card integrante-card h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-start gap-3">
+                                            <div class="user-avatar integrante-avatar">
+                                                {{ iniciales(integrante.nombre) }}
+                                            </div>
+
+                                            <div class="flex-grow-1 min-w-0">
+                                                <div class="d-flex justify-content-between
+                                                            align-items-start gap-2">
+                                                    <div class="min-w-0">
+                                                        <h3 class="h6 fw-semibold
+                                                                   text-truncate mb-1">
+                                                            {{ integrante.nombre }}
+                                                        </h3>
+                                                        <div class="small text-secondary
+                                                                    text-truncate">
+                                                            {{ integrante.correo }}
+                                                        </div>
+                                                    </div>
+                                                    <span class="badge"
+                                                          :class="claseEstado(integrante.estado)">
+                                                        {{ integrante.estado }}
+                                                    </span>
+                                                </div>
+
+                                                <div class="mt-3 d-flex flex-wrap gap-2">
+                                                    <span class="badge rounded-pill
+                                                                 text-bg-light border">
+                                                        {{ integrante.rol }}
+                                                    </span>
+                                                    <span class="badge rounded-pill
+                                                                 text-bg-primary-subtle
+                                                                 text-primary">
+                                                        {{ integrante.especialidad }}
+                                                    </span>
+                                                </div>
+
+                                                <div class="small text-secondary mt-3">
+                                                    <i class="bi bi-folder2 me-1"></i>
+                                                    {{ integrante.proyecto }}
+                                                </div>
+
+                                                <div class="d-flex justify-content-between
+                                                            align-items-center mt-3 pt-3
+                                                            border-top flex-wrap gap-2">
+                                                    <small class="text-secondary">
+                                                        <i class="bi bi-list-check me-1"></i>
+                                                        {{ integrante.tareasAsignadas }}
+                                                        tarea(s) asignada(s)
+                                                    </small>
+
+                                                    <div class="btn-group btn-group-sm">
+                                                        <button class="btn btn-outline-secondary"
+                                                                title="Ver perfil"
+                                                                @click="verPerfil(integrante)">
+                                                            <i class="bi bi-person-vcard"></i>
+                                                        </button>
+                                                        <button class="btn btn-outline-primary"
+                                                                title="Editar"
+                                                                @click="editarIntegrante(integrante)">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </button>
+                                                        <button class="btn btn-outline-success"
+                                                                title="Asignar tarea"
+                                                                @click="asignarTarea(integrante)">
+                                                            <i class="bi bi-clipboard-plus"></i>
+                                                        </button>
+                                                        <button class="btn btn-outline-danger"
+                                                                title="Retirar del equipo"
+                                                                @click="retirarIntegrante(integrante.id)">
+                                                            <i class="bi bi-person-dash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </article>
+                            </div>
+
+                            <div class="col-12"
+                                 v-if="integrantesFiltrados.length === 0">
+                                <div class="text-center py-5">
+                                    <i class="bi bi-people display-5 text-secondary"></i>
+                                    <h3 class="h6 mt-3">No hay integrantes</h3>
+                                    <p class="text-secondary small mb-0">
+                                        Ajusta los filtros o incorpora un integrante.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vista de especialidades. -->
+                    <div v-else-if="vista === 'especialidades'">
+                        <div class="d-flex justify-content-between
+                                    align-items-center flex-wrap gap-2 mb-3">
+                            <div>
+                                <h2 class="h5 fw-semibold mb-1">
+                                    Especialidades del equipo
+                                </h2>
+                                <p class="small text-secondary mb-0">
+                                    Organiza las áreas de conocimiento del proyecto.
+                                </p>
+                            </div>
+                            <button class="btn btn-outline-primary btn-sm"
+                                    @click="abrirEspecialidad">
+                                <i class="bi bi-plus-lg me-1"></i>
+                                Nueva especialidad
+                            </button>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6 col-xl-4"
+                                 v-for="especialidad in resumenEspecialidades"
+                                 :key="especialidad.nombre">
+                                <article class="card especialidad-card h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between
+                                                    align-items-center mb-3">
+                                            <div class="equipo-stat-icon icon-purple">
+                                                <i class="bi bi-diagram-3"></i>
+                                            </div>
+                                            <span class="badge text-bg-light border">
+                                                {{ especialidad.total }}
+                                                integrante(s)
+                                            </span>
+                                        </div>
+                                        <h3 class="h6 fw-semibold">
+                                            {{ especialidad.nombre }}
+                                        </h3>
+                                        <p class="small text-secondary mb-0">
+                                            Miembros asignados a esta área.
+                                        </p>
+                                        <button class="btn btn-link btn-sm px-0 mt-2"
+                                                @click="filtrarPorEspecialidad(especialidad.nombre)">
+                                            Ver integrantes
+                                            <i class="bi bi-arrow-right"></i>
+                                        </button>
+                                    </div>
+                                </article>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vista de asignaciones. -->
+                    <div v-else-if="vista === 'asignaciones'">
+                        <h2 class="h5 fw-semibold mb-3">
+                            Asignaciones del equipo
+                        </h2>
+                        <div class="table-responsive">
+                            <table class="table align-middle equipo-table">
+                                <thead>
+                                <tr>
+                                    <th>Integrante</th>
+                                    <th>Especialidad</th>
+                                    <th>Tareas asignadas</th>
+                                    <th>Estado</th>
+                                    <th>Acción</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr v-for="integrante in integrantesFiltrados"
+                                    :key="integrante.id">
+                                    <td class="fw-medium">
+                                        {{ integrante.nombre }}
+                                    </td>
+                                    <td>{{ integrante.especialidad }}</td>
+                                    <td>{{ integrante.tareasAsignadas }}</td>
+                                    <td>
+                                        <span class="badge"
+                                              :class="claseEstado(integrante.estado)">
+                                            {{ integrante.estado }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"
+                                                @click="asignarTarea(integrante)">
+                                            Asignar tarea
+                                        </button>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Vista de actividad. -->
+                    <div v-else-if="vista === 'actividad'">
+                        <h2 class="h5 fw-semibold mb-3">
+                            Actividad reciente
+                        </h2>
+                        <div v-if="actividades.length" class="actividad-list">
+                            <article class="actividad-item"
+                                     v-for="actividad in actividades"
+                                     :key="actividad.id">
+                                <div class="actividad-icon">
+                                    <i class="bi"
+                                       :class="actividad.icono"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-medium">
+                                        {{ actividad.descripcion }}
+                                    </div>
+                                    <small class="text-secondary">
+                                        {{ actividad.fecha }}
+                                    </small>
+                                </div>
+                            </article>
+                        </div>
+                        <p v-else class="text-secondary">
+                            Todavía no hay actividad registrada.
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal para agregar o editar integrantes. -->
+    <div class="modal fade"
+         :class="{show: mostrarModalIntegrante}"
+         :style="{display: mostrarModalIntegrante ? 'block' : 'none'}"
+         tabindex="-1"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="tituloModalIntegrante"
+         v-if="mostrarModalIntegrante">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <form @submit.prevent="guardarIntegrante">
+                    <div class="modal-header">
+                        <div>
+                            <h2 class="modal-title fs-5 fw-semibold"
+                                id="tituloModalIntegrante">
+                                {{ modoEdicion ? 'Editar integrante' : 'Agregar integrante' }}
+                            </h2>
+                            <p class="small text-secondary mb-0">
+                                Registra los datos y la participación del miembro.
+                            </p>
+                        </div>
+                        <button type="button"
+                                class="btn-close"
+                                aria-label="Cerrar"
+                                @click="cerrarModal"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label for="nombreIntegrante"
+                                       class="form-label">
+                                    Nombre completo *
+                                </label>
+                                <input id="nombreIntegrante"
+                                       class="form-control"
+                                       v-model.trim="formulario.nombre"
+                                       required
+                                       maxlength="100"
+                                       placeholder="Ej. Carlos Ruiz">
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label for="correoIntegrante"
+                                       class="form-label">
+                                    Correo electrónico *
+                                </label>
+                                <input id="correoIntegrante"
+                                       type="email"
+                                       class="form-control"
+                                       v-model.trim="formulario.correo"
+                                       required
+                                       maxlength="150"
+                                       placeholder="correo@ejemplo.com">
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label for="proyectoIntegrante"
+                                       class="form-label">
+                                    Proyecto *
+                                </label>
+                                <select id="proyectoIntegrante"
+                                        class="form-select"
+                                        v-model="formulario.proyecto"
+                                        required>
+                                    <option value="" disabled>
+                                        Selecciona un proyecto
+                                    </option>
+                                    <option v-for="proyecto in proyectos"
+                                            :key="proyecto"
+                                            :value="proyecto">
+                                        {{ proyecto }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label for="rolIntegrante"
+                                       class="form-label">
+                                    Rol en el proyecto *
+                                </label>
+                                <select id="rolIntegrante"
+                                        class="form-select"
+                                        v-model="formulario.rol"
+                                        required>
+                                    <option value="" disabled>
+                                        Selecciona un rol
+                                    </option>
+                                    <option v-for="rol in roles"
+                                            :key="rol"
+                                            :value="rol">
+                                        {{ rol }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label for="especialidadIntegrante"
+                                       class="form-label">
+                                    Especialidad *
+                                </label>
+                                <select id="especialidadIntegrante"
+                                        class="form-select"
+                                        v-model="formulario.especialidad"
+                                        required>
+                                    <option value="" disabled>
+                                        Selecciona una especialidad
+                                    </option>
+                                    <option v-for="especialidad in especialidades"
+                                            :key="especialidad"
+                                            :value="especialidad">
+                                        {{ especialidad }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label for="estadoIntegrante"
+                                       class="form-label">
+                                    Estado de participación
+                                </label>
+                                <select id="estadoIntegrante"
+                                        class="form-select"
+                                        v-model="formulario.estado">
+                                    <option v-for="estado in estados"
+                                            :key="estado"
+                                            :value="estado">
+                                        {{ estado }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label for="fechaIngreso"
+                                       class="form-label">
+                                    Fecha de incorporación *
+                                </label>
+                                <input id="fechaIngreso"
+                                       type="date"
+                                       class="form-control"
+                                       v-model="formulario.fechaIngreso"
+                                       required>
+                            </div>
+                        </div>
+
+                        <div v-if="mensajeError"
+                             class="alert alert-danger mt-3 mb-0"
+                             role="alert">
+                            {{ mensajeError }}
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button"
+                                class="btn btn-light"
+                                @click="cerrarModal">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check2 me-1"></i>
+                            {{ modoEdicion ? 'Guardar cambios' : 'Guardar integrante' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para visualizar el perfil del integrante. -->
+    <div class="modal fade"
+         :class="{show: integranteSeleccionado !== null}"
+         :style="{display: integranteSeleccionado ? 'block' : 'none'}"
+         tabindex="-1"
+         role="dialog"
+         aria-modal="true"
+         v-if="integranteSeleccionado">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5">Perfil del integrante</h2>
+                    <button type="button"
+                            class="btn-close"
+                            aria-label="Cerrar"
+                            @click="integranteSeleccionado = null"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="user-avatar perfil-avatar mx-auto mb-3">
+                        {{ iniciales(integranteSeleccionado.nombre) }}
+                    </div>
+                    <h3 class="h5 fw-semibold">
+                        {{ integranteSeleccionado.nombre }}
+                    </h3>
+                    <p class="text-secondary">
+                        {{ integranteSeleccionado.correo }}
+                    </p>
+                    <div class="text-start border rounded-3 p-3">
+                        <p><strong>Proyecto:</strong>
+                            {{ integranteSeleccionado.proyecto }}</p>
+                        <p><strong>Rol:</strong>
+                            {{ integranteSeleccionado.rol }}</p>
+                        <p><strong>Especialidad:</strong>
+                            {{ integranteSeleccionado.especialidad }}</p>
+                        <p><strong>Estado:</strong>
+                            {{ integranteSeleccionado.estado }}</p>
+                        <p class="mb-0"><strong>Fecha de incorporación:</strong>
+                            {{ formatearFecha(integranteSeleccionado.fechaIngreso) }}</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-light"
+                            @click="integranteSeleccionado = null">
+                        Cerrar
+                    </button>
+                    <button class="btn btn-primary"
+                            @click="editarIntegrante(integranteSeleccionado)">
+                        <i class="bi bi-pencil me-1"></i>
+                        Editar perfil
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fondo de los modales. -->
+    <div class="modal-backdrop fade show"
+         v-if="mostrarModalIntegrante || integranteSeleccionado"></div>
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script th:src="@{/js/equipo.js}"></script>
+</body>
+</html>

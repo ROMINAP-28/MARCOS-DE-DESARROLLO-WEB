@@ -1,0 +1,362 @@
+
+/* ==========================================
+   GESTIÓN DE PROYECTOS - MÓDULO REPORTES
+   Estilos específicos de la página.
+   La barra lateral utiliza estilos globales.
+========================================== */
+
+/* Evitar mostrar las expresiones Vue antes de cargar */
+[v-cloak] {
+    display: none !important;
+}
+
+/* Área principal */
+.reportes-main {
+    flex: 1;
+    min-width: 0;
+    min-height: 100vh;
+    padding: 32px;
+    background: #f5f7fb;
+    color: #1e293b;
+}
+
+/* Encabezado */
+.reportes-header h1 {
+    color: #172b4d;
+    letter-spacing: -0.5px;
+}
+
+.reportes-header p {
+    font-size: 0.95rem;
+}
+
+.reportes-header .btn {
+    padding: 10px 18px;
+    border-radius: 9px;
+    font-weight: 500;
+}
+
+/* Paneles principales */
+.reportes-panel {
+    border: 1px solid #e7ebf2;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 4px 16px rgba(31, 45, 61, 0.035);
+    overflow: hidden;
+}
+
+.reportes-panel > .card-body {
+    min-width: 0;
+}
+
+/* Tarjetas de indicadores */
+.reportes-stat-card {
+    height: 100%;
+    border: 1px solid #e7ebf2;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 4px 16px rgba(31, 45, 61, 0.035);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.reportes-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(31, 45, 61, 0.08);
+}
+
+.reportes-stat-card .card-body {
+    padding: 20px;
+}
+
+.reportes-stat-card .h3 {
+    margin-top: 5px;
+    color: #172b4d;
+    font-size: 1.65rem;
+}
+
+.reportes-stat-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    border-radius: 13px;
+    font-size: 1.35rem;
+}
+
+.icon-blue {
+    color: #2563eb;
+    background: #eaf1ff;
+}
+
+.icon-green {
+    color: #15803d;
+    background: #e6f7ed;
+}
+
+.icon-purple {
+    color: #7c3aed;
+    background: #f1eaff;
+}
+
+.icon-orange {
+    color: #c47b0b;
+    background: #fff4dc;
+}
+
+/* Tarjetas de tipos de reporte */
+.tipo-reporte-card {
+    height: 100%;
+    border: 1px solid #e7ebf2;
+    border-radius: 12px;
+    background: #fff;
+    transition: border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.tipo-reporte-card:hover {
+    transform: translateY(-3px);
+    border-color: #b8cdfd;
+    box-shadow: 0 8px 22px rgba(31, 45, 61, 0.07);
+}
+
+.tipo-reporte-card.tipo-reporte-seleccionado {
+    border: 1.5px solid #2563eb;
+    background: #f8faff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.07);
+}
+
+.tipo-reporte-card .card-body {
+    padding: 20px;
+}
+
+.tipo-reporte-card h3 {
+    color: #172b4d;
+    line-height: 1.4;
+}
+
+.tipo-reporte-card p {
+    min-height: 60px;
+    line-height: 1.55;
+}
+
+.tipo-reporte-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    font-size: 1.35rem;
+}
+
+.tipo-reporte-card .btn {
+    padding: 9px 10px;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+/* Formulario y filtros */
+.reportes-panel .form-label {
+    margin-bottom: 7px;
+    color: #475569;
+    font-size: 0.87rem;
+    font-weight: 600;
+}
+
+.reportes-panel .form-control,
+.reportes-panel .form-select {
+    min-height: 42px;
+    border: 1px solid #dce3ed;
+    border-radius: 8px;
+    color: #334155;
+    font-size: 0.9rem;
+}
+
+.reportes-panel .form-control:focus,
+.reportes-panel .form-select:focus {
+    border-color: #80aaff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.reportes-panel .btn {
+    border-radius: 8px;
+}
+
+.reportes-panel .btn-primary {
+    background: #2563eb;
+    border-color: #2563eb;
+}
+
+.reportes-panel .btn-primary:hover {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+}
+
+/* Vista previa */
+.preview-stat {
+    height: 100%;
+    padding: 18px;
+    border: 1px solid #e7ebf2;
+    border-radius: 11px;
+    background: #f8fafc;
+}
+
+.preview-stat .h4 {
+    margin-top: 8px;
+    color: #172b4d;
+    font-size: 1.5rem;
+}
+
+/* Búsqueda del historial */
+.reportes-search {
+    width: min(100%, 310px);
+}
+
+.reportes-search .input-group-text {
+    color: #64748b;
+    border-color: #dce3ed;
+    border-radius: 8px 0 0 8px;
+}
+
+.reportes-search .form-control {
+    border-radius: 0 8px 8px 0;
+}
+
+/* Tabla de reportes */
+.reportes-table {
+    width: 100%;
+    margin-bottom: 0;
+    font-size: 0.9rem;
+}
+
+.reportes-table thead th {
+    padding: 14px 16px;
+    border-bottom: 1px solid #e5eaf1;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.35px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.reportes-table tbody td {
+    padding: 15px 16px;
+    border-color: #edf0f5;
+    color: #334155;
+    vertical-align: middle;
+}
+
+.reportes-table tbody tr {
+    transition: background 0.15s ease;
+}
+
+.reportes-table tbody tr:hover {
+    background: #f8faff;
+}
+
+.reportes-table .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 7px;
+    color: #475569;
+}
+
+.reportes-table .btn:hover {
+    color: #2563eb;
+    background: #eaf1ff;
+    border-color: #c9d9ff;
+}
+
+.reportes-table .badge {
+    padding: 6px 9px;
+    font-size: 0.74rem;
+    font-weight: 600;
+}
+
+/* Mensajes */
+.reportes-panel .alert {
+    border-radius: 9px;
+    font-size: 0.88rem;
+}
+
+/* Impresión / vista PDF */
+@media print {
+    body {
+        background: #fff !important;
+    }
+
+    .reportes-main {
+        padding: 0 !important;
+        min-height: auto;
+        background: #fff !important;
+    }
+
+    .reportes-header,
+    .reportes-main > .row,
+    .reportes-main > section:not(:has(.preview-stat)),
+    .reportes-main .btn,
+    .reportes-main .reportes-search {
+        display: none !important;
+    }
+
+    .reportes-panel:has(.preview-stat) {
+        display: block !important;
+        border: 0;
+        box-shadow: none;
+    }
+
+    .preview-stat {
+        break-inside: avoid;
+    }
+}
+
+/* Adaptación a pantallas medianas */
+@media (max-width: 991.98px) {
+    .reportes-main {
+        padding: 24px;
+    }
+
+    .tipo-reporte-card p {
+        min-height: auto;
+    }
+}
+
+/* Adaptación a móviles */
+@media (max-width: 575.98px) {
+    .reportes-main {
+        padding: 16px;
+    }
+
+    .reportes-header {
+        align-items: stretch !important;
+        flex-direction: column;
+    }
+
+    .reportes-header > button {
+        width: 100%;
+    }
+
+    .reportes-stat-card .card-body {
+        padding: 15px;
+    }
+
+    .reportes-panel .card-body {
+        padding: 18px !important;
+    }
+
+    .reportes-search {
+        width: 100%;
+    }
+
+    .reportes-table {
+        min-width: 720px;
+    }
+}

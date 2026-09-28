@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear cuenta | Gestión de Proyectos</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="login-page">
+
+<main class="container-fluid min-vh-100 d-flex align-items-center justify-content-center py-4">
+    <div class="row login-container shadow-lg overflow-hidden">
+
+        <!-- Panel informativo -->
+        <section class="col-lg-5 login-banner d-none d-lg-flex flex-column
+                        justify-content-center align-items-center text-center p-5">
+            <div class="login-logo mb-4">GP</div>
+            <h1 class="fw-bold text-white">Únete a tu equipo</h1>
+            <p class="text-white mt-3">
+                Crea tu cuenta y empieza a organizar tus proyectos,
+                tareas y actividades en un solo lugar.
+            </p>
+        </section>
+
+        <!-- Formulario de registro -->
+        <section class="col-lg-7 bg-white p-4 p-md-5 d-flex flex-column justify-content-center">
+            <div id="registroApp">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold">Crear una cuenta</h2>
+                    <p class="text-secondary">
+                        Completa tus datos para registrarte
+                    </p>
+                </div>
+
+                <form @submit.prevent="registrar" novalidate>
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label fw-semibold">
+                            Nombre completo
+                        </label>
+                        <input
+                                type="text"
+                                id="nombre"
+                                class="form-control form-control-lg"
+                                placeholder="Ingresa tu nombre completo"
+                                v-model.trim="nombre"
+                                autocomplete="name"
+                                required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="correoRegistro" class="form-label fw-semibold">
+                            Correo electrónico
+                        </label>
+                        <input
+                                type="email"
+                                id="correoRegistro"
+                                class="form-control form-control-lg"
+                                placeholder="ejemplo@correo.com"
+                                v-model.trim="correo"
+                                autocomplete="email"
+                                required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="contrasenaRegistro" class="form-label fw-semibold">
+                            Contraseña
+                        </label>
+                        <input
+                                type="password"
+                                id="contrasenaRegistro"
+                                class="form-control form-control-lg"
+                                placeholder="Mínimo 8 caracteres"
+                                v-model="contrasena"
+                                autocomplete="new-password"
+                                minlength="8"
+                                required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="confirmarContrasena" class="form-label fw-semibold">
+                            Confirmar contraseña
+                        </label>
+                        <input
+                                type="password"
+                                id="confirmarContrasena"
+                                class="form-control form-control-lg"
+                                placeholder="Vuelve a escribir tu contraseña"
+                                v-model="confirmarContrasena"
+                                autocomplete="new-password"
+                                required>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input
+                                class="form-check-input"
+                                type="checkbox"
+                                id="aceptarTerminos"
+                                v-model="aceptaTerminos">
+                        <label class="form-check-label" for="aceptarTerminos">
+                            Acepto los términos y condiciones.
+                        </label>
+                    </div>
+
+                    <div v-if="mensaje"
+                         class="alert"
+                         :class="tipoMensaje === 'error' ? 'alert-danger' : 'alert-info'"
+                         role="alert">
+                        {{ mensaje }}
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-primary btn-lg w-100">
+                        Crear cuenta
+                    </button>
+                </form>
+
+                <div class="text-center mt-4">
+                    <span class="text-secondary">¿Ya tienes una cuenta?</span>
+                    <a th:href="@{/login}"
+                       class="fw-semibold text-decoration-none">
+                        Inicia sesión
+                    </a>
+                </div>
+
+                <div class="text-center mt-3">
+                    <a th:href="@{/}"
+                       class="text-secondary text-decoration-none">
+                        ← Volver al inicio
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script>
+    const { createApp } = Vue;
+
+    createApp({
+        data() {
+            return {
+                nombre: '',
+                correo: '',
+                contrasena: '',
+                confirmarContrasena: '',
+                aceptaTerminos: false,
+                mensaje: '',
+                tipoMensaje: ''
+            };
+        },
+        methods: {
+            registrar() {
+                this.mensaje = '';
+                this.tipoMensaje = '';
+
+                if (!this.nombre || !this.correo ||
+                    !this.contrasena || !this.confirmarContrasena) {
+                    this.mensaje = 'Completa todos los campos.';
+                    this.tipoMensaje = 'error';
+                    return;
+                }
+
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.correo)) {
+                    this.mensaje = 'Ingresa un correo electrónico válido.';
+                    this.tipoMensaje = 'error';
+                    return;
+                }
+
+                if (this.contrasena.length < 8) {
+                    this.mensaje = 'La contraseña debe tener al menos 8 caracteres.';
+                    this.tipoMensaje = 'error';
+                    return;
+                }
+
+                if (this.contrasena !== this.confirmarContrasena) {
+                    this.mensaje = 'Las contraseñas no coinciden.';
+                    this.tipoMensaje = 'error';
+                    return;
+                }
+
+                if (!this.aceptaTerminos) {
+                    this.mensaje = 'Debes aceptar los términos y condiciones.';
+                    this.tipoMensaje = 'error';
+                    return;
+                }
+
+                this.mensaje =
+                    'Formulario validado. El registro se conectará posteriormente con el backend.';
+                this.tipoMensaje = 'info';
+            }
+        }
+    }).mount('#registroApp');
+</script>
+</body>
+</html>

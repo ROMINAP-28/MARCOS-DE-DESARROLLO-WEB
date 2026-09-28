@@ -1,0 +1,372 @@
+
+/* =========================================
+   MÓDULO EQUIPO
+   Estilos específicos de la página de equipo.
+   La barra lateral reutiliza los estilos globales.
+========================================= */
+
+/* Evita mostrar las expresiones Vue antes de cargar los datos. */
+[v-cloak] {
+    display: none !important;
+}
+
+/* Contenido principal */
+.equipo-main {
+    min-width: 0;
+    padding: 32px;
+    background: #f5f7fb;
+    min-height: 100vh;
+}
+
+.equipo-header h1 {
+    color: #172b4d;
+    letter-spacing: -0.5px;
+}
+
+.equipo-header p {
+    font-size: 0.95rem;
+}
+
+/* Paneles y tarjetas */
+.equipo-panel,
+.equipo-stat-card,
+.integrante-card,
+.especialidad-card {
+    border: 1px solid #e7ebf2;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 4px 16px rgba(31, 45, 61, 0.035);
+}
+
+.equipo-stat-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.equipo-stat-card:hover,
+.integrante-card:hover,
+.especialidad-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(31, 45, 61, 0.08);
+}
+
+.equipo-stat-card .card-body {
+    padding: 20px;
+}
+
+.equipo-stat-icon {
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 13px;
+    font-size: 1.3rem;
+}
+
+.icon-blue {
+    color: #2563eb;
+    background: #eaf1ff;
+}
+
+.icon-green {
+    color: #15803d;
+    background: #e6f7ed;
+}
+
+.icon-orange {
+    color: #c47b0b;
+    background: #fff4dc;
+}
+
+.icon-purple {
+    color: #7c3aed;
+    background: #f1eaff;
+}
+
+/* Formularios y filtros */
+.equipo-panel .form-label {
+    color: #475569;
+    margin-bottom: 7px;
+}
+
+.equipo-panel .form-control,
+.equipo-panel .form-select,
+.equipo-panel .input-group-text {
+    min-height: 42px;
+    border-color: #dce3ed;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.equipo-panel .input-group .input-group-text {
+    border-radius: 8px 0 0 8px;
+    color: #64748b;
+}
+
+.equipo-panel .input-group .form-control {
+    border-radius: 0 8px 8px 0;
+}
+
+.equipo-panel .form-control:focus,
+.equipo-panel .form-select:focus {
+    border-color: #80aaff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Pestañas del módulo */
+.equipo-tabs {
+    gap: 6px;
+    border-bottom-color: #e8edf4;
+    flex-wrap: wrap;
+}
+
+.equipo-tabs .nav-link {
+    color: #64748b;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border: 1px solid transparent;
+    border-radius: 9px 9px 0 0;
+    padding: 11px 15px;
+}
+
+.equipo-tabs .nav-link:hover {
+    color: #2563eb;
+    background: #f6f8fc;
+}
+
+.equipo-tabs .nav-link.active {
+    color: #2563eb;
+    background: #fff;
+    border-color: #e8edf4 #e8edf4 #fff;
+    font-weight: 600;
+}
+
+/* Tarjetas de integrantes */
+.integrante-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.integrante-card .card-body {
+    padding: 19px;
+}
+
+.integrante-avatar {
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #2457b8;
+    background: #e8f0ff;
+}
+
+.user-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.integrante-card h3 {
+    color: #1e293b;
+}
+
+.integrante-card .badge {
+    font-size: 0.74rem;
+    font-weight: 600;
+    padding: 7px 10px;
+}
+
+.integrante-card .btn-group .btn {
+    width: 34px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+}
+
+.integrante-card .btn-group {
+    gap: 5px;
+}
+
+/* Tarjetas de especialidades */
+.especialidad-card .card-body {
+    padding: 20px;
+}
+
+.especialidad-card h3 {
+    color: #1e293b;
+}
+
+.especialidad-card .btn-link {
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/* Tabla de asignaciones */
+.equipo-table {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+}
+
+.equipo-table thead th {
+    padding: 13px 12px;
+    color: #64748b;
+    background: #f8fafc;
+    border-bottom: 1px solid #e5eaf1;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.35px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.equipo-table tbody td {
+    padding: 14px 12px;
+    color: #334155;
+    border-color: #edf0f5;
+}
+
+/* Historial de actividad */
+.actividad-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.actividad-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 17px 4px;
+    border-bottom: 1px solid #edf0f5;
+}
+
+.actividad-item:last-child {
+    border-bottom: 0;
+}
+
+.actividad-icon {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #2563eb;
+    background: #eaf1ff;
+    border-radius: 50%;
+    font-size: 1rem;
+}
+
+/* Modal de integrantes y perfiles */
+#equipoApp .modal {
+    z-index: 1055;
+}
+
+#equipoApp .modal-backdrop {
+    z-index: 1050;
+}
+
+#equipoApp .modal-content {
+    border: 0;
+    border-radius: 15px;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.2);
+    overflow: hidden;
+}
+
+#equipoApp .modal-header,
+#equipoApp .modal-footer {
+    padding: 18px 22px;
+    border-color: #edf0f5;
+}
+
+#equipoApp .modal-body {
+    padding: 22px;
+}
+
+#equipoApp .modal-title {
+    color: #172b4d;
+}
+
+#equipoApp .modal .form-label {
+    color: #334155;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+#equipoApp .modal .form-control,
+#equipoApp .modal .form-select {
+    min-height: 43px;
+    border-color: #dce3ed;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+#equipoApp .modal .form-control:focus,
+#equipoApp .modal .form-select:focus {
+    border-color: #80aaff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.perfil-avatar {
+    width: 76px;
+    height: 76px;
+    color: #2457b8;
+    background: #e8f0ff;
+    font-size: 1.4rem;
+}
+
+#equipoApp .modal .btn {
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+/* Ajustes de espacio para pantallas medianas y pequeñas */
+@media (max-width: 991.98px) {
+    .equipo-main {
+        padding: 24px;
+    }
+
+    .equipo-header {
+        align-items: flex-start !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .equipo-main {
+        padding: 16px;
+    }
+
+    .equipo-header {
+        flex-direction: column;
+    }
+
+    .equipo-header > button {
+        width: 100%;
+    }
+
+    .equipo-tabs {
+        gap: 2px;
+    }
+
+    .equipo-tabs .nav-link {
+        padding: 9px 10px;
+        font-size: 0.82rem;
+    }
+
+    .integrante-card .card-body {
+        padding: 14px;
+    }
+
+    .integrante-card .btn-group {
+        flex-wrap: wrap;
+    }
+
+    #equipoApp .modal-body {
+        padding: 16px;
+    }
+}

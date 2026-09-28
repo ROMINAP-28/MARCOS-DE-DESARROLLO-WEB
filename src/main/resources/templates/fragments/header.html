@@ -1,0 +1,58 @@
+
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Rúbrica: fragmento reutilizable para mantener una navegación uniforme entre interfaces. -->
+<header th:fragment="header">
+    <!-- Bootstrap: barra de navegación adaptable a distintos tamaños de pantalla. -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+        <div class="container">
+            <!-- Thymeleaf: enlace dinámico hacia la página principal. -->
+            <a class="navbar-brand fw-bold" th:href="@{/}">
+                Gestión de Proyectos
+            </a>
+
+            <!-- Bootstrap: botón que despliega la navegación en dispositivos pequeños. -->
+            <button class="navbar-toggler" type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#menuPrincipal"
+                    aria-controls="menuPrincipal"
+                    aria-expanded="false"
+                    aria-label="Mostrar navegación">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Bootstrap: menú colapsable para navegación responsive. -->
+            <div class="collapse navbar-collapse" id="menuPrincipal">
+                <ul class="navbar-nav ms-auto align-items-lg-center">
+                    <!-- Thymeleaf: ruta a la página de inicio. -->
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/}">Inicio</a>
+                    </li>
+
+                    <!-- Enlace de navegación preparado para el módulo de proyectos. -->
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/login}">Proyectos</a>
+                    </li>
+
+                    <!-- Thymeleaf: acceso a la interfaz de autenticación. -->
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/login}">Iniciar sesión</a>
+                    </li>
+
+                    <!-- Bootstrap: botón destacado para acceder al registro. -->
+                    <li class="nav-item ms-lg-2">
+                        <a class="btn btn-light text-primary fw-semibold"
+                           th:href="@{/registro}">
+                            Crear cuenta
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+</body>
+</html>
