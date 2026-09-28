@@ -1,92 +1,40 @@
 
+/* Tareas + Kanban + drag-and-drop + API REST. */
 const { createApp } = Vue;
 
 createApp({
     data() {
         return {
-            usuario: "Usuario",
-            vista: "tabla",
-            busqueda: "",
-            filtroProyecto: "",
-            filtroPrioridad: "",
-            filtroEstado: "",
-            filtroResponsable: "",
+            usuario: 'Usuario',
+            vista: 'tabla',
+            busqueda: '',
+            filtroProyecto: '',
+            filtroPrioridad: '',
+            filtroEstado: '',
+            filtroResponsable: '',
             mostrarModal: false,
             modoEdicion: false,
             tareaArrastrada: null,
-            mensajeError: "",
+            mensajeError: '',
             siguienteId: 6,
 
-            estados: ["Pendiente", "En progreso", "Completada"],
-            prioridades: ["Baja", "Media", "Alta", "Urgente"],
-            proyectos: [
-                "Travelink",
-                "Sistema de Gestión",
-                "Proyecto Académico"
-            ],
+            estados: ['Pendiente', 'En progreso', 'Completada'],
+            prioridades: ['Baja', 'Media', 'Alta', 'Urgente'],
+
+            proyectos: [],
+
             responsables: [
-                "Ana Torres",
-                "Carlos Ruiz",
-                "María López",
-                "Juan Pérez"
+                'Ana Torres',
+                'Carlos Ruiz',
+                'María López',
+                'Juan Pérez'
             ],
 
-            // Datos temporales de demostración.
-            // TODO: reemplazar por tareas obtenidas desde la API de Spring Boot.
-            tareas: [
-                {
-                    id: 1,
-                    nombre: "Diseñar la interfaz",
-                    descripcion: "Preparar las vistas principales del sistema.",
-                    proyecto: "Travelink",
-                    prioridad: "Alta",
-                    estado: "Pendiente",
-                    fechaFin: "2026-09-30",
-                    responsable: "Ana Torres"
-                },
-                {
-                    id: 2,
-                    nombre: "Conectar base de datos",
-                    descripcion: "Configurar la conexión con PostgreSQL.",
-                    proyecto: "Travelink",
-                    prioridad: "Urgente",
-                    estado: "En progreso",
-                    fechaFin: "2026-10-02",
-                    responsable: "Carlos Ruiz"
-                },
-                {
-                    id: 3,
-                    nombre: "Revisar requisitos",
-                    descripcion: "Validar los requisitos funcionales.",
-                    proyecto: "Sistema de Gestión",
-                    prioridad: "Media",
-                    estado: "Pendiente",
-                    fechaFin: "2026-10-05",
-                    responsable: "María López"
-                },
-                {
-                    id: 4,
-                    nombre: "Crear estructura HTML",
-                    descripcion: "Implementar la estructura inicial de las páginas.",
-                    proyecto: "Travelink",
-                    prioridad: "Baja",
-                    estado: "Completada",
-                    fechaFin: "2026-09-25",
-                    responsable: "Juan Pérez"
-                },
-                {
-                    id: 5,
-                    nombre: "Implementar autenticación",
-                    descripcion: "Preparar el inicio de sesión de usuarios.",
-                    proyecto: "Proyecto Académico",
-                    prioridad: "Alta",
-                    estado: "En progreso",
-                    fechaFin: "2026-10-08",
-                    responsable: "Ana Torres"
-                }
-            ],
+            tareas: [],
 
-            formulario: this.formularioVacio()
+            formulario: this.formularioVacio(),
+
+            cargando: true
         };
     },
 
@@ -95,205 +43,302 @@ createApp({
             const texto = this.busqueda.toLowerCase();
 
             return this.tareas.filter(tarea => {
-                const coincideTexto =
-                    tarea.nombre.toLowerCase().includes(texto) ||
-                    tarea.descripcion.toLowerCase().includes(texto) ||
-                    tarea.proyecto.toLowerCase().includes(texto) ||
-                    tarea.responsable.toLowerCase().includes(texto);
+                const contenido =
+                    `${tarea.nombre} ${tarea.descripcion} ${tarea.proyecto} ${tarea.responsable}`
+                        .toLowerCase();
 
-                const coincideProyecto =
-                    !this.filtroProyecto ||
-                    tarea.proyecto === this.filtroProyecto;
-
-                const coincidePrioridad =
-                    !this.filtroPrioridad ||
-                    tarea.prioridad === this.filtroPrioridad;
-
-                const coincideEstado =
-                    !this.filtroEstado ||
-                    tarea.estado === this.filtroEstado;
-
-                const coincideResponsable =
-                    !this.filtroResponsable ||
-                    tarea.responsable === this.filtroResponsable;
-
-                return coincideTexto &&
-                    coincideProyecto &&
-                    coincidePrioridad &&
-                    coincideEstado &&
-                    coincideResponsable;
+                return contenido.includes(texto) &&
+                    (!this.filtroProyecto ||
+                        tarea.proyecto === this.filtroProyecto) &&
+                    (!this.filtroPrioridad ||
+                        tarea.prioridad === this.filtroPrioridad) &&
+                    (!this.filtroEstado ||
+                        tarea.estado === this.filtroEstado) &&
+                    (!this.filtroResponsable ||
+                        tarea.responsable === this.filtroResponsable);
             });
         }
+    },
+
+    mounted() {
+        this.cargarTareas();
     },
 
     methods: {
         formularioVacio() {
             return {
                 id: null,
-                nombre: "",
-                descripcion: "",
-                proyecto: "",
-                prioridad: "",
-                estado: "Pendiente",
-                fechaFin: "",
-                responsable: ""
+                nombre: '',
+                descripcion: '',
+                proyecto: '',
+                prioridad: '',
+                estado: 'Pendiente',
+                fechaFin: '',
+                responsable: ''
             };
         },
 
+        async cargarTareas() {
+            this.cargando = true;
+
+            try {
+                const respuesta =
+                    await fetch('/api/miembro3/tareas');
+
+                if (!respuesta.ok) {
+                    throw new Error('No se pudieron cargar las tareas.');
+                }
+
+                this.tareas = await respuesta.json();
+
+                this.proyectos = [
+                    ...new Set(this.tareas.map(t => t.proyecto))
+                ];
+
+                const maxId = this.tareas.reduce(
+                    (max, t) => Math.max(max, Number(t.id)),
+                    0
+                );
+
+                this.siguienteId = maxId + 1;
+
+            } catch (error) {
+                this.mensajeError = error.message;
+
+            } finally {
+                this.cargando = false;
+            }
+        },
+
         contarEstado(estado) {
-            return this.tareasFiltradas.filter(
-                tarea => tarea.estado === estado
-            ).length;
+            return this.tareasFiltradas
+                .filter(t => t.estado === estado)
+                .length;
         },
 
         tareasPorEstado(estado) {
-            return this.tareasFiltradas.filter(
-                tarea => tarea.estado === estado
-            );
+            return this.tareasFiltradas
+                .filter(t => t.estado === estado);
         },
 
         abrirNuevaTarea() {
             this.modoEdicion = false;
             this.formulario = this.formularioVacio();
-            this.mensajeError = "";
+            this.mensajeError = '';
             this.mostrarModal = true;
         },
 
         editarTarea(tarea) {
             this.modoEdicion = true;
             this.formulario = { ...tarea };
-            this.mensajeError = "";
+            this.mensajeError = '';
             this.mostrarModal = true;
         },
 
         cerrarModal() {
             this.mostrarModal = false;
-            this.mensajeError = "";
+            this.mensajeError = '';
         },
 
-        guardarTarea() {
-            this.mensajeError = "";
+        async guardarTarea() {
+            this.mensajeError = '';
 
             if (!this.formulario.nombre ||
                 !this.formulario.proyecto ||
                 !this.formulario.prioridad ||
                 !this.formulario.fechaFin ||
                 !this.formulario.responsable) {
-                this.mensajeError = "Completa todos los campos obligatorios.";
+
+                this.mensajeError =
+                    'Completa todos los campos obligatorios.';
+
                 return;
             }
 
-            if (this.modoEdicion) {
-                const indice = this.tareas.findIndex(
-                    tarea => tarea.id === this.formulario.id
-                );
+            try {
+                const esEdicion = this.modoEdicion;
 
-                if (indice !== -1) {
-                    this.tareas[indice] = { ...this.formulario };
+                const url = esEdicion
+                    ? `/api/miembro3/tareas/${this.formulario.id}`
+                    : '/api/miembro3/tareas';
+
+                const respuesta = await fetch(url, {
+                    method: esEdicion ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(this.formulario)
+                });
+
+                if (!respuesta.ok) {
+                    throw new Error('No se pudo guardar la tarea.');
                 }
 
-                // TODO: enviar los cambios al backend para actualizar la tarea en PostgreSQL.
-            } else {
-                const nuevaTarea = {
-                    ...this.formulario,
-                    id: this.siguienteId++
-                };
+                const guardada = await respuesta.json();
 
-                this.tareas.unshift(nuevaTarea);
+                if (esEdicion) {
+                    const indice = this.tareas.findIndex(
+                        t => t.id === guardada.id
+                    );
 
-                // TODO: enviar la nueva tarea al backend para guardarla en PostgreSQL.
+                    if (indice !== -1) {
+                        this.tareas[indice] = guardada;
+                    }
+
+                } else {
+                    this.tareas.unshift(guardada);
+                }
+
+                this.proyectos = [
+                    ...new Set(this.tareas.map(t => t.proyecto))
+                ];
+
+                this.cerrarModal();
+
+            } catch (error) {
+                this.mensajeError = error.message;
             }
-
-            this.cerrarModal();
         },
 
-        eliminarTarea(id) {
-            const confirmar = window.confirm(
-                "¿Estás seguro de que deseas eliminar esta tarea?"
-            );
+        async eliminarTarea(id) {
+            if (!window.confirm(
+                '¿Estás seguro de que deseas eliminar esta tarea?'
+            )) {
+                return;
+            }
 
-            if (!confirmar) return;
+            try {
+                const respuesta = await fetch(
+                    `/api/miembro3/tareas/${id}`,
+                    {
+                        method: 'DELETE'
+                    }
+                );
 
-            this.tareas = this.tareas.filter(tarea => tarea.id !== id);
+                if (!respuesta.ok) {
+                    throw new Error('No se pudo eliminar la tarea.');
+                }
 
-            // TODO: solicitar al backend la eliminación de la tarea en PostgreSQL.
+                this.tareas = this.tareas.filter(
+                    t => t.id !== id
+                );
+
+            } catch (error) {
+                this.mensajeError = error.message;
+            }
         },
 
         arrastrarTarea(evento, tarea) {
             this.tareaArrastrada = tarea.id;
-            evento.dataTransfer.effectAllowed = "move";
-            evento.dataTransfer.setData("text/plain", String(tarea.id));
+
+            evento.dataTransfer.effectAllowed = 'move';
+
+            evento.dataTransfer.setData(
+                'text/plain',
+                String(tarea.id)
+            );
         },
 
-        soltarTarea(evento, nuevoEstado) {
+        async soltarTarea(evento, nuevoEstado) {
             evento.preventDefault();
 
             const id = Number(
-                evento.dataTransfer.getData("text/plain") ||
+                evento.dataTransfer.getData('text/plain') ||
                 this.tareaArrastrada
             );
 
-            const tarea = this.tareas.find(item => item.id === id);
+            const tarea = this.tareas.find(
+                item => Number(item.id) === id
+            );
 
             if (!tarea || tarea.estado === nuevoEstado) {
                 this.tareaArrastrada = null;
                 return;
             }
 
+            const estadoAnterior = tarea.estado;
+
             tarea.estado = nuevoEstado;
             this.tareaArrastrada = null;
 
-            // TODO: persistir el nuevo estado mediante la API de Spring Boot.
+            try {
+                const respuesta = await fetch(
+                    `/api/miembro3/tareas/${id}/estado`,
+                    {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            estado: nuevoEstado
+                        })
+                    }
+                );
+
+                if (!respuesta.ok) {
+                    throw new Error(
+                        'No se pudo guardar el cambio de estado.'
+                    );
+                }
+
+                const actualizada = await respuesta.json();
+
+                const indice = this.tareas.findIndex(
+                    t => Number(t.id) === id
+                );
+
+                if (indice !== -1) {
+                    this.tareas[indice] = actualizada;
+                }
+
+            } catch (error) {
+                tarea.estado = estadoAnterior;
+                this.mensajeError = error.message;
+            }
         },
 
         clasePrioridad(prioridad) {
-            const clases = {
-                "Baja": "priority-low",
-                "Media": "priority-medium",
-                "Alta": "priority-high",
-                "Urgente": "priority-urgent"
-            };
-
-            return clases[prioridad] || "";
+            return ({
+                Baja: 'priority-low',
+                Media: 'priority-medium',
+                Alta: 'priority-high',
+                Urgente: 'priority-urgent'
+            })[prioridad] || '';
         },
 
         claseEstado(estado) {
-            const clases = {
-                "Pendiente": "status-pending",
-                "En progreso": "status-progress",
-                "Completada": "status-done"
-            };
-
-            return clases[estado] || "";
+            return ({
+                Pendiente: 'status-pending',
+                'En progreso': 'status-progress',
+                Completada: 'status-done'
+            })[estado] || '';
         },
 
         clasePunto(estado) {
-            const clases = {
-                "Pendiente": "dot-pending",
-                "En progreso": "dot-progress",
-                "Completada": "dot-done"
-            };
-
-            return clases[estado] || "";
+            return ({
+                Pendiente: 'dot-pending',
+                'En progreso': 'dot-progress',
+                Completada: 'dot-done'
+            })[estado] || '';
         },
 
         iniciales(nombre) {
-            return nombre
-
-                .split(" ")
+            return (nombre || '')
+                .split(' ')
                 .filter(Boolean)
                 .slice(0, 2)
-                .map(parte => parte[0].toUpperCase())
-                .join("");
+                .map(p => p[0].toUpperCase())
+                .join('');
         },
 
         formatearFecha(fecha) {
-            if (!fecha) return "Sin fecha";
+            if (!fecha) return 'Sin fecha';
 
-            const partes = fecha.split("-");
-            if (partes.length !== 3) return fecha;
+            const partes = fecha.split('-');
 
-            return `${partes[2]}/${partes[1]}/${partes[0]}`;
+            return partes.length === 3
+                ? `${partes[2]}/${partes[1]}/${partes[0]}`
+                : fecha;
         }
     }
-}).mount("#app");
+}).mount('#app');
