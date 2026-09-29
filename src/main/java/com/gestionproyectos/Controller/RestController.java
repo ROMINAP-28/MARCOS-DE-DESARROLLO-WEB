@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
-@RequestMapping()
+@RequestMapping("/api")
+
 public class RestController {
 
     private final AtomicLong proyectoId = new AtomicLong(3);
