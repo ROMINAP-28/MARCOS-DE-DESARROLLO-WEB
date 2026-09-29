@@ -154,7 +154,8 @@
             };
         },
         methods: {
-            registrar() {
+
+            async registrar() {
                 this.mensaje = '';
                 this.tipoMensaje = '';
 
@@ -171,8 +172,9 @@
                     return;
                 }
 
-                if (this.contrasena.length < 8) {
-                    this.mensaje = 'La contraseña debe tener al menos 8 caracteres.';
+                if (this.contrasena.length < 8 ||
+                    this.contrasena.length > 72) {
+                    this.mensaje = 'La contraseña debe tener entre 8 y 72 caracteres.';
                     this.tipoMensaje = 'error';
                     return;
                 }
@@ -189,9 +191,43 @@
                     return;
                 }
 
-                this.mensaje =
-                    'Formulario validado. El registro se conectará posteriormente con el backend.';
-                this.tipoMensaje = 'info';
+                try {
+                    const respuesta = await fetch('/api/auth/registro', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            nombre: this.nombre,
+                            correo: this.correo,
+                            contrasena: this.contrasena
+                        })
+                    });
+
+                    const resultado = await respuesta.json();
+
+                    if (!respuesta.ok) {
+                        this.mensaje = resultado.mensaje ||
+                            'No se pudo completar el registro.';
+                        this.tipoMensaje = 'error';
+                        return;
+                    }
+
+                    this.mensaje = resultado.mensaje;
+                    this.tipoMensaje = 'exito';
+
+                    this.nombre = '';
+                    this.correo = '';
+                    this.contrasena = '';
+                    this.confirmarContrasena = '';
+                    this.aceptaTerminos = false;
+
+                } catch (error) {
+                    console.error('Error en el registro:', error);
+                    this.mensaje =
+                        'No se pudo conectar con el servidor. Inténtalo nuevamente.';
+                    this.tipoMensaje = 'error';
+                }
             }
         }
     }).mount('#registroApp');
