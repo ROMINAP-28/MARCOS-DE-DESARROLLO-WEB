@@ -3,6 +3,7 @@ package com.gestionproyectos.Controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,8 +11,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
 @RequestMapping("/api")
-
-public class RestController {
+public class ApiController {
 
     private final AtomicLong proyectoId = new AtomicLong(3);
     private final AtomicLong tareaId = new AtomicLong(5);

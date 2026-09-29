@@ -1,23 +1,36 @@
+
 package com.gestionproyectos.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "proyecto_usuario")
-@Data
+@Getter
+@Setter
 public class ProyectoUsuario {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    private String rolEnProyecto;
+    @EmbeddedId
+    private ProyectoUsuarioId id;
 
     @ManyToOne
-    @JoinColumn(name = "proyecto_id")
+    @MapsId("idProyecto")
+    @JoinColumn(name = "id_proyecto", nullable = false)
     private Proyecto proyecto;
 
     @ManyToOne
-    @JoinColumn(name = "usuario_id")
+    @MapsId("idUsuario")
+    @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
+
+    @Column(name = "rol", length = 50)
+    private String rol;
+
+    @Column(name = "estado", length = 30)
+    private String estado;
+
+    @Column(name = "fecha_asignacion")
+    private LocalDateTime fechaAsignacion;
 }

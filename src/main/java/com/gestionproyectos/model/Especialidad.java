@@ -1,19 +1,31 @@
+
 package com.gestionproyectos.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import java.util.List;
 
 @Entity
 @Table(name = "especialidad")
-@Data
+@Getter
+@Setter
 public class Especialidad {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id_especialidad")
+    private Integer idEspecialidad;
 
-    private String nombre;
+    @Column(name = "nombre_especialidad",
+            nullable = false,
+            unique = true,
+            length = 100)
+    private String nombreEspecialidad;
+
+    @Column(name = "descripcion", length = 255)
+    private String descripcion;
 
     @OneToMany(mappedBy = "especialidad")
-    private List usuarios;
+    private List<Usuario> usuarios;
 }
