@@ -2,6 +2,9 @@
 package com.gestionproyectos.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
@@ -18,18 +21,28 @@ public class Usuario {
     @Column(name = "id_usuario")
     private Integer idUsuario;
 
+    @NotBlank
+    @Size(max = 100)
     @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
 
+    @NotBlank
+    @Email
+    @Size(max = 150)
     @Column(name = "correo", nullable = false, unique = true, length = 150)
     private String email;
 
+    @NotBlank
+    @Size(max = 255)
     @Column(name = "contrasena_hash", nullable = false, length = 255)
     private String password;
 
+    @Size(max = 20)
     @Column(name = "telefono", length = 20)
     private String telefono;
 
+    @NotBlank
+    @Size(max = 50)
     @Column(name = "rol", nullable = false, length = 50)
     private String rol;
 

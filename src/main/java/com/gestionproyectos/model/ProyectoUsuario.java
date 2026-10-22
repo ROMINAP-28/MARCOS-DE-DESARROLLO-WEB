@@ -2,6 +2,8 @@
 package com.gestionproyectos.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
@@ -15,19 +17,23 @@ public class ProyectoUsuario {
     @EmbeddedId
     private ProyectoUsuarioId id;
 
+    @NotNull
     @ManyToOne
     @MapsId("idProyecto")
     @JoinColumn(name = "id_proyecto", nullable = false)
     private Proyecto proyecto;
 
+    @NotNull
     @ManyToOne
     @MapsId("idUsuario")
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
+    @Size(max = 50)
     @Column(name = "rol", length = 50)
     private String rol;
 
+    @Size(max = 30)
     @Column(name = "estado", length = 30)
     private String estado;
 
