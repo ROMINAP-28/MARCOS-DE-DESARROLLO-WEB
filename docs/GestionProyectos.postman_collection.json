@@ -1,0 +1,438 @@
+{
+  "info": {
+    "name": "Gestión de Proyectos - API REST",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base",
+      "value": "http://localhost:8080"
+    }
+  ],
+  "item": [
+    {
+      "name": "Proyectos",
+      "item": [
+        {
+          "name": "GET listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/api/miembro3/proyectos",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "api",
+                "miembro3",
+                "proyectos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET buscar (q)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/api/miembro3/proyectos?q=web",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "api",
+                "miembro3",
+                "proyectos"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "web"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/api/miembro3/proyectos/1",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "api",
+                "miembro3",
+                "proyectos",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST crear",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/api/miembro3/proyectos",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "api",
+                "miembro3",
+                "proyectos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Proyecto de prueba\",\n  \"descripcion\": \"Creado desde Postman\",\n  \"fechaInicio\": \"2026-11-01\",\n  \"fechaFin\": \"2026-12-15\",\n  \"prioridad\": \"Alta\",\n  \"responsable\": \"María López\",\n  \"integrantes\": [\n    \"Carlos Torres\",\n    \"Ana García\"\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "PUT actualizar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/api/miembro3/proyectos/1",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "api",
+                "miembro3",
+                "proyectos",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Proyecto de prueba\",\n  \"descripcion\": \"Creado desde Postman\",\n  \"fechaInicio\": \"2026-11-01\",\n  \"fechaFin\": \"2026-12-15\",\n  \"prioridad\": \"Alta\",\n  \"responsable\": \"María López\",\n  \"integrantes\": [\n    \"Carlos Torres\",\n    \"Ana García\"\n  ],\n  \"estado\": \"En progreso\",\n  \"progreso\": 40\n}"
+            }
+          }
+        },
+        {
+          "name": "DELETE eliminar",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/api/miembro3/proyectos/4",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "api",
+                "miembro3",
+                "proyectos",
+                "4"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tareas",
+      "item": [
+        {
+          "name": "GET listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/api/miembro3/tareas",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "api",
+                "miembro3",
+                "tareas"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/api/miembro3/tareas/1",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "api",
+                "miembro3",
+                "tareas",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST crear",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/api/miembro3/tareas",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "api",
+                "miembro3",
+                "tareas"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Tarea de prueba\",\n  \"descripcion\": \"Creada desde Postman\",\n  \"proyecto\": \"Plataforma web colaborativa\",\n  \"prioridad\": \"Alta\",\n  \"estado\": \"Pendiente\",\n  \"fechaFin\": \"2026-11-10\",\n  \"responsable\": \"Ana Torres\"\n}"
+            }
+          }
+        },
+        {
+          "name": "PUT actualizar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/api/miembro3/tareas/1",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "api",
+                "miembro3",
+                "tareas",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Tarea de prueba\",\n  \"descripcion\": \"Creada desde Postman\",\n  \"proyecto\": \"Plataforma web colaborativa\",\n  \"prioridad\": \"Alta\",\n  \"estado\": \"En progreso\",\n  \"fechaFin\": \"2026-11-10\",\n  \"responsable\": \"Ana Torres\"\n}"
+            }
+          }
+        },
+        {
+          "name": "PATCH cambiar estado",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/api/miembro3/tareas/1/estado",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "api",
+                "miembro3",
+                "tareas",
+                "1",
+                "estado"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"Completada\"\n}"
+            }
+          }
+        },
+        {
+          "name": "DELETE eliminar",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/api/miembro3/tareas/6",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "api",
+                "miembro3",
+                "tareas",
+                "6"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Especialidades",
+      "item": [
+        {
+          "name": "GET listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/api/miembro3/especialidades",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "api",
+                "miembro3",
+                "especialidades"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST crear",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/api/miembro3/especialidades",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "api",
+                "miembro3",
+                "especialidades"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Backend\",\n  \"descripcion\": \"Desarrollo del servidor\"\n}"
+            }
+          }
+        },
+        {
+          "name": "PUT actualizar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/api/miembro3/especialidades/1",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "api",
+                "miembro3",
+                "especialidades",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Backend Java\",\n  \"descripcion\": \"Spring Boot\"\n}"
+            }
+          }
+        },
+        {
+          "name": "DELETE eliminar",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/api/miembro3/especialidades/1",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "api",
+                "miembro3",
+                "especialidades",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "GET listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/api/miembro3/usuarios",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "api",
+                "miembro3",
+                "usuarios"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/api/miembro3/usuarios/1",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "api",
+                "miembro3",
+                "usuarios",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
