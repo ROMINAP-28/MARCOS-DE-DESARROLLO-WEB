@@ -57,4 +57,9 @@ public class HomeController {
     public String mostrarReportes() {
         return "dashboard/reportes";
     }
+
+    @GetMapping("/configuracion")
+    public String mostrarConfiguracion() {
+        return "perfil/configuracion";
+    }
 }

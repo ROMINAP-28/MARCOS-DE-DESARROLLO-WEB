@@ -1,0 +1,54 @@
+.config-main {
+    gap: 1.5rem;
+}
+
+.config-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    box-shadow: 0 3px 12px rgba(15, 23, 42, .04);
+}
+
+.config-card .card-body {
+    padding: 1.5rem;
+}
+
+.config-heading {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.config-icon {
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: 0 0 2.75rem;
+    place-items: center;
+    border-radius: .75rem;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 1.25rem;
+}
+
+.config-option {
+    padding: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: .75rem;
+}
+
+.config-option .form-check-input {
+    width: 2.5rem;
+    height: 1.35rem;
+    margin: .15rem 0 0;
+    cursor: pointer;
+}
+
+.config-main.config-compact { gap: .75rem; }
+.config-compact .row { --bs-gutter-y: .75rem; }
+.config-compact .config-card .card-body { padding: 1rem; }
+.config-compact .config-heading { margin-bottom: .75rem; }
+
+@media (max-width: 575.98px) {
+    .config-card .card-body { padding: 1.25rem; }
+}

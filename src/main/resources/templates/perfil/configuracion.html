@@ -1,10 +1,123 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración | Gestión de Proyectos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/dashboar.css}">
+    <link rel="stylesheet" th:href="@{/css/configuracion.css}">
 </head>
 <body>
+<div class="container-fluid p-0">
+    <div class="dashboard-layout d-flex">
+        <aside class="dashboard-sidebar bg-white border-end">
+            <div class="sidebar-profile">
+                <div class="user-avatar" aria-hidden="true">U</div>
+                <div class="min-w-0">
+                    <div class="fw-semibold text-truncate">Usuario</div>
+                    <small class="text-secondary">Cuenta</small>
+                </div>
+            </div>
+            <hr>
+            <nav class="nav flex-column dashboard-nav" aria-label="Navegación principal">
+                <a class="nav-link" th:href="@{/dashboard}"><i class="bi bi-grid-1x2" aria-hidden="true"></i><span>Dashboard</span></a>
+                <a class="nav-link" th:href="@{/proyectos}"><i class="bi bi-folder" aria-hidden="true"></i><span>Proyectos</span></a>
+                <a class="nav-link" th:href="@{/tareas}"><i class="bi bi-check2-square" aria-hidden="true"></i><span>Tareas</span></a>
+                <a class="nav-link" th:href="@{/equipo}"><i class="bi bi-people" aria-hidden="true"></i><span>Equipo</span></a>
+                <a class="nav-link" th:href="@{/reportes}"><i class="bi bi-bar-chart" aria-hidden="true"></i><span>Reportes</span></a>
+                <a class="nav-link active" th:href="@{/configuracion}" aria-current="page"><i class="bi bi-gear" aria-hidden="true"></i><span>Configuración</span></a>
+            </nav>
+        </aside>
 
+        <main class="dashboard-main flex-grow-1 config-main">
+            <header class="mb-2">
+                <p class="text-secondary small mb-1">Cuenta / Configuración</p>
+                <h1 class="h3 fw-bold mb-2">Configuración</h1>
+                <p class="text-secondary mb-0">Administra las preferencias de visualización y consulta el estado de tu cuenta.</p>
+            </header>
+
+            <div class="row g-4">
+                <div class="col-12 col-xl-7">
+                    <section class="card config-card h-100" aria-labelledby="preferencias-titulo">
+                        <div class="card-body">
+                            <div class="config-heading">
+                                <span class="config-icon"><i class="bi bi-sliders" aria-hidden="true"></i></span>
+                                <div>
+                                    <h2 id="preferencias-titulo" class="h5 fw-semibold mb-1">Preferencias de visualización</h2>
+                                    <p class="text-secondary small mb-0">Personaliza cómo se muestra esta página.</p>
+                                </div>
+                            </div>
+                            <div class="config-option d-flex justify-content-between align-items-start gap-3">
+                                <div>
+                                    <label for="vistaCompacta" class="fw-semibold">Vista compacta</label>
+                                    <p id="vistaCompactaAyuda" class="text-secondary small mb-0">Reduce el espacio entre las secciones de configuración en este navegador.</p>
+                                </div>
+                                <div class="form-check form-switch m-0">
+                                    <input id="vistaCompacta" class="form-check-input" type="checkbox"
+                                           role="switch" aria-describedby="vistaCompactaAyuda">
+                                </div>
+                            </div>
+                            <p class="small text-secondary mb-0 mt-3">Esta preferencia se guarda únicamente en tu navegador y no modifica la cuenta ni otras páginas.</p>
+                            <p id="estadoPreferencia" class="visually-hidden" role="status" aria-live="polite"></p>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="col-12 col-xl-5">
+                    <section class="card config-card h-100" aria-labelledby="cuenta-titulo">
+                        <div class="card-body">
+                            <div class="config-heading">
+                                <span class="config-icon"><i class="bi bi-person-circle" aria-hidden="true"></i></span>
+                                <div>
+                                    <h2 id="cuenta-titulo" class="h5 fw-semibold mb-1">Datos de la cuenta</h2>
+                                    <p class="text-secondary small mb-0">Información personal y de acceso.</p>
+                                </div>
+                            </div>
+                            <div class="alert alert-info mb-0" role="note">
+                                La consulta y edición de datos personales estarán disponibles cuando se integre la autenticación de usuarios.
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="col-12 col-xl-7">
+                    <section class="card config-card h-100" aria-labelledby="seguridad-titulo">
+                        <div class="card-body">
+                            <div class="config-heading">
+                                <span class="config-icon"><i class="bi bi-shield-lock" aria-hidden="true"></i></span>
+                                <div>
+                                    <h2 id="seguridad-titulo" class="h5 fw-semibold mb-1">Seguridad</h2>
+                                    <p class="text-secondary small mb-0">Protección y acceso a tu cuenta.</p>
+                                </div>
+                            </div>
+                            <p class="text-secondary mb-0">El cambio de contraseña y la gestión de sesiones requieren conectar esta vista con el servicio de autenticación. Todavía no están disponibles.</p>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="col-12 col-xl-5">
+                    <section class="card config-card h-100" aria-labelledby="ayuda-titulo">
+                        <div class="card-body">
+                            <div class="config-heading">
+                                <span class="config-icon"><i class="bi bi-compass" aria-hidden="true"></i></span>
+                                <div>
+                                    <h2 id="ayuda-titulo" class="h5 fw-semibold mb-1">Accesos rápidos</h2>
+                                    <p class="text-secondary small mb-0">Vuelve a tus espacios de trabajo.</p>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <a class="btn btn-outline-primary" th:href="@{/proyectos}">Ver proyectos</a>
+                                <a class="btn btn-outline-primary" th:href="@{/tareas}">Ver tareas</a>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+<script th:src="@{/js/configuracion.js}"></script>
 </body>
 </html>
