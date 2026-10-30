@@ -57,7 +57,7 @@ public class TareaController {
 
     // PATCH http://localhost:8080/api/miembro3/tareas/1/estado   (lo usa el tablero Kanban)
     @PatchMapping("/tareas/{id}/estado")
-    public TareaDto cambiarEstado(@PathVariable Integer id, @RequestBody EstadoRequest request) {
+    public TareaDto cambiarEstado(@PathVariable Integer id, @Valid @RequestBody EstadoRequest request) {
         return tareaServicio.cambiarEstado(id, request.estado());
     }
 

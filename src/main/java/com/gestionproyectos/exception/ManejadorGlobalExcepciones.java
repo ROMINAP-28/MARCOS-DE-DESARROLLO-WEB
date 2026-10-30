@@ -32,6 +32,11 @@ public class ManejadorGlobalExcepciones {
         return respuesta(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
+    @ExceptionHandler(RecursoDuplicadoException.class)
+    public ResponseEntity<Map<String, String>> duplicado(RecursoDuplicadoException e) {
+        return respuesta(HttpStatus.CONFLICT, e.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> validacion(MethodArgumentNotValidException e) {
         String mensaje = e.getBindingResult().getFieldErrors().stream()

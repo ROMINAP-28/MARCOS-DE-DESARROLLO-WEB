@@ -1,3 +1,5 @@
 package com.gestionproyectos.dto;
 
-public record EstadoRequest(String estado) {}
+import jakarta.validation.constraints.NotBlank;
+
+public record EstadoRequest(@NotBlank String estado) {}
