@@ -6,10 +6,12 @@ import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -51,6 +53,19 @@ public class Proyecto {
     @Column(name = "porcentaje_avance")
     private Float porcentajeAvance;
 
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_responsable", nullable = false)
+    private Usuario responsable;
+
+    @Column(name = "fecha_creacion", nullable = false, updatable = false)
+    private LocalDateTime fechaCreacion;
+
+    @PrePersist
+    void iniciarFechaCreacion() {
+        if (fechaCreacion == null) fechaCreacion = LocalDateTime.now();
+    }
+
     @AssertTrue(message = "La fecha de fin no puede ser anterior a la fecha de inicio")
     public boolean isPeriodoValido() {
         return fechaInicio == null || fechaFin == null || !fechaFin.isBefore(fechaInicio);
@@ -61,4 +76,10 @@ public class Proyecto {
 
     @OneToMany(mappedBy = "proyecto", cascade = CascadeType.ALL)
     private List<Tarea> tareas;
+
+    @OneToMany(mappedBy = "proyecto", cascade = CascadeType.ALL)
+    private List<Recurso> recursos;
+
+    @OneToMany(mappedBy = "proyecto", cascade = CascadeType.ALL)
+    private List<Reporte> reportes;
 }

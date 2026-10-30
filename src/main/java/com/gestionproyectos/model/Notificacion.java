@@ -29,11 +29,20 @@ public class Notificacion {
     @Column(name = "mensaje", nullable = false)
     private String mensaje;
 
+    // Detalle opcional, separado del mensaje breve usado en las notificaciones actuales.
+    @Column(name = "contenido", length = 255)
+    private String contenido;
+
     @Column(name = "leido")
     private Boolean leido = false;
 
     @Column(name = "fecha_creacion")
     private LocalDateTime fechaCreacion;
+
+    @PrePersist
+    void iniciarFechaCreacion() {
+        if (fechaCreacion == null) fechaCreacion = LocalDateTime.now();
+    }
 
     @NotNull
     @ManyToOne

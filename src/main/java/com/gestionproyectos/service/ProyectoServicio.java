@@ -63,6 +63,7 @@ public class ProyectoServicio implements IProyectoServicio {
 
         Proyecto proyecto = new Proyecto();
         copiarDatos(proyecto, request);
+        proyecto.setResponsable(responsable);
         proyecto.setEstado(estadoValido(request.estado(), "Planificado"));
         proyecto.setPorcentajeAvance(progresoValido(request.progreso(), 0));
         proyecto = proyectoRepositorio.save(proyecto);
@@ -79,6 +80,7 @@ public class ProyectoServicio implements IProyectoServicio {
         Map<Integer, Usuario> equipo = armarEquipo(responsable, request.integrantes());
 
         copiarDatos(proyecto, request);
+        proyecto.setResponsable(responsable);
         proyecto.setEstado(estadoValido(request.estado(), proyecto.getEstado()));
         proyecto.setPorcentajeAvance(progresoValido(request.progreso(),
                 proyecto.getPorcentajeAvance() == null ? 0 : Math.round(proyecto.getPorcentajeAvance())));
@@ -92,7 +94,7 @@ public class ProyectoServicio implements IProyectoServicio {
 
     @Override
     public void eliminarProyecto(Integer idProyecto) {
-        // cascade = ALL en el modelo borra también equipo, tareas, comentarios y notificaciones.
+        // cascade = ALL borra equipo, tareas, comentarios, notificaciones, recursos y reportes.
         proyectoRepositorio.delete(obtener(idProyecto));
     }
 
@@ -175,10 +177,7 @@ public class ProyectoServicio implements IProyectoServicio {
 
     private ProyectoDto aDto(Proyecto p) {
         List<ProyectoUsuario> equipo = proyectoUsuarioRepositorio.buscarPorProyecto(p.getIdProyecto());
-        String responsable = equipo.stream()
-                .filter(pu -> ROL_RESPONSABLE.equalsIgnoreCase(pu.getRol()))
-                .map(pu -> pu.getUsuario().getNombre())
-                .findFirst().orElse("");
+        String responsable = p.getResponsable().getNombre();
         List<String> integrantes = equipo.stream()
                 .map(pu -> pu.getUsuario().getNombre()).toList();
         int progreso = p.getPorcentajeAvance() == null ? 0 : Math.round(p.getPorcentajeAvance());

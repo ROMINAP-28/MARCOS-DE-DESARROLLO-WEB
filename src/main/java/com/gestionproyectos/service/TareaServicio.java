@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -105,6 +106,10 @@ public class TareaServicio implements ITareaServicio {
         tarea.setEstado(estado);
         tarea.setFechaFin(r.fechaFin());
         tarea.setProyecto(proyecto);
+        if (tarea.getResponsable() == null
+                || !Objects.equals(tarea.getResponsable().getIdUsuario(), responsable.getIdUsuario())) {
+            tarea.setFechaAsignacion(LocalDateTime.now());
+        }
         tarea.setResponsable(responsable);
     }
 

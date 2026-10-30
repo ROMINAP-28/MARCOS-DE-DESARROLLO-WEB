@@ -27,6 +27,11 @@ public class Comentario {
     @Column(name = "fecha_creacion")
     private LocalDateTime fechaCreacion;
 
+    @PrePersist
+    void iniciarFechaCreacion() {
+        if (fechaCreacion == null) fechaCreacion = LocalDateTime.now();
+    }
+
     @NotNull
     @ManyToOne
     @JoinColumn(name = "id_usuario", nullable = false)

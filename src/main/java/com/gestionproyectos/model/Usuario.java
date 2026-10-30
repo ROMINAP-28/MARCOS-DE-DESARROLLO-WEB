@@ -62,8 +62,16 @@ public class Usuario {
     @Column(name = "fecha_registro")
     private LocalDateTime fechaRegistro;
 
+    @PrePersist
+    void iniciarFechaRegistro() {
+        if (fechaRegistro == null) fechaRegistro = LocalDateTime.now();
+    }
+
     @OneToMany(mappedBy = "usuario")
     private List<ProyectoUsuario> proyectoUsuarios;
+
+    @OneToMany(mappedBy = "responsable")
+    private List<Proyecto> proyectosResponsable;
 
     @OneToMany(mappedBy = "responsable")
     private List<Tarea> tareas;
@@ -73,4 +81,7 @@ public class Usuario {
 
     @OneToMany(mappedBy = "usuario")
     private List<Comentario> comentarios;
+
+    @OneToMany(mappedBy = "usuarioGenerador")
+    private List<Reporte> reportesGenerados;
 }

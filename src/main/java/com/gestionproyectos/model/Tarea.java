@@ -49,6 +49,15 @@ public class Tarea {
     @Column(name = "fecha_creacion")
     private LocalDateTime fechaCreacion;
 
+    @Column(name = "fecha_asignacion")
+    private LocalDateTime fechaAsignacion;
+
+    @PrePersist
+    void iniciarFechas() {
+        if (fechaCreacion == null) fechaCreacion = LocalDateTime.now();
+        if (fechaAsignacion == null) fechaAsignacion = fechaCreacion;
+    }
+
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_proyecto", nullable = false)

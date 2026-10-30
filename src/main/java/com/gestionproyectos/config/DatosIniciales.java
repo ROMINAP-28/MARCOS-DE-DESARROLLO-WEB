@@ -93,6 +93,7 @@ public class DatosIniciales {
         p.setPrioridad(prioridad);
         p.setEstado(estado);
         p.setPorcentajeAvance(avance);
+        p.setResponsable(u.get(responsable));
         p = proyectos.save(p);
 
         asignar(equipos, p, u.get(responsable), "Responsable");
