@@ -57,3 +57,28 @@ CREATE TABLE reporte (
 );
 CREATE INDEX idx_reporte_proyecto ON reporte(id_proyecto);
 CREATE INDEX idx_reporte_usuario_generador ON reporte(id_usuario_generador);
+
+INSERT INTO proyecto (
+    id_proyecto,
+    descripcion,
+    estado,
+    fecha_fin,
+    fecha_inicio,
+    nombre_proyecto,
+    porcentaje_avance,
+    prioridad,
+    fecha_creacion,
+    id_responsable
+)
+VALUES (
+    6,
+    'Desarrollo de una plataforma de gestion de proyectos',
+    'En progreso',
+    '2026-12-30',
+    '2026-11-13',
+    'Sistema de Gestion de Proyectos',
+    25.5,
+    'Alta',
+    CURRENT_TIMESTAMP,
+    1
+);
