@@ -101,8 +101,18 @@
                 </p>
             </section>
 
+            <div v-if="cargando" class="alert alert-info" role="status">
+                Cargando resumen de proyectos y tareas...
+            </div>
+            <div v-if="errorCarga" class="alert alert-danger" role="alert">
+                {{ errorCarga }}
+                <button type="button" class="btn btn-sm btn-outline-danger ms-2"
+                        @click="cargarResumen">Reintentar</button>
+            </div>
+
             <!-- Bootstrap: presenta los cuatro indicadores principales. -->
             <section
+                    v-if="!cargando && !errorCarga"
                     class="row g-3 mb-4 dashboard-stats"
                     aria-label="Resumen de actividad">
 
@@ -177,7 +187,7 @@
             </section>
 
             <!-- Bootstrap: distribuye los paneles inferiores en dos columnas. -->
-            <section class="row g-3 dashboard-panels">
+            <section v-if="!cargando && !errorCarga" class="row g-3 dashboard-panels">
 
                 <!-- Vue.js: presenta los proyectos y su porcentaje de avance. -->
                 <div class="col-12 col-xl-6 d-flex">
@@ -235,7 +245,7 @@
                     </section>
                 </div>
 
-                <!-- Vue.js: presenta las tareas pendientes y en progreso. -->
+            <!-- Vue.js: presenta las tareas que vencen en los próximos 7 días. -->
                 <div class="col-12 col-xl-6 d-flex">
                     <section class="card dashboard-panel h-100 w-100">
 
@@ -261,7 +271,7 @@
                                     </thead>
 
                                     <tbody>
-                                    <!-- Vue.js: genera una fila por tarea pendiente. -->
+                                    <!-- Vue.js: genera una fila por tarea próxima a vencer. -->
                                     <tr
                                             v-for="tarea in tareasProximas"
                                             :key="tarea.id">
@@ -272,7 +282,7 @@
 
                                         <!-- Vue.js: formatea la fecha de vencimiento. -->
                                         <td>
-                                            {{ fechaLegible(tarea.fecha) }}
+                                             {{ fechaLegible(tarea.fechaFin) }}
                                         </td>
 
                                         <!-- Vue.js + Bootstrap: colorea la prioridad. -->

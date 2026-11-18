@@ -5,46 +5,16 @@ const { createApp } = Vue;
 createApp({
     data() {
         return {
-            // Datos demostrativos que luego se obtendrán desde la API REST.
             usuario: 'Usuario',
-
-            proyectos: [
-                { id: 1, nombre: 'Proyecto 1', progreso: 25 },
-                { id: 2, nombre: 'Proyecto 2', progreso: 30 },
-                { id: 3, nombre: 'Proyecto 3', progreso: 20 }
-            ],
-
-            tareas: [
-                {
-                    id: 1,
-                    nombre: 'Diseñar interfaz',
-                    fecha: '2026-09-29',
-                    prioridad: 'Alta',
-                    estado: 'Pendiente'
-                },
-                {
-                    id: 2,
-                    nombre: 'Revisar documentación',
-                    fecha: '2026-09-30',
-                    prioridad: 'Media',
-                    estado: 'Pendiente'
-                },
-                {
-                    id: 3,
-                    nombre: 'Preparar presentación',
-                    fecha: '2026-10-01',
-                    prioridad: 'Baja',
-                    estado: 'Completada'
-                },
-                {
-                    id: 4,
-                    nombre: 'Validar requisitos',
-                    fecha: '2026-10-02',
-                    prioridad: 'Alta',
-                    estado: 'En progreso'
-                }
-            ]
+            proyectos: [],
+            tareas: [],
+            cargando: true,
+            errorCarga: ''
         };
+    },
+
+    mounted() {
+        this.cargarResumen();
     },
 
     computed: {
@@ -55,11 +25,18 @@ createApp({
             ).length;
         },
 
-        // Vue.js: filtra las tareas que aún no están completadas.
+        // Tareas no completadas que vencen desde hoy hasta dentro de 7 días.
         tareasProximas() {
+            const hoy = new Date();
+            const finVentana = new Date(hoy);
+            finVentana.setDate(finVentana.getDate() + 7);
+            const desde = this.fechaISO(hoy);
+            const hasta = this.fechaISO(finVentana);
+
             return this.tareas.filter(
-                tarea => tarea.estado !== 'Completada'
-            );
+                tarea => tarea.estado !== 'Completada' &&
+                    tarea.fechaFin && tarea.fechaFin >= desde && tarea.fechaFin <= hasta
+            ).sort((a, b) => a.fechaFin.localeCompare(b.fechaFin));
         },
 
         // Vue.js: obtiene el saludo según la hora local.
@@ -83,6 +60,44 @@ createApp({
     },
 
     methods: {
+        async cargarResumen() {
+            this.cargando = true;
+            this.errorCarga = '';
+
+            try {
+                const [respuestaProyectos, respuestaTareas] = await Promise.all([
+                    fetch('/api/miembro3/proyectos'),
+                    fetch('/api/miembro3/tareas')
+                ]);
+                if (!respuestaProyectos.ok || !respuestaTareas.ok) {
+                    throw new Error('No se pudo cargar el resumen. Inténtalo de nuevo.');
+                }
+
+                const [proyectos, tareas] = await Promise.all([
+                    respuestaProyectos.json(), respuestaTareas.json()
+                ]);
+                if (!Array.isArray(proyectos) || !Array.isArray(tareas)) {
+                    throw new Error('La respuesta del servidor no es válida.');
+                }
+
+                this.proyectos = proyectos;
+                this.tareas = tareas;
+            } catch (error) {
+                this.proyectos = [];
+                this.tareas = [];
+                this.errorCarga = error.message || 'No se pudo cargar el resumen.';
+            } finally {
+                this.cargando = false;
+            }
+        },
+
+        fechaISO(fecha) {
+            const anio = fecha.getFullYear();
+            const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+            const dia = String(fecha.getDate()).padStart(2, '0');
+            return `${anio}-${mes}-${dia}`;
+        },
+
         // Vue.js + Bootstrap: asigna el color según la prioridad.
         clasePrioridad(prioridad) {
             const clases = {

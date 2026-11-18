@@ -1,6 +1,6 @@
 RESULTADO DE LA AUDITORÍA
 
-La persistencia es parcial y las estadísticas no están sincronizadas en tiempo real. Los formularios de registro, creación de proyectos y CRUD de tareas llegan a PostgreSQL; los de Equipo y Reportes operan principalmente sobre datos locales del navegador. El dashboard muestra cifras de demostración.
+La persistencia es parcial y las estadísticas no están sincronizadas en tiempo real entre clientes. Los formularios de registro, creación de proyectos y CRUD de tareas llegan a PostgreSQL; los de Equipo y Reportes operan principalmente sobre datos locales del navegador. El dashboard ya consulta proyectos y tareas reales al cargar o recargar la página (hallazgo crítico 1 corregido).
 
 Alcance verificado: código fuente y esquema de PostgreSQL mediante consultas de solo lectura. No ejecuté formularios en un navegador ni modifiqué archivos o datos durante la auditoría. Además, el proyecto usa Spring Boot 4.1.1, no 3.x (pom.xml:5-9); no encontré implementación de JWT, WebSocket ni Scheduler en el código y dependencias revisados.
 
@@ -18,10 +18,12 @@ Son vistas Thymeleaf que alojan aplicaciones Vue; los formularios interactivos u
 
 HALLAZGOS CRÍTICOS
 
-1. Dashboard con datos fijos.
+1. Dashboard con datos fijos. [COMPLETADO: 2026-11-17]
    Archivos: static/js/dashboard.js:8-46; templates/dashboard/dashboard.html:109-167.
-   Error: Los proyectos, tareas y contadores proceden de arrays fijos. No reflejan altas, bajas ni cambios en PostgreSQL, ni siquiera al recargar la página.
-   Corrección: Cargar /api/miembro3/proyectos y /api/miembro3/tareas al montar la vista; calcular los contadores a partir de esas respuestas. Para actualización entre pestañas, añadir sondeo o WebSocket cuando exista backend para ello.
+   Error original: Los proyectos, tareas y contadores procedían de arrays fijos. No reflejaban altas, bajas ni cambios en PostgreSQL, ni siquiera al recargar la página.
+   Corrección aplicada: dashboard.js obtiene /api/miembro3/proyectos y /api/miembro3/tareas al montar la vista; los indicadores se derivan de las respuestas. La plantilla usa tarea.fechaFin y muestra como próximas a vencer únicamente tareas no completadas con vencimiento desde hoy hasta dentro de 7 días. Se muestra carga/error y se permite reintentar; no se presentan cifras ficticias si falla la API.
+   Verificación: node --test src/test/js/dashboard.test.js (3 pruebas correctas); .\mvnw.cmd test con Java 21 (16 pruebas correctas, incluido el arranque con PostgreSQL).
+   Alcance: cifras reales al abrir o recargar el dashboard. La actualización instantánea entre clientes todavía no está implementada; sigue pendiente el hallazgo medio 5.
 
 2. Equipo sin persistencia.
    Archivos: static/js/equipo.js:22-127,264-337,344-426; templates/dashboard/equipo.html:557-710.
@@ -96,9 +98,9 @@ HALLAZGOS MENORES Y PUNTOS CORRECTOS
 - src/main/resources/application.properties:5 configura ahora puerto 8081. Los comentarios que aún anuncian localhost:8080 en algunos controladores están desactualizados.
 - application.properties:4 contiene una contraseña de PostgreSQL en texto claro; conviene usar una variable de entorno. pom.xml:68-86 declara dos veces spring-boot-starter-data-jpa.
 
-CORRECCIÓN MÍNIMA PARA LAS ESTADÍSTICAS
+CORRECCIÓN MÍNIMA PARA LAS ESTADÍSTICAS (IMPLEMENTADA EN EL HALLAZGO CRÍTICO 1)
 
-Sin afirmar que esto sea WebSocket, el primer paso funcional sería sustituir los arrays fijos de dashboard.js por lecturas reales:
+Sin afirmar que esto sea WebSocket, se sustituyeron los arrays fijos de dashboard.js por lecturas reales. Esquema simplificado de la solución aplicada:
 
     async mounted() {
         const [proyectos, tareas] = await Promise.all([
@@ -110,6 +112,6 @@ Sin afirmar que esto sea WebSocket, el primer paso funcional sería sustituir lo
         this.tareas = await tareas.json();
     }
 
-Luego habría que usar tarea.fechaFin —no el campo ficticio fecha— y definir «Próximas a vencer» por fecha y estado, no como todas las no completadas. Esto daría cifras reales al cargar la página; la actualización instantánea entre clientes seguiría pendiente.
+Ya se usa tarea.fechaFin —no el campo ficticio fecha— y «Próximas a vencer» se define por fecha y estado, no como todas las no completadas. Hay cifras reales al cargar la página; la actualización instantánea entre clientes sigue pendiente.
 
 Prioridad recomendada: corregir primero la edición de proyectos y las pantallas Equipo/Reportes que aparentan guardar; después conectar el dashboard a datos reales y decidir si el requisito pide refresco al navegar o tiempo real mediante WebSocket.
