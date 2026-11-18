@@ -16,6 +16,11 @@ public interface ProyectoUsuarioRepository
             + "order by pu.fechaAsignacion, pu.id.idUsuario")
     List<ProyectoUsuario> buscarPorProyecto(@Param("idProyecto") Integer idProyecto);
 
+    @Query("select pu from ProyectoUsuario pu join fetch pu.proyecto "
+            + "join fetch pu.usuario u left join fetch u.especialidad "
+            + "order by pu.id.idProyecto, pu.id.idUsuario")
+    List<ProyectoUsuario> listarParticipaciones();
+
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("delete from ProyectoUsuario pu where pu.id.idProyecto = :idProyecto")
     void eliminarPorProyecto(@Param("idProyecto") Integer idProyecto);

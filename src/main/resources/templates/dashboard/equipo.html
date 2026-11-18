@@ -78,21 +78,31 @@
                     </div>
                     <h1 class="h3 fw-semibold mb-1">Gestión del equipo</h1>
                     <p class="text-secondary mb-0">
-                        Administra integrantes, roles, especialidades
-                        y participación en los proyectos.
+                        Administra la participación de usuarios registrados,
+                        sus tareas y las especialidades disponibles.
                     </p>
                 </div>
 
                 <button class="btn btn-primary"
                         type="button"
+                        :disabled="cargando || errorCarga"
                         @click="abrirNuevoIntegrante">
                     <i class="bi bi-person-plus me-1"></i>
                     Agregar integrante
                 </button>
             </header>
 
+            <div v-if="cargando" class="alert alert-info" role="status">Cargando datos del equipo...</div>
+            <div v-if="mensajeError && !mostrarModalIntegrante && !tareaAsignada"
+                 class="alert alert-danger" role="alert">
+                {{ mensajeError }}
+                <button v-if="errorCarga" type="button" class="btn btn-sm btn-outline-danger ms-2"
+                        @click="cargarDatos">Reintentar</button>
+            </div>
+            <div v-if="mensajeExito" class="alert alert-success" role="status">{{ mensajeExito }}</div>
+
             <!-- Resumen general del equipo. -->
-            <section class="row g-3 mb-4"
+            <section v-if="!cargando && !errorCarga" class="row g-3 mb-4"
                      aria-label="Resumen del equipo">
 
                 <div class="col-12 col-sm-6 col-xl-3">
@@ -167,7 +177,7 @@
             </section>
 
             <!-- Selección de proyecto y filtros del equipo. -->
-            <section class="card equipo-panel mb-4">
+            <section v-if="!cargando && !errorCarga" class="card equipo-panel mb-4">
                 <div class="card-body">
                     <div class="row g-3 align-items-end">
                         <div class="col-12 col-md-4">
@@ -180,9 +190,9 @@
                                     v-model="filtroProyecto">
                                 <option value="">Todos los proyectos</option>
                                 <option v-for="proyecto in proyectos"
-                                        :key="proyecto"
-                                        :value="proyecto">
-                                    {{ proyecto }}
+                                        :key="proyecto.id"
+                                        :value="proyecto.id">
+                                    {{ proyecto.nombre }}
                                 </option>
                             </select>
                         </div>
@@ -231,9 +241,9 @@
                                     v-model="filtroEspecialidad">
                                 <option value="">Todas las especialidades</option>
                                 <option v-for="especialidad in especialidades"
-                                        :key="especialidad"
-                                        :value="especialidad">
-                                    {{ especialidad }}
+                                        :key="especialidad.id"
+                                        :value="especialidad.nombre">
+                                    {{ especialidad.nombre }}
                                 </option>
                             </select>
                         </div>
@@ -259,7 +269,7 @@
             </section>
 
             <!-- Navegación entre las vistas del módulo. -->
-            <section class="card equipo-panel">
+            <section v-if="!cargando && !errorCarga" class="card equipo-panel">
                 <div class="card-header bg-white border-bottom-0 pt-3 px-3">
                     <ul class="nav nav-tabs equipo-tabs">
                         <li class="nav-item">
@@ -284,14 +294,6 @@
                                     @click="vista = 'asignaciones'">
                                 <i class="bi bi-list-task me-1"></i>
                                 Asignaciones
-                            </button>
-                        </li>
-                        <li class="nav-item">
-                            <button class="nav-link"
-                                    :class="{active: vista === 'actividad'}"
-                                    @click="vista = 'actividad'">
-                                <i class="bi bi-activity me-1"></i>
-                                Actividad
                             </button>
                         </li>
                     </ul>
@@ -322,7 +324,7 @@
                         <div class="row g-3">
                             <div class="col-12 col-xl-6"
                                  v-for="integrante in integrantesFiltrados"
-                                 :key="integrante.id">
+                                 :key="integrante.idProyecto + '-' + integrante.idUsuario">
                                 <article class="card integrante-card h-100">
                                     <div class="card-body">
                                         <div class="d-flex align-items-start gap-3">
@@ -388,12 +390,13 @@
                                                         </button>
                                                         <button class="btn btn-outline-success"
                                                                 title="Asignar tarea"
-                                                                @click="asignarTarea(integrante)">
+                                                                 :disabled="integrante.estado !== 'Activo'"
+                                                                 @click="asignarTarea(integrante)">
                                                             <i class="bi bi-clipboard-plus"></i>
                                                         </button>
                                                         <button class="btn btn-outline-danger"
                                                                 title="Retirar del equipo"
-                                                                @click="retirarIntegrante(integrante.id)">
+                                                                 @click="retirarIntegrante(integrante)">
                                                             <i class="bi bi-person-dash"></i>
                                                         </button>
                                                     </div>
@@ -487,7 +490,7 @@
                                 </thead>
                                 <tbody>
                                 <tr v-for="integrante in integrantesFiltrados"
-                                    :key="integrante.id">
+                                    :key="integrante.idProyecto + '-' + integrante.idUsuario">
                                     <td class="fw-medium">
                                         {{ integrante.nombre }}
                                     </td>
@@ -501,7 +504,8 @@
                                     </td>
                                     <td>
                                         <button class="btn btn-sm btn-outline-primary"
-                                                @click="asignarTarea(integrante)">
+                                                 :disabled="integrante.estado !== 'Activo'"
+                                                 @click="asignarTarea(integrante)">
                                             Asignar tarea
                                         </button>
                                     </td>
@@ -511,33 +515,6 @@
                         </div>
                     </div>
 
-                    <!-- Vista de actividad. -->
-                    <div v-else-if="vista === 'actividad'">
-                        <h2 class="h5 fw-semibold mb-3">
-                            Actividad reciente
-                        </h2>
-                        <div v-if="actividades.length" class="actividad-list">
-                            <article class="actividad-item"
-                                     v-for="actividad in actividades"
-                                     :key="actividad.id">
-                                <div class="actividad-icon">
-                                    <i class="bi"
-                                       :class="actividad.icono"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="fw-medium">
-                                        {{ actividad.descripcion }}
-                                    </div>
-                                    <small class="text-secondary">
-                                        {{ actividad.fecha }}
-                                    </small>
-                                </div>
-                            </article>
-                        </div>
-                        <p v-else class="text-secondary">
-                            Todavía no hay actividad registrada.
-                        </p>
-                    </div>
                 </div>
             </section>
         </main>
@@ -562,7 +539,7 @@
                                 {{ modoEdicion ? 'Editar integrante' : 'Agregar integrante' }}
                             </h2>
                             <p class="small text-secondary mb-0">
-                                Registra los datos y la participación del miembro.
+                                Asigna un usuario registrado a un proyecto.
                             </p>
                         </div>
                         <button type="button"
@@ -573,92 +550,36 @@
 
                     <div class="modal-body">
                         <div class="row g-3">
-                            <div class="col-12 col-md-6">
-                                <label for="nombreIntegrante"
-                                       class="form-label">
-                                    Nombre completo *
-                                </label>
-                                <input id="nombreIntegrante"
-                                       class="form-control"
-                                       v-model.trim="formulario.nombre"
-                                       required
-                                       maxlength="100"
-                                       placeholder="Ej. Carlos Ruiz">
+                            <div v-if="modoEdicion" class="col-12">
+                                <p class="mb-1"><strong>Usuario:</strong> {{ formulario.nombre }}</p>
+                                <p class="mb-1"><strong>Proyecto:</strong> {{ formulario.proyecto }}</p>
+                                <p class="text-secondary small mb-0">
+                                    El responsable y los datos de la cuenta se gestionan por separado.
+                                </p>
                             </div>
 
-                            <div class="col-12 col-md-6">
-                                <label for="correoIntegrante"
-                                       class="form-label">
-                                    Correo electrónico *
-                                </label>
-                                <input id="correoIntegrante"
-                                       type="email"
-                                       class="form-control"
-                                       v-model.trim="formulario.correo"
-                                       required
-                                       maxlength="150"
-                                       placeholder="correo@ejemplo.com">
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <label for="proyectoIntegrante"
-                                       class="form-label">
-                                    Proyecto *
-                                </label>
-                                <select id="proyectoIntegrante"
-                                        class="form-select"
-                                        v-model="formulario.proyecto"
-                                        required>
-                                    <option value="" disabled>
-                                        Selecciona un proyecto
-                                    </option>
-                                    <option v-for="proyecto in proyectos"
-                                            :key="proyecto"
-                                            :value="proyecto">
-                                        {{ proyecto }}
-                                    </option>
-                                </select>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <label for="rolIntegrante"
-                                       class="form-label">
-                                    Rol en el proyecto *
-                                </label>
-                                <select id="rolIntegrante"
-                                        class="form-select"
-                                        v-model="formulario.rol"
-                                        required>
-                                    <option value="" disabled>
-                                        Selecciona un rol
-                                    </option>
-                                    <option v-for="rol in roles"
-                                            :key="rol"
-                                            :value="rol">
-                                        {{ rol }}
-                                    </option>
-                                </select>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <label for="especialidadIntegrante"
-                                       class="form-label">
-                                    Especialidad *
-                                </label>
-                                <select id="especialidadIntegrante"
-                                        class="form-select"
-                                        v-model="formulario.especialidad"
-                                        required>
-                                    <option value="" disabled>
-                                        Selecciona una especialidad
-                                    </option>
-                                    <option v-for="especialidad in especialidades"
-                                            :key="especialidad"
-                                            :value="especialidad">
-                                        {{ especialidad }}
-                                    </option>
-                                </select>
-                            </div>
+                            <template v-else>
+                                <div class="col-12 col-md-6">
+                                    <label for="proyectoIntegrante" class="form-label">Proyecto *</label>
+                                    <select id="proyectoIntegrante" class="form-select"
+                                            v-model.number="formulario.idProyecto" required>
+                                        <option value="" disabled>Selecciona un proyecto</option>
+                                        <option v-for="proyecto in proyectos" :key="proyecto.id"
+                                                :value="proyecto.id">{{ proyecto.nombre }}</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label for="usuarioIntegrante" class="form-label">Usuario registrado *</label>
+                                    <select id="usuarioIntegrante" class="form-select"
+                                            v-model.number="formulario.idUsuario" required>
+                                        <option value="" disabled>Selecciona un usuario</option>
+                                        <option v-for="usuario in usuariosDisponibles" :key="usuario.id"
+                                                :value="usuario.id">{{ usuario.nombre }} ({{ usuario.correo }})</option>
+                                    </select>
+                                    <small class="text-secondary">Para crear una cuenta usa la página de registro.
+                                        El nuevo miembro tendrá rol Integrante.</small>
+                                </div>
+                            </template>
 
                             <div class="col-12 col-md-6">
                                 <label for="estadoIntegrante"
@@ -676,17 +597,10 @@
                                 </select>
                             </div>
 
-                            <div class="col-12 col-md-6">
-                                <label for="fechaIngreso"
-                                       class="form-label">
-                                    Fecha de incorporación *
-                                </label>
-                                <input id="fechaIngreso"
-                                       type="date"
-                                       class="form-control"
-                                       v-model="formulario.fechaIngreso"
-                                       required>
-                            </div>
+                            <p class="text-secondary small mb-0">
+                                La fecha de incorporación se guarda automáticamente en el servidor.
+                                La especialidad pertenece al perfil del usuario, no a esta participación.
+                            </p>
                         </div>
 
                         <div v-if="mensajeError"
@@ -702,10 +616,48 @@
                                 @click="cerrarModal">
                             Cancelar
                         </button>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" :disabled="guardando">
                             <i class="bi bi-check2 me-1"></i>
                             {{ modoEdicion ? 'Guardar cambios' : 'Guardar integrante' }}
                         </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Asignación real mediante la API de tareas. -->
+    <div class="modal fade show" style="display: block" v-if="tareaAsignada"
+         role="dialog" aria-modal="true" aria-labelledby="tituloTareaEquipo">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form @submit.prevent="guardarTareaAsignada">
+                    <div class="modal-header">
+                        <h2 id="tituloTareaEquipo" class="modal-title fs-5">Asignar tarea a {{ tareaAsignada.nombre }}</h2>
+                        <button type="button" class="btn-close" @click="tareaAsignada = null"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-secondary">Proyecto: {{ tareaAsignada.proyecto }}</p>
+                        <label for="nombreTareaEquipo" class="form-label">Nombre *</label>
+                        <input id="nombreTareaEquipo" v-model.trim="formularioTarea.nombre"
+                               class="form-control mb-3" required maxlength="150">
+                        <label for="descripcionTareaEquipo" class="form-label">Descripción</label>
+                        <textarea id="descripcionTareaEquipo" v-model.trim="formularioTarea.descripcion"
+                                  class="form-control mb-3" maxlength="500"></textarea>
+                        <label for="prioridadTareaEquipo" class="form-label">Prioridad *</label>
+                        <select id="prioridadTareaEquipo" v-model="formularioTarea.prioridad"
+                                class="form-select mb-3" required>
+                            <option value="Baja">Baja</option><option value="Media">Media</option>
+                            <option value="Alta">Alta</option><option value="Urgente">Urgente</option>
+                        </select>
+                        <label for="fechaFinTareaEquipo" class="form-label">Fecha de fin *</label>
+                        <input id="fechaFinTareaEquipo" type="date" v-model="formularioTarea.fechaFin"
+                               class="form-control" required>
+                        <p v-if="mensajeError" class="alert alert-danger mt-3 mb-0" role="alert">{{ mensajeError }}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" @click="tareaAsignada = null">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" :disabled="guardando">Guardar tarea</button>
                     </div>
                 </form>
             </div>
@@ -760,7 +712,7 @@
                     <button class="btn btn-primary"
                             @click="editarIntegrante(integranteSeleccionado)">
                         <i class="bi bi-pencil me-1"></i>
-                        Editar perfil
+                         Editar participación
                     </button>
                 </div>
             </div>
@@ -769,7 +721,7 @@
 
     <!-- Fondo de los modales. -->
     <div class="modal-backdrop fade show"
-         v-if="mostrarModalIntegrante || integranteSeleccionado"></div>
+          v-if="mostrarModalIntegrante || integranteSeleccionado || tareaAsignada"></div>
 </div>
 
 <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>

@@ -3,6 +3,7 @@ package com.gestionproyectos.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
@@ -15,4 +16,6 @@ public record TareaRequest(
         @NotBlank String prioridad,
         String estado,
         @NotNull LocalDate fechaFin,
-        @NotBlank String responsable) {}
+        @NotBlank String responsable,
+        @Positive Integer idProyecto,
+        @Positive Integer idResponsable) {}

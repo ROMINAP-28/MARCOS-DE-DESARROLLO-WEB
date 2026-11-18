@@ -93,10 +93,14 @@ public class TareaServicio implements ITareaServicio {
         if (!ESTADOS.contains(estado)) {
             throw new SolicitudInvalidaException("Estado no válido");
         }
-        Proyecto proyecto = proyectoRepositorio.findFirstByNombreIgnoreCase(r.proyecto().trim())
+        Proyecto proyecto = (r.idProyecto() == null
+                ? proyectoRepositorio.findFirstByNombreIgnoreCase(r.proyecto().trim())
+                : proyectoRepositorio.findById(r.idProyecto()))
                 .orElseThrow(() -> new SolicitudInvalidaException(
                         "No existe el proyecto \"" + r.proyecto() + "\"."));
-        Usuario responsable = usuarioRepositorio.findFirstByNombreIgnoreCase(r.responsable().trim())
+        Usuario responsable = (r.idResponsable() == null
+                ? usuarioRepositorio.findFirstByNombreIgnoreCase(r.responsable().trim())
+                : usuarioRepositorio.findById(r.idResponsable()))
                 .orElseThrow(() -> new SolicitudInvalidaException(
                         "No existe el usuario \"" + r.responsable() + "\"."));
 

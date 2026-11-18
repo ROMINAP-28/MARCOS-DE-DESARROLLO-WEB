@@ -25,10 +25,13 @@ HALLAZGOS CRÍTICOS
    Verificación: node --test src/test/js/dashboard.test.js (3 pruebas correctas); .\mvnw.cmd test con Java 21 (16 pruebas correctas, incluido el arranque con PostgreSQL).
    Alcance: cifras reales al abrir o recargar el dashboard. La actualización instantánea entre clientes todavía no está implementada; sigue pendiente el hallazgo medio 5.
 
-2. Equipo sin persistencia.
+2. Equipo sin persistencia. [COMPLETADO: 2026-11-17]
    Archivos: static/js/equipo.js:22-127,264-337,344-426; templates/dashboard/equipo.html:557-710.
    Error: Agregar, editar y retirar integrantes; asignar tareas y crear especialidades solo cambia arrays locales. La interfaz puede anunciar éxito sin que exista un registro nuevo en BD.
    Corrección: Cargar proyectos, usuarios y especialidades desde la API. Implementar la operación de participación en ProyectoUsuario mediante servicio y endpoint propios; usar los endpoints existentes de tareas y especialidades donde corresponda. Actualizar la vista después de una respuesta exitosa.
+   Corrección aplicada: equipo.js carga proyectos, usuarios registrados, especialidades y participaciones de la API. El alta, el cambio de estado y el retiro de participaciones usan /api/miembro3/participaciones y se guardan en ProyectoUsuario; el formulario no crea cuentas ni contraseñas. Las tareas se registran mediante la API existente con IDs de proyecto y usuario, y las especialidades se crean mediante su API. Se retiró la actividad ficticia; los contadores y filtros se derivan de registros reales. Ante errores de carga no se muestran cifras anteriores y las operaciones fallidas no alteran integrantes locales.
+   Verificación: node --test src/test/js/dashboard.test.js src/test/js/equipo.test.js (6 pruebas correctas); .\mvnw.cmd -q test con Java 21 y PostgreSQL (33 pruebas correctas, incluidas persistencia de participaciones, renderización y asignación de tarea por IDs).
+   Alcance: la edición de una participación cambia su estado; el rol Responsable se gestiona desde el proyecto y la especialidad desde el perfil del usuario. La vista no proporciona historial de actividad sin un origen persistente.
 
 3. Reportes ficticios.
    Archivos: static/js/reportes.js:21-123,220-293; templates/dashboard/reportes.html:274-365.
