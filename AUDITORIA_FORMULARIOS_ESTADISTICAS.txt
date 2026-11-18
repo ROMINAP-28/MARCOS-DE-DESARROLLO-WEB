@@ -41,13 +41,16 @@ HALLAZGOS CRÍTICOS
    Verificación: node --test src/test/js/*.test.js (9 pruebas correctas); .\mvnw.cmd -q test con Java 21 y PostgreSQL (37 pruebas correctas, incluidas consultas y filtros por tipo/proyecto/fecha y validación REST).
    Alcance: consultas y CSV reales sin historial ni PDF/Excel; la consulta no se presenta como reporte persistido. El historial requiere resolver antes la autenticación.
 
-4. La edición de proyectos crea duplicados.
+4. La edición de proyectos crea duplicados. [COMPLETADO: 2026-11-17]
    Archivos: static/js/proyectos.js:93-150; templates/dashboard/proyectos.html:466-474,795-803.
    Error: El botón Editar abre el formulario, pero guardarProyecto() siempre hace POST /proyectos. Guardar cambios crea otro proyecto en vez de actualizar el existente. Tampoco hay acción de eliminación en esta vista, aunque el backend sí tiene DELETE.
-   Corrección: Seleccionar URL y método según modoEdicion e idEdicion, y reemplazar el elemento en this.proyectos con el DTO devuelto. Ejemplo:
-       fetch(esEdicion ? `/api/miembro3/proyectos/${this.idEdicion}` : '/api/miembro3/proyectos', {
-           method: esEdicion ? 'PUT' : 'POST', ...
-       })
+    Corrección: Seleccionar URL y método según modoEdicion e idEdicion, y reemplazar el elemento en this.proyectos con el DTO devuelto. Ejemplo:
+        fetch(esEdicion ? `/api/miembro3/proyectos/${this.idEdicion}` : '/api/miembro3/proyectos', {
+            method: esEdicion ? 'PUT' : 'POST', ...
+        })
+    Corrección aplicada: proyectos.js usa POST para altas y PUT /proyectos/{id} para editar, reemplaza el DTO recibido sin crear otra tarjeta y comunica errores del servidor. El formulario carga usuarios registrados y envía sus IDs, evitando ambigüedades por nombres repetidos. ProyectoServicio actualiza solo las participaciones modificadas, conserva estado y fecha de las restantes e impide retirar miembros con tareas asignadas. Se añadió DELETE con confirmación explícita del borrado en cascada; el servicio elimina primero las asociaciones compuestas para permitir la operación en PostgreSQL.
+    Verificación: node --test src/test/js/*.test.js (11 pruebas correctas); .\mvnw.cmd -q test con Java 21 y PostgreSQL (41 pruebas correctas, incluidas edición sin duplicados, preservación de participaciones, usuarios con nombres iguales, eliminación y API REST).
+    Alcance: la eliminación es irreversible y afecta los registros relacionados, como advierte la confirmación. El hallazgo medio 1 (longitud de la descripción) sigue pendiente; los errores de validación del servidor se muestran en el formulario.
 
 5. Login sin autenticación.
    Archivos: templates/auth/login.html:137-146; pom.xml:79-82.

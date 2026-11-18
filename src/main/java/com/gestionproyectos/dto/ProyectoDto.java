@@ -7,4 +7,5 @@ import java.util.List;
 public record ProyectoDto(Integer id, String nombre, String descripcion,
                           LocalDate fechaInicio, LocalDate fechaFin, String prioridad,
                           String responsable, List<String> integrantes,
-                          String estado, int progreso) {}
+                          String estado, int progreso, Integer idResponsable,
+                          List<Integer> idsIntegrantes) {}

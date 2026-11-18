@@ -10,6 +10,7 @@ import com.gestionproyectos.model.ProyectoUsuarioId;
 import com.gestionproyectos.model.Usuario;
 import com.gestionproyectos.repository.ProyectoRepository;
 import com.gestionproyectos.repository.ProyectoUsuarioRepository;
+import com.gestionproyectos.repository.TareaRepository;
 import com.gestionproyectos.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,13 +32,15 @@ public class ProyectoServicio implements IProyectoServicio {
     private final ProyectoRepository proyectoRepositorio;
     private final ProyectoUsuarioRepository proyectoUsuarioRepositorio;
     private final UsuarioRepository usuarioRepositorio;
+    private final TareaRepository tareaRepositorio;
 
     public ProyectoServicio(ProyectoRepository proyectoRepositorio,
                             ProyectoUsuarioRepository proyectoUsuarioRepositorio,
-                            UsuarioRepository usuarioRepositorio) {
+                            UsuarioRepository usuarioRepositorio, TareaRepository tareaRepositorio) {
         this.proyectoRepositorio = proyectoRepositorio;
         this.proyectoUsuarioRepositorio = proyectoUsuarioRepositorio;
         this.usuarioRepositorio = usuarioRepositorio;
+        this.tareaRepositorio = tareaRepositorio;
     }
 
     @Override
@@ -58,8 +61,8 @@ public class ProyectoServicio implements IProyectoServicio {
     @Override
     public ProyectoDto guardarProyecto(ProyectoRequest request) {
         validarPeriodo(request);
-        Usuario responsable = buscarUsuario(request.responsable());
-        Map<Integer, Usuario> equipo = armarEquipo(responsable, request.integrantes());
+        Usuario responsable = buscarResponsable(request);
+        Map<Integer, Usuario> equipo = armarEquipo(responsable, request);
 
         Proyecto proyecto = new Proyecto();
         copiarDatos(proyecto, request);
@@ -76,25 +79,53 @@ public class ProyectoServicio implements IProyectoServicio {
     public ProyectoDto actualizarProyecto(Integer idProyecto, ProyectoRequest request) {
         Proyecto proyecto = obtener(idProyecto);
         validarPeriodo(request);
-        Usuario responsable = buscarUsuario(request.responsable());
-        Map<Integer, Usuario> equipo = armarEquipo(responsable, request.integrantes());
+        Usuario responsable = buscarResponsable(request);
+        Map<Integer, Usuario> equipo = armarEquipo(responsable, request);
+
+        List<ProyectoUsuario> actuales = proyectoUsuarioRepositorio.buscarPorProyecto(idProyecto);
+        for (ProyectoUsuario miembro : actuales) {
+            if (!equipo.containsKey(miembro.getId().getIdUsuario())
+                    && tareaRepositorio.countByProyecto_IdProyectoAndResponsable_IdUsuario(
+                            idProyecto, miembro.getId().getIdUsuario()) > 0) {
+                throw new SolicitudInvalidaException(
+                        "Reasigna las tareas del integrante antes de retirarlo del proyecto.");
+            }
+        }
 
         copiarDatos(proyecto, request);
         proyecto.setResponsable(responsable);
         proyecto.setEstado(estadoValido(request.estado(), proyecto.getEstado()));
         proyecto.setPorcentajeAvance(progresoValido(request.progreso(),
                 proyecto.getPorcentajeAvance() == null ? 0 : Math.round(proyecto.getPorcentajeAvance())));
-        proyectoRepositorio.saveAndFlush(proyecto);
+        proyectoRepositorio.save(proyecto);
 
-        // Reemplaza el equipo completo (el delete masivo ejecuta flush + clear).
-        proyectoUsuarioRepositorio.eliminarPorProyecto(idProyecto);
-        asignarEquipo(proyectoRepositorio.getReferenceById(idProyecto), responsable, equipo);
-        return aDto(obtener(idProyecto));
+        Map<Integer, ProyectoUsuario> porUsuario = new LinkedHashMap<>();
+        for (ProyectoUsuario miembro : actuales) {
+            porUsuario.put(miembro.getId().getIdUsuario(), miembro);
+            if (!equipo.containsKey(miembro.getId().getIdUsuario())) {
+                proyectoUsuarioRepositorio.delete(miembro);
+            }
+        }
+        for (Usuario usuario : equipo.values()) {
+            ProyectoUsuario miembro = porUsuario.get(usuario.getIdUsuario());
+            if (miembro == null) {
+                proyectoUsuarioRepositorio.save(crearMiembro(proyecto, usuario, responsable));
+            } else {
+                // Conservar fecha de asignación y estado de quien sigue en el proyecto.
+                miembro.setRol(usuario.getIdUsuario().equals(responsable.getIdUsuario())
+                        ? ROL_RESPONSABLE : ROL_INTEGRANTE);
+            }
+        }
+        return aDto(proyecto);
     }
 
     @Override
     public void eliminarProyecto(Integer idProyecto) {
-        // cascade = ALL borra equipo, tareas, comentarios, notificaciones, recursos y reportes.
+        obtener(idProyecto);
+        // Eliminar primero el vínculo compuesto: @MapsId no permite que quede
+        // una participación gestionada referenciando al proyecto borrado.
+        proyectoUsuarioRepositorio.eliminarPorProyecto(idProyecto);
+        // cascade = ALL borra tareas, comentarios, notificaciones, recursos y reportes.
         proyectoRepositorio.delete(obtener(idProyecto));
     }
 
@@ -111,12 +142,27 @@ public class ProyectoServicio implements IProyectoServicio {
                         "No existe el usuario \"" + nombre + "\"."));
     }
 
+    private Usuario buscarResponsable(ProyectoRequest request) {
+        return request.idResponsable() == null ? buscarUsuario(request.responsable())
+                : buscarUsuarioPorId(request.idResponsable());
+    }
+
+    private Usuario buscarUsuarioPorId(Integer id) {
+        return usuarioRepositorio.findById(id)
+                .orElseThrow(() -> new SolicitudInvalidaException("No existe el usuario con ID " + id + "."));
+    }
+
     /** Responsable primero, luego integrantes sin repetir. */
-    private Map<Integer, Usuario> armarEquipo(Usuario responsable, List<String> integrantes) {
+    private Map<Integer, Usuario> armarEquipo(Usuario responsable, ProyectoRequest request) {
         Map<Integer, Usuario> equipo = new LinkedHashMap<>();
         equipo.put(responsable.getIdUsuario(), responsable);
-        if (integrantes != null) {
-            for (String nombre : integrantes) {
+        if (request.idsIntegrantes() != null) {
+            for (Integer id : request.idsIntegrantes()) {
+                Usuario u = buscarUsuarioPorId(id);
+                equipo.putIfAbsent(u.getIdUsuario(), u);
+            }
+        } else if (request.integrantes() != null) {
+            for (String nombre : request.integrantes()) {
                 if (nombre == null || nombre.isBlank()) continue;
                 Usuario u = buscarUsuario(nombre);
                 equipo.putIfAbsent(u.getIdUsuario(), u);
@@ -128,20 +174,28 @@ public class ProyectoServicio implements IProyectoServicio {
     private void asignarEquipo(Proyecto proyecto, Usuario responsable, Map<Integer, Usuario> equipo) {
         LocalDateTime ahora = LocalDateTime.now();
         for (Usuario usuario : equipo.values()) {
-            ProyectoUsuarioId id = new ProyectoUsuarioId();
-            id.setIdProyecto(proyecto.getIdProyecto());
-            id.setIdUsuario(usuario.getIdUsuario());
-
-            ProyectoUsuario pu = new ProyectoUsuario();
-            pu.setId(id);
-            pu.setProyecto(proyecto);
-            pu.setUsuario(usuario);
-            pu.setRol(usuario.getIdUsuario().equals(responsable.getIdUsuario())
-                    ? ROL_RESPONSABLE : ROL_INTEGRANTE);
-            pu.setEstado("Activo");
-            pu.setFechaAsignacion(ahora);
-            proyectoUsuarioRepositorio.save(pu);
+            proyectoUsuarioRepositorio.save(crearMiembro(proyecto, usuario, responsable, ahora));
         }
+    }
+
+    private ProyectoUsuario crearMiembro(Proyecto proyecto, Usuario usuario, Usuario responsable) {
+        return crearMiembro(proyecto, usuario, responsable, LocalDateTime.now());
+    }
+
+    private ProyectoUsuario crearMiembro(Proyecto proyecto, Usuario usuario, Usuario responsable,
+                                         LocalDateTime fecha) {
+        ProyectoUsuarioId id = new ProyectoUsuarioId();
+        id.setIdProyecto(proyecto.getIdProyecto());
+        id.setIdUsuario(usuario.getIdUsuario());
+        ProyectoUsuario miembro = new ProyectoUsuario();
+        miembro.setId(id);
+        miembro.setProyecto(proyecto);
+        miembro.setUsuario(usuario);
+        miembro.setRol(usuario.getIdUsuario().equals(responsable.getIdUsuario())
+                ? ROL_RESPONSABLE : ROL_INTEGRANTE);
+        miembro.setEstado("Activo");
+        miembro.setFechaAsignacion(fecha);
+        return miembro;
     }
 
     private void copiarDatos(Proyecto proyecto, ProyectoRequest r) {
@@ -183,6 +237,8 @@ public class ProyectoServicio implements IProyectoServicio {
         int progreso = p.getPorcentajeAvance() == null ? 0 : Math.round(p.getPorcentajeAvance());
         return new ProyectoDto(p.getIdProyecto(), p.getNombre(), p.getDescripcion(),
                 p.getFechaInicio(), p.getFechaFin(), p.getPrioridad(),
-                responsable, integrantes, p.getEstado(), progreso);
+                responsable, integrantes, p.getEstado(), progreso,
+                p.getResponsable().getIdUsuario(), equipo.stream()
+                        .map(pu -> pu.getUsuario().getIdUsuario()).toList());
     }
 }

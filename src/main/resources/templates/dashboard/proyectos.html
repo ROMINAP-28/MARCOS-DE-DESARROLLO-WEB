@@ -104,6 +104,7 @@
 
                 <button type="button"
                         class="btn btn-primary"
+                        :disabled="cargando || !!errorCarga"
                         @click="abrirModal">
 
                     <i class="bi bi-plus-lg me-1"></i>
@@ -113,9 +114,17 @@
 
             </section>
 
+            <div v-if="cargando" class="alert alert-info" role="status">Cargando proyectos y usuarios...</div>
+            <div v-if="errorCarga" class="alert alert-danger" role="alert">
+                {{ errorCarga }}
+                <button type="button" class="btn btn-outline-danger btn-sm ms-2"
+                        @click="cargarProyectos">Reintentar</button>
+            </div>
+            <div v-if="errorOperacion" class="alert alert-danger" role="alert">{{ errorOperacion }}</div>
+
 
             <!-- Indicadores de resumen de proyectos. -->
-            <section class="row g-3 projects-summary"
+            <section v-if="!cargando && !errorCarga" class="row g-3 projects-summary"
                      aria-label="Resumen de proyectos">
 
                 <div class="col-6 col-xl-3">
@@ -221,7 +230,7 @@
 
 
             <!-- Búsqueda y filtros del listado. -->
-            <section class="card projects-toolbar">
+            <section v-if="!cargando && !errorCarga" class="card projects-toolbar">
 
                 <div class="card-body">
 
@@ -326,7 +335,7 @@
 
 
             <!-- Listado dinámico de proyectos. -->
-            <section class="projects-list-section">
+            <section v-if="!cargando && !errorCarga" class="projects-list-section">
 
                 <div class="d-flex justify-content-between align-items-center mb-3">
 
@@ -482,6 +491,11 @@
 
                                             Ver
 
+                                        </button>
+
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                                @click="eliminarProyecto(proyecto)">
+                                            <i class="bi bi-trash me-1"></i> Eliminar
                                         </button>
 
                                     </div>
@@ -710,7 +724,7 @@
 
                             <select id="responsableProyecto"
                                     class="form-select"
-                                    v-model="formulario.responsable"
+                                    v-model.number="formulario.idResponsable"
                                     required>
 
                                 <option disabled value="">
@@ -718,10 +732,10 @@
                                 </option>
 
                                 <option v-for="persona in equipoDisponible"
-                                        :key="persona"
-                                        :value="persona">
+                                        :key="persona.id"
+                                        :value="persona.id">
 
-                                    {{ persona }}
+                                    {{ persona.nombre }} ({{ persona.correo }})
 
                                 </option>
 
@@ -743,16 +757,16 @@
 
                         <select id="integrantesProyecto"
                                 class="form-select"
-                                v-model="formulario.integrantes"
+                                 v-model.number="formulario.idsIntegrantes"
                                 multiple
                                 size="4"
                                 aria-describedby="ayudaIntegrantes">
 
-                            <option v-for="persona in equipoDisponible"
-                                    :key="persona"
-                                    :value="persona">
+                             <option v-for="persona in equipoDisponible"
+                                     :key="persona.id"
+                                     :value="persona.id">
 
-                                {{ persona }}
+                                 {{ persona.nombre }} ({{ persona.correo }})
 
                             </option>
 
@@ -793,7 +807,7 @@
 
 
                     <button type="submit"
-                            class="btn btn-primary">
+                            class="btn btn-primary" :disabled="guardando">
 
                         <i class="bi bi-check2 me-1"></i>
 

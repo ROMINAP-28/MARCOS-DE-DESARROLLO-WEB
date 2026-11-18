@@ -6,6 +6,7 @@ import com.gestionproyectos.model.ProyectoUsuario;
 import com.gestionproyectos.model.Usuario;
 import com.gestionproyectos.repository.ProyectoRepository;
 import com.gestionproyectos.repository.ProyectoUsuarioRepository;
+import com.gestionproyectos.repository.TareaRepository;
 import com.gestionproyectos.repository.UsuarioRepository;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +26,7 @@ class ProyectoServicioTests {
         ProyectoRepository proyectos = mock(ProyectoRepository.class);
         ProyectoUsuarioRepository equipos = mock(ProyectoUsuarioRepository.class);
         UsuarioRepository usuarios = mock(UsuarioRepository.class);
-        ProyectoServicio servicio = new ProyectoServicio(proyectos, equipos, usuarios);
+        ProyectoServicio servicio = new ProyectoServicio(proyectos, equipos, usuarios, mock(TareaRepository.class));
 
         Usuario responsable = new Usuario();
         responsable.setIdUsuario(7);

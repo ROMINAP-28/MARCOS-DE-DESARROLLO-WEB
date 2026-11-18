@@ -15,9 +15,12 @@ createApp({
             modoEdicion: false,
             idEdicion: null,
             errorFormulario: '',
+            errorCarga: '',
+            errorOperacion: '',
             mensajeExito: '',
             cargando: true,
-            equipoDisponible: ['María López', 'Carlos Torres', 'Ana García', 'José Ramírez', 'Brayan Quispe'],
+            guardando: false,
+            equipoDisponible: [],
             proyectos: [],
             formulario: this.formularioVacio()
         };
@@ -52,29 +55,42 @@ createApp({
                 fechaInicio: '',
                 fechaFin: '',
                 prioridad: '',
-                responsable: '',
-                integrantes: []
+                idResponsable: '',
+                idsIntegrantes: []
             };
         },
 
         async cargarProyectos() {
             this.cargando = true;
+            this.errorCarga = '';
 
             try {
-                const respuesta = await fetch('/api/miembro3/proyectos');
-
-                if (!respuesta.ok) {
-                    throw new Error('No se pudieron cargar los proyectos.');
-                }
-
-                this.proyectos = await respuesta.json();
+                const [proyectos, usuarios] = await Promise.all([
+                    this.solicitar('/api/miembro3/proyectos'),
+                    this.solicitar('/api/miembro3/usuarios')
+                ]);
+                this.proyectos = proyectos;
+                this.equipoDisponible = usuarios;
+                this.errorCarga = '';
+                this.errorOperacion = '';
 
             } catch (error) {
-                this.errorFormulario = error.message;
+                this.errorCarga = error.message;
+                this.proyectos = [];
+                this.equipoDisponible = [];
 
             } finally {
                 this.cargando = false;
             }
+        },
+
+        async solicitar(url, opciones) {
+            const respuesta = await fetch(url, opciones);
+            if (!respuesta.ok) {
+                const error = await respuesta.json().catch(() => ({}));
+                throw new Error(error.mensaje || 'No se pudo completar la operación.');
+            }
+            return respuesta.status === 204 ? null : respuesta.json();
         },
 
         abrirModal() {
@@ -82,6 +98,8 @@ createApp({
             this.idEdicion = null;
             this.formulario = this.formularioVacio();
             this.errorFormulario = '';
+            this.errorOperacion = '';
+            this.mensajeExito = '';
             this.mostrarModal = true;
         },
 
@@ -92,13 +110,19 @@ createApp({
 
         async guardarProyecto() {
             this.errorFormulario = '';
+            if (this.guardando) return;
+
+            const responsable = this.equipoDisponible.find(
+                usuario => usuario.id === this.formulario.idResponsable);
+            const integrantes = this.formulario.idsIntegrantes.map(id =>
+                this.equipoDisponible.find(usuario => usuario.id === id));
 
             if (!this.formulario.nombre ||
                 !this.formulario.descripcion ||
                 !this.formulario.fechaInicio ||
                 !this.formulario.fechaFin ||
-                !this.formulario.prioridad ||
-                !this.formulario.responsable) {
+                !this.formulario.prioridad || !responsable ||
+                integrantes.some(usuario => !usuario)) {
 
                 this.errorFormulario = 'Completa todos los campos obligatorios.';
                 return;
@@ -110,29 +134,35 @@ createApp({
                 return;
             }
 
+            this.guardando = true;
             try {
-                const respuesta = await fetch('/api/miembro3/proyectos', {
-                    method: 'POST',
+                const edicion = this.modoEdicion;
+                const proyecto = await this.solicitar(edicion
+                    ? `/api/miembro3/proyectos/${this.idEdicion}` : '/api/miembro3/proyectos', {
+                    method: edicion ? 'PUT' : 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(this.formulario)
+                    body: JSON.stringify({ ...this.formulario,
+                        responsable: responsable.nombre,
+                        integrantes: integrantes.map(usuario => usuario.nombre) })
                 });
-
-                if (!respuesta.ok) {
-                    throw new Error('No se pudo registrar el proyecto.');
+                if (edicion) {
+                    const indice = this.proyectos.findIndex(item => item.id === this.idEdicion);
+                    if (indice !== -1) this.proyectos.splice(indice, 1, proyecto);
+                    else this.proyectos.unshift(proyecto);
+                } else {
+                    this.proyectos.unshift(proyecto);
                 }
 
-                const nuevo = await respuesta.json();
-
-                this.proyectos.unshift(nuevo);
-
                 this.cerrarModal();
-
-                this.mensajeExito = 'Proyecto creado correctamente.';
+                this.mensajeExito = edicion ? 'Proyecto actualizado correctamente.'
+                    : 'Proyecto creado correctamente.';
 
             } catch (error) {
                 this.errorFormulario = error.message;
+            } finally {
+                this.guardando = false;
             }
         },
 
@@ -140,18 +170,37 @@ createApp({
             this.modoEdicion = true;
             this.idEdicion = proyecto.id;
 
-            this.formulario = {
-                ...proyecto,
-                integrantes: [...(proyecto.integrantes || [])]
-            };
+            this.formulario = { nombre: proyecto.nombre, descripcion: proyecto.descripcion,
+                fechaInicio: proyecto.fechaInicio, fechaFin: proyecto.fechaFin,
+                prioridad: proyecto.prioridad, idResponsable: proyecto.idResponsable,
+                idsIntegrantes: [...(proyecto.idsIntegrantes || [])],
+                estado: proyecto.estado, progreso: proyecto.progreso };
 
-            this.errorFormulario =
-                'La edición de proyectos queda preparada para conectarse al CRUD de la base de datos del grupo.';
+            this.errorFormulario = '';
+            this.mensajeExito = '';
 
             this.mostrarModal = true;
         },
 
+        async eliminarProyecto(proyecto) {
+            if (!window.confirm(`¿Eliminar definitivamente "${proyecto.nombre}"? También se eliminarán `
+                + 'sus tareas, participaciones, recursos y reportes asociados. Esta acción no se puede deshacer.')) {
+                return;
+            }
+            this.errorOperacion = '';
+            this.mensajeExito = '';
+            try {
+                await this.solicitar(`/api/miembro3/proyectos/${proyecto.id}`, { method: 'DELETE' });
+                this.proyectos = this.proyectos.filter(item => item.id !== proyecto.id);
+                if (this.detalleSeleccionado?.id === proyecto.id) this.cerrarDetalle();
+                this.mensajeExito = 'Proyecto eliminado correctamente.';
+            } catch (error) {
+                this.errorOperacion = error.message;
+            }
+        },
+
         async verProyecto(proyecto) {
+            this.errorOperacion = '';
             try {
                 const respuesta =
                     await fetch('/api/miembro3/proyectos/' + proyecto.id);
@@ -164,7 +213,7 @@ createApp({
                 this.mostrarDetalle = true;
 
             } catch (error) {
-                this.errorFormulario = error.message;
+                this.errorOperacion = error.message;
             }
         },
 
