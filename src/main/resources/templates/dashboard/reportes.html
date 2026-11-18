@@ -108,14 +108,22 @@
 
                 <button type="button"
                         class="btn btn-primary"
+                        :disabled="cargando || !indicadores"
                         @click="abrirGenerador">
                     <i class="bi bi-file-earmark-plus me-2"></i>
                     Generar reporte
                 </button>
             </header>
 
+            <div v-if="cargando" class="alert alert-info" role="status">Cargando datos reales...</div>
+            <div v-if="!cargando && !indicadores" class="alert alert-danger" role="alert">
+                {{ mensajeError }}
+                <button type="button" class="btn btn-outline-danger btn-sm ms-2"
+                        @click="cargarDatos">Reintentar</button>
+            </div>
+
             <!-- INDICADORES -->
-            <section class="row g-3 mb-4"
+            <section v-if="indicadores && !cargando" class="row g-3 mb-4"
                      aria-label="Resumen de reportes">
 
                 <div class="col-12 col-sm-6 col-xl-3">
@@ -127,10 +135,10 @@
 
                             <div>
                                 <div class="text-secondary small">
-                                    Reportes generados
+                                    Proyectos registrados
                                 </div>
                                 <div class="h3 fw-bold mb-0">
-                                    {{ reportes.length }}
+                                    {{ indicadores.proyectosTotal }}
                                 </div>
                             </div>
                         </div>
@@ -149,7 +157,7 @@
                                     Proyectos activos
                                 </div>
                                 <div class="h3 fw-bold mb-0">
-                                    {{ proyectosActivos }}
+                                    {{ indicadores.proyectosActivos }}
                                 </div>
                             </div>
                         </div>
@@ -168,7 +176,7 @@
                                     Tareas completadas
                                 </div>
                                 <div class="h3 fw-bold mb-0">
-                                    {{ tareasCompletadas }}
+                                    {{ indicadores.tareasCompletadas }}
                                 </div>
                             </div>
                         </div>
@@ -184,10 +192,10 @@
 
                             <div>
                                 <div class="text-secondary small">
-                                    Reportes recientes
+                                    Tareas registradas
                                 </div>
                                 <div class="h3 fw-bold mb-0">
-                                    {{ reportesRecientes.length }}
+                                    {{ indicadores.tareasTotal }}
                                 </div>
                             </div>
                         </div>
@@ -196,7 +204,7 @@
             </section>
 
             <!-- TIPOS DE REPORTES -->
-            <section class="card reportes-panel mb-4">
+            <section v-if="indicadores && !cargando" class="card reportes-panel mb-4">
                 <div class="card-body p-4">
 
                     <div class="mb-3">
@@ -249,7 +257,7 @@
             </section>
 
             <!-- GENERADOR Y FILTROS -->
-            <section class="card reportes-panel mb-4"
+            <section v-if="indicadores && !cargando" class="card reportes-panel mb-4"
                      id="generadorReporte">
 
                 <div class="card-body p-4">
@@ -281,19 +289,18 @@
                                     Proyecto
                                 </label>
 
-                                <!-- TODO: cargar proyectos reales desde la API. -->
                                 <select id="filtroProyectoReporte"
                                         class="form-select"
-                                        v-model="filtros.proyecto">
+                                        v-model.number="filtros.idProyecto">
 
                                     <option value="">
                                         Todos los proyectos
                                     </option>
 
                                     <option v-for="proyecto in proyectos"
-                                            :key="proyecto"
-                                            :value="proyecto">
-                                        {{ proyecto }}
+                                            :key="proyecto.id"
+                                            :value="proyecto.id">
+                                        {{ proyecto.nombre }}
                                     </option>
                                 </select>
                             </div>
@@ -305,9 +312,10 @@
                                 </label>
 
                                 <input id="fechaDesdeReporte"
-                                       type="date"
-                                       class="form-control"
-                                       v-model="filtros.fechaDesde">
+                                        type="date"
+                                        class="form-control"
+                                        :disabled="tipoSeleccionado === 'recursos'"
+                                        v-model="filtros.fechaDesde">
                             </div>
 
                             <div class="col-12 col-md-4">
@@ -317,27 +325,13 @@
                                 </label>
 
                                 <input id="fechaHastaReporte"
-                                       type="date"
-                                       class="form-control"
-                                       v-model="filtros.fechaHasta">
+                                        type="date"
+                                        class="form-control"
+                                        :disabled="tipoSeleccionado === 'recursos'"
+                                        v-model="filtros.fechaHasta">
                             </div>
 
-                            <div class="col-12 col-md-4">
-                                <label for="formatoReporte"
-                                       class="form-label">
-                                    Formato de salida
-                                </label>
-
-                                <select id="formatoReporte"
-                                        class="form-select"
-                                        v-model="filtros.formato">
-                                    <option value="PDF">PDF</option>
-                                    <option value="Excel">Excel</option>
-                                    <option value="CSV">CSV</option>
-                                </select>
-                            </div>
-
-                            <div class="col-12 col-md-8 d-flex
+                            <div class="col-12 d-flex
                                         align-items-end justify-content-md-end
                                         gap-2">
 
@@ -348,10 +342,10 @@
                                     Limpiar
                                 </button>
 
-                                <button type="submit"
+                                <button type="submit" :disabled="consultando"
                                         class="btn btn-primary">
                                     <i class="bi bi-file-earmark-plus me-1"></i>
-                                    Generar reporte
+                                    {{ consultando ? 'Consultando...' : 'Consultar datos' }}
                                 </button>
                             </div>
                         </div>
@@ -363,6 +357,10 @@
                             {{ mensajeError }}
                         </div>
                     </form>
+                    <p class="small text-secondary mt-3 mb-0">
+                        Las fechas filtran por inicio del proyecto, fin de la tarea o incorporación
+                        al equipo según el tipo. Los recursos no registran fecha. No se guarda historial.
+                    </p>
                 </div>
             </section>
 
@@ -377,16 +375,16 @@
 
                         <div>
                             <span class="badge text-bg-primary mb-2">
-                                Vista previa
+                         Consulta actual (sin historial)
                             </span>
 
                             <h2 class="h5 fw-bold mb-1">
-                                {{ reporteActual.nombre }}
+                                 {{ nombreTipoSeleccionado }}
                             </h2>
 
                             <p class="text-secondary small mb-0">
-                                Proyecto: {{ reporteActual.proyecto }}
-                                · Generado: {{ formatearFecha(reporteActual.fecha) }}
+                                 Proyecto: {{ reporteActual.proyecto }}
+                                 · Consultado: {{ formatearFecha(reporteActual.fechaConsulta) }}
                             </p>
                         </div>
 
@@ -396,13 +394,6 @@
                             <i class="bi bi-x-lg me-1"></i>
                             Cerrar vista previa
                         </button>
-                    </div>
-
-                    <div class="alert alert-info small">
-                        <i class="bi bi-info-circle me-2"></i>
-                        Esta vista previa utiliza datos de demostración.
-                        La información definitiva se obtendrá de la base
-                        de datos al integrar el backend.
                     </div>
 
                     <div class="row g-3">
@@ -425,143 +416,10 @@
                     <div class="d-flex justify-content-end mt-3">
                         <button type="button"
                                 class="btn btn-primary"
-                                @click="descargarReporte(reporteActual)">
+                                 @click="descargarCSV(reporteActual)">
                             <i class="bi bi-download me-2"></i>
-                            Descargar {{ reporteActual.formato }}
+                            Descargar CSV
                         </button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- HISTORIAL DE REPORTES -->
-            <section class="card reportes-panel mb-4">
-
-                <div class="card-body p-0">
-
-                    <div class="p-4 border-bottom">
-                        <div class="d-flex justify-content-between
-                                    align-items-center flex-wrap gap-3">
-
-                            <div>
-                                <h2 class="h5 fw-bold mb-1">
-                                    Reportes recientes
-                                </h2>
-                                <p class="text-secondary small mb-0">
-                                    Historial de informes generados.
-                                </p>
-                            </div>
-
-                            <div class="input-group reportes-search">
-                                <span class="input-group-text bg-white">
-                                    <i class="bi bi-search"
-                                       aria-hidden="true"></i>
-                                </span>
-
-                                <input type="search"
-                                       class="form-control"
-                                       placeholder="Buscar reporte..."
-                                       aria-label="Buscar reporte"
-                                       v-model="busqueda">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="table-responsive">
-                        <table class="table reportes-table align-middle">
-
-                            <thead>
-                            <tr>
-                                <th scope="col">Reporte</th>
-                                <th scope="col">Proyecto</th>
-                                <th scope="col">Fecha</th>
-                                <th scope="col">Formato</th>
-                                <th scope="col">Estado</th>
-                                <th scope="col" class="text-end">
-                                    Acciones
-                                </th>
-                            </tr>
-                            </thead>
-
-                            <tbody>
-                            <tr v-for="reporte in reportesFiltrados"
-                                :key="reporte.id">
-
-                                <td>
-                                    <div class="fw-semibold">
-                                        {{ reporte.nombre }}
-                                    </div>
-                                    <div class="text-secondary small">
-                                        {{ reporte.tipo }}
-                                    </div>
-                                </td>
-
-                                <td>
-                                    {{ reporte.proyecto }}
-                                </td>
-
-                                <td>
-                                    {{ formatearFecha(reporte.fecha) }}
-                                </td>
-
-                                <td>
-                                        <span class="badge text-bg-light border">
-                                            {{ reporte.formato }}
-                                        </span>
-                                </td>
-
-                                <td>
-                                        <span class="badge rounded-pill"
-                                              :class="reporte.estado === 'Generado'
-                                                  ? 'text-bg-success'
-                                                  : 'text-bg-warning'">
-                                            {{ reporte.estado }}
-                                        </span>
-                                </td>
-
-                                <td class="text-end">
-                                    <div class="d-inline-flex gap-1">
-
-                                        <button type="button"
-                                                class="btn btn-sm btn-light border"
-                                                title="Ver reporte"
-                                                aria-label="Ver reporte"
-                                                @click="verReporte(reporte)">
-                                            <i class="bi bi-eye"
-                                               aria-hidden="true"></i>
-                                        </button>
-
-                                        <button type="button"
-                                                class="btn btn-sm btn-light border"
-                                                title="Descargar reporte"
-                                                aria-label="Descargar reporte"
-                                                @click="descargarReporte(reporte)">
-                                            <i class="bi bi-download"
-                                               aria-hidden="true"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <tr v-if="reportesFiltrados.length === 0">
-                                <td colspan="6"
-                                    class="text-center py-5">
-
-                                    <i class="bi bi-file-earmark-x
-                                                  fs-2 text-secondary"
-                                       aria-hidden="true"></i>
-
-                                    <p class="fw-semibold mt-2 mb-1">
-                                        No se encontraron reportes
-                                    </p>
-
-                                    <p class="text-secondary small mb-0">
-                                        Prueba con otro término de búsqueda
-                                        o genera un nuevo reporte.
-                                    </p>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </section>

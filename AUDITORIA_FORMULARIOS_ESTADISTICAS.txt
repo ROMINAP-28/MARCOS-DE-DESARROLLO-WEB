@@ -33,10 +33,13 @@ HALLAZGOS CRÍTICOS
    Verificación: node --test src/test/js/dashboard.test.js src/test/js/equipo.test.js (6 pruebas correctas); .\mvnw.cmd -q test con Java 21 y PostgreSQL (33 pruebas correctas, incluidas persistencia de participaciones, renderización y asignación de tarea por IDs).
    Alcance: la edición de una participación cambia su estado; el rol Responsable se gestiona desde el proyecto y la especialidad desde el perfil del usuario. La vista no proporciona historial de actividad sin un origen persistente.
 
-3. Reportes ficticios.
+3. Reportes ficticios. [COMPLETADO: 2026-11-17]
    Archivos: static/js/reportes.js:21-123,220-293; templates/dashboard/reportes.html:274-365.
    Error: Proyectos, indicadores, historial y resúmenes son ficticios. «Generar reporte» no consulta ni guarda Reporte; PDF imprime la vista y Excel aún no está implementado.
    Corrección: Definir DTO de generación, ReporteRepository, servicio y endpoint; consultar datos reales, guardar Reporte si se requiere historial y devolver resultados para sustituir el array local.
+   Corrección aplicada: la pantalla carga proyectos e indicadores reales y POST /api/miembro3/reportes/consulta calcula los resúmenes desde Proyecto, Tarea, ProyectoUsuario y Recurso, filtrando por proyecto y por la fecha propia de cada tipo. Los recursos no tienen fecha y rechazan ese filtro. La vista previa y el CSV usan exclusivamente la respuesta del servidor; se retiraron los arrays ficticios, el historial simulado y las opciones PDF/Excel que no generaban archivos reales. No se guarda Reporte porque, sin autenticación, no es posible atribuir de forma fiable id_usuario_generador; el historial queda expresamente pendiente para después del hallazgo crítico 5.
+   Verificación: node --test src/test/js/*.test.js (9 pruebas correctas); .\mvnw.cmd -q test con Java 21 y PostgreSQL (37 pruebas correctas, incluidas consultas y filtros por tipo/proyecto/fecha y validación REST).
+   Alcance: consultas y CSV reales sin historial ni PDF/Excel; la consulta no se presenta como reporte persistido. El historial requiere resolver antes la autenticación.
 
 4. La edición de proyectos crea duplicados.
    Archivos: static/js/proyectos.js:93-150; templates/dashboard/proyectos.html:466-474,795-803.

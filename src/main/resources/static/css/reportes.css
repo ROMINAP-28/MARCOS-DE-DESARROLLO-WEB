@@ -210,112 +210,10 @@
     font-size: 1.5rem;
 }
 
-/* Búsqueda del historial */
-.reportes-search {
-    width: min(100%, 310px);
-}
-
-.reportes-search .input-group-text {
-    color: #64748b;
-    border-color: #dce3ed;
-    border-radius: 8px 0 0 8px;
-}
-
-.reportes-search .form-control {
-    border-radius: 0 8px 8px 0;
-}
-
-/* Tabla de reportes */
-.reportes-table {
-    width: 100%;
-    margin-bottom: 0;
-    font-size: 0.9rem;
-}
-
-.reportes-table thead th {
-    padding: 14px 16px;
-    border-bottom: 1px solid #e5eaf1;
-    background: #f8fafc;
-    color: #64748b;
-    font-size: 0.74rem;
-    font-weight: 700;
-    letter-spacing: 0.35px;
-    text-transform: uppercase;
-    white-space: nowrap;
-}
-
-.reportes-table tbody td {
-    padding: 15px 16px;
-    border-color: #edf0f5;
-    color: #334155;
-    vertical-align: middle;
-}
-
-.reportes-table tbody tr {
-    transition: background 0.15s ease;
-}
-
-.reportes-table tbody tr:hover {
-    background: #f8faff;
-}
-
-.reportes-table .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 7px;
-    color: #475569;
-}
-
-.reportes-table .btn:hover {
-    color: #2563eb;
-    background: #eaf1ff;
-    border-color: #c9d9ff;
-}
-
-.reportes-table .badge {
-    padding: 6px 9px;
-    font-size: 0.74rem;
-    font-weight: 600;
-}
-
 /* Mensajes */
 .reportes-panel .alert {
     border-radius: 9px;
     font-size: 0.88rem;
-}
-
-/* Impresión / vista PDF */
-@media print {
-    body {
-        background: #fff !important;
-    }
-
-    .reportes-main {
-        padding: 0 !important;
-        min-height: auto;
-        background: #fff !important;
-    }
-
-    .reportes-header,
-    .reportes-main > .row,
-    .reportes-main > section:not(:has(.preview-stat)),
-    .reportes-main .btn,
-    .reportes-main .reportes-search {
-        display: none !important;
-    }
-
-    .reportes-panel:has(.preview-stat) {
-        display: block !important;
-        border: 0;
-        box-shadow: none;
-    }
-
-    .preview-stat {
-        break-inside: avoid;
-    }
 }
 
 /* Adaptación a pantallas medianas */
@@ -352,11 +250,4 @@
         padding: 18px !important;
     }
 
-    .reportes-search {
-        width: 100%;
-    }
-
-    .reportes-table {
-        min-width: 720px;
-    }
 }
