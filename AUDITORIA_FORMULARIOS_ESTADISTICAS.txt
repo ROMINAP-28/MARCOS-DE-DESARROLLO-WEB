@@ -1,0 +1,115 @@
+RESULTADO DE LA AUDITORÍA
+
+La persistencia es parcial y las estadísticas no están sincronizadas en tiempo real. Los formularios de registro, creación de proyectos y CRUD de tareas llegan a PostgreSQL; los de Equipo y Reportes operan principalmente sobre datos locales del navegador. El dashboard muestra cifras de demostración.
+
+Alcance verificado: código fuente y esquema de PostgreSQL mediante consultas de solo lectura. No ejecuté formularios en un navegador ni modifiqué archivos o datos durante la auditoría. Además, el proyecto usa Spring Boot 4.1.1, no 3.x (pom.xml:5-9); no encontré implementación de JWT, WebSocket ni Scheduler en el código y dependencias revisados.
+
+INVENTARIO DE FORMULARIOS
+
+- templates/auth/registro.html:39-119: Nombre, correo y contraseña con v-model; confirmación y términos se validan en Vue. POST /api/auth/registro; persiste Usuario.
+- templates/auth/login.html:43-99: Correo y contraseña con v-model. No llama al backend.
+- templates/dashboard/proyectos.html:579-808: Nombre, descripción, fechas, prioridad, responsable e integrantes con v-model. Crea proyectos; la edición no persiste.
+- templates/dashboard/tareas.html:312-384: Nombre, descripción, proyecto, fecha, prioridad, estado y responsable con v-model. POST/PUT; persiste tareas.
+- templates/dashboard/equipo.html:557-710: Nombre, correo, proyecto, rol, especialidad, estado y fecha con v-model. Solo modifica arrays de Vue.
+- templates/dashboard/reportes.html:274-365: Proyecto, rango de fechas y formato con v-model. Genera datos de demostración, no guarda reportes.
+- templates/perfil/configuracion.html:58-63: Preferencia «vista compacta». Se guarda únicamente en localStorage, de forma explícita y apropiada para esa preferencia.
+
+Son vistas Thymeleaf que alojan aplicaciones Vue; los formularios interactivos usan v-model, no th:field. Tener v-model no implica persistencia: depende de lo que haga el método de envío.
+
+HALLAZGOS CRÍTICOS
+
+1. Dashboard con datos fijos.
+   Archivos: static/js/dashboard.js:8-46; templates/dashboard/dashboard.html:109-167.
+   Error: Los proyectos, tareas y contadores proceden de arrays fijos. No reflejan altas, bajas ni cambios en PostgreSQL, ni siquiera al recargar la página.
+   Corrección: Cargar /api/miembro3/proyectos y /api/miembro3/tareas al montar la vista; calcular los contadores a partir de esas respuestas. Para actualización entre pestañas, añadir sondeo o WebSocket cuando exista backend para ello.
+
+2. Equipo sin persistencia.
+   Archivos: static/js/equipo.js:22-127,264-337,344-426; templates/dashboard/equipo.html:557-710.
+   Error: Agregar, editar y retirar integrantes; asignar tareas y crear especialidades solo cambia arrays locales. La interfaz puede anunciar éxito sin que exista un registro nuevo en BD.
+   Corrección: Cargar proyectos, usuarios y especialidades desde la API. Implementar la operación de participación en ProyectoUsuario mediante servicio y endpoint propios; usar los endpoints existentes de tareas y especialidades donde corresponda. Actualizar la vista después de una respuesta exitosa.
+
+3. Reportes ficticios.
+   Archivos: static/js/reportes.js:21-123,220-293; templates/dashboard/reportes.html:274-365.
+   Error: Proyectos, indicadores, historial y resúmenes son ficticios. «Generar reporte» no consulta ni guarda Reporte; PDF imprime la vista y Excel aún no está implementado.
+   Corrección: Definir DTO de generación, ReporteRepository, servicio y endpoint; consultar datos reales, guardar Reporte si se requiere historial y devolver resultados para sustituir el array local.
+
+4. La edición de proyectos crea duplicados.
+   Archivos: static/js/proyectos.js:93-150; templates/dashboard/proyectos.html:466-474,795-803.
+   Error: El botón Editar abre el formulario, pero guardarProyecto() siempre hace POST /proyectos. Guardar cambios crea otro proyecto en vez de actualizar el existente. Tampoco hay acción de eliminación en esta vista, aunque el backend sí tiene DELETE.
+   Corrección: Seleccionar URL y método según modoEdicion e idEdicion, y reemplazar el elemento en this.proyectos con el DTO devuelto. Ejemplo:
+       fetch(esEdicion ? `/api/miembro3/proyectos/${this.idEdicion}` : '/api/miembro3/proyectos', {
+           method: esEdicion ? 'PUT' : 'POST', ...
+       })
+
+5. Login sin autenticación.
+   Archivos: templates/auth/login.html:137-146; pom.xml:79-82.
+   Error: El login no autentica: muestra un mensaje de interfaz pendiente. Se usa spring-security-crypto para hash, pero eso no implementa Spring Security/JWT. Por tanto, no hay usuario autenticado para atribuir con confianza reportes o cambios.
+   Corrección: Implementar autenticación y autorización reales antes de presentar login, acciones de usuario o notificaciones como funcionalidades completas. No confiar en un id_usuario_generador enviado libremente por el cliente.
+
+HALLAZGOS MEDIOS
+
+1. Longitud incompatible de descripción de proyecto.
+   Archivos: templates/dashboard/proyectos.html:613-619; dto/ProyectoRequest.java:14; model/Proyecto.java:33-35.
+   Error: La descripción permite 500 caracteres en HTML, pero el DTO y PostgreSQL admiten 255. Una entrada de 256–500 supera la validación del servidor.
+   Corrección: Alinear maxlength="255" y mostrar el mensaje 400, o ampliar conjuntamente DTO, entidad y columna mediante migración. No basta con cambiar solo HTML.
+
+2. Selectores incompletos y asociaciones ambiguas por nombre.
+   Archivos: static/js/proyectos.js:20,720-757; static/js/tareas.js:24-31,92-96; service/ProyectoServicio.java:106-123; service/TareaServicio.java:95-101.
+   Error: Los responsables de proyectos y tareas están precargados o derivados de las tareas existentes. Un usuario o proyecto nuevo puede no aparecer en los selectores; un proyecto sin tareas no aparece en el selector de tareas. Además, el backend busca por nombre con findFirst...: si hay nombres repetidos, puede vincular la solicitud al registro equivocado.
+   Corrección: Poblar selectores con GET /usuarios y GET /proyectos; enviar IDs y resolver con findById. Validar en servicio la pertenencia del responsable al proyecto si esa es la regla de negocio.
+
+3. Campos de tarea limitados o ausentes.
+   Archivos: static/js/tareas.js:143-200; templates/dashboard/tareas.html:316-325; dto/TareaRequest.java:12-18.
+   Error: Crear y editar tareas persiste los campos enviados, pero la descripción no tiene límite HTML aunque DTO/BD admiten 500. La vista no ofrece fechaInicio, pese a existir en Tarea; TareaServicio.copiarDatos() tampoco la asigna.
+   Corrección: Añadir maxlength="500". Si fechaInicio debe poder editarse, incorporarla a formulario, DTO y copiarDatos(), y validar el intervalo.
+
+4. Los contadores «totales» dependen de los filtros.
+   Archivos: static/js/proyectos.js:176-179; static/js/tareas.js:113-116; templates/dashboard/proyectos.html:132-207; templates/dashboard/tareas.html:93-119.
+   Error: Los indicadores etiquetados como totales o estados se calculan sobre listas filtradas. Al escribir en búsqueda pueden cambiar aunque no haya cambiado ningún dato en BD. En estas dos vistas sí se actualiza el estado Vue después de operaciones exitosas realizadas en la misma vista.
+   Corrección: Separar «total global» (this.proyectos.length, this.tareas.length) de «resultados filtrados»; calcular indicadores globales desde el conjunto completo o desde un endpoint agregado.
+
+5. No hay sincronización automática entre vistas.
+   Archivos: static/js/proyectos.js:43-77; static/js/tareas.js:63-110; static/js/dashboard.js:5-47.
+   Error: Proyectos y Tareas cargan la API solo al montar sus respectivas páginas. No hay sincronización automática entre vistas, pestañas o usuarios. Los GET existentes pueden devolver datos actuales cuando se invocan, pero no existe un endpoint de métricas ni emisión de eventos que actualice el dashboard.
+   Corrección: Crear, por ejemplo, GET /api/dashboard/resumen con agregados de repositorio; refrescarlo después de mutaciones y al volver a la página. Si se exige tiempo real entre clientes, añadir eventos WebSocket tras la confirmación de la transacción.
+
+6. Validación de valores permitidos incompleta.
+   Archivos: dto/ProyectoRequest.java:12-21; dto/TareaRequest.java:11-18; Controller/ProyectoController.java:45-54; Controller/TareaController.java:46-60.
+   Error: Sí existe @Valid para POST/PUT y campos obligatorios principales. Sin embargo, prioridad y estado no tienen validación declarativa completa en los DTO: Tarea los comprueba en servicio; Proyecto valida el estado y rango de progreso en servicio, pero no restringe sus valores de prioridad.
+   Corrección: Centralizar valores permitidos mediante enum o validación explícita también en ProyectoServicio; conservar validación de servidor aunque HTML use <select>.
+
+7. Actualización de equipos mediante borrado masivo.
+   Archivos: service/ProyectoServicio.java:23,59-92; repository/ProyectoUsuarioRepository.java:19-21.
+   Error: El alta de proyecto y asignaciones está dentro de @Transactional: un fallo normal debería revertir el conjunto, lo cual es correcto. La actualización, no obstante, elimina masivamente todas las participaciones y las recrea; clearAutomatically = true limpia el contexto de persistencia.
+   Corrección: Conservar la transacción, pero probar específicamente actualización y rollback contra BD. Considerar sincronizar diferencias de integrantes en lugar de borrar y recrear todo, para conservar rol, estado y fecha de asignación cuando no cambian.
+
+8. Borrado en cascada de proyectos.
+   Archivos: model/Proyecto.java:74-84; service/ProyectoServicio.java:95-99.
+   Error: Eliminar un proyecto aplica CascadeType.ALL a tareas, recursos, reportes y participaciones. Funciona como borrado, pero puede perder historial que el equipo esperaba conservar.
+   Corrección: Confirmar la política funcional: cascada intencional, restricción del borrado o borrado lógico. No cambiarla sin esa decisión.
+
+HALLAZGOS MENORES Y PUNTOS CORRECTOS
+
+- templates/dashboard/tareas.html:316-317 limita el nombre a 120 caracteres, mientras TareaRequest y la columna permiten 150: es una restricción de interfaz más estricta, no un fallo de persistencia.
+- templates/auth/registro.html:44-103,158-224 envía los tres campos que espera RegistroRequest; confirmación y aceptación de términos solo se usan para validación cliente. UsuarioServicio.java:45-59 aplica hash y guarda al usuario. Es un recorrido correctamente conectado, aunque los términos no se registran como aceptación en BD.
+- static/js/configuracion.js:1-28 persiste solo una preferencia visual local; no debería contabilizarse como fallo ORM.
+- src/main/resources/application.properties:5 configura ahora puerto 8081. Los comentarios que aún anuncian localhost:8080 en algunos controladores están desactualizados.
+- application.properties:4 contiene una contraseña de PostgreSQL en texto claro; conviene usar una variable de entorno. pom.xml:68-86 declara dos veces spring-boot-starter-data-jpa.
+
+CORRECCIÓN MÍNIMA PARA LAS ESTADÍSTICAS
+
+Sin afirmar que esto sea WebSocket, el primer paso funcional sería sustituir los arrays fijos de dashboard.js por lecturas reales:
+
+    async mounted() {
+        const [proyectos, tareas] = await Promise.all([
+            fetch('/api/miembro3/proyectos'),
+            fetch('/api/miembro3/tareas')
+        ]);
+        if (!proyectos.ok || !tareas.ok) throw new Error('No se pudo cargar el resumen');
+        this.proyectos = await proyectos.json();
+        this.tareas = await tareas.json();
+    }
+
+Luego habría que usar tarea.fechaFin —no el campo ficticio fecha— y definir «Próximas a vencer» por fecha y estado, no como todas las no completadas. Esto daría cifras reales al cargar la página; la actualización instantánea entre clientes seguiría pendiente.
+
+Prioridad recomendada: corregir primero la edición de proyectos y las pantallas Equipo/Reportes que aparentan guardar; después conectar el dashboard a datos reales y decidir si el requisito pide refresco al navegar o tiempo real mediante WebSocket.
