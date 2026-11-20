@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta name="_csrf" th:content="${_csrf?.token}">
+    <meta name="_csrf_header" th:content="${_csrf?.headerName}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mis proyectos | Gestión de Proyectos</title>
@@ -83,6 +85,9 @@
                 </a>
 
             </nav>
+            <form th:action="@{/logout}" method="post" class="px-3 mt-3">
+                <button type="submit" class="btn btn-outline-secondary w-100">Cerrar sesión</button>
+            </form>
         </aside>
 
 
@@ -473,6 +478,7 @@
                                     <div class="d-flex gap-2">
 
                                         <button type="button"
+                                                v-if="puedeGestionar(proyecto)"
                                                 class="btn btn-sm btn-outline-primary"
                                                 @click="editarProyecto(proyecto)">
 
@@ -494,6 +500,7 @@
                                         </button>
 
                                         <button type="button" class="btn btn-sm btn-outline-danger"
+                                                v-if="puedeGestionar(proyecto)"
                                                 @click="eliminarProyecto(proyecto)">
                                             <i class="bi bi-trash me-1"></i> Eliminar
                                         </button>
@@ -725,6 +732,7 @@
                             <select id="responsableProyecto"
                                     class="form-select"
                                     v-model.number="formulario.idResponsable"
+                                    :disabled="!modoEdicion"
                                     required>
 
                                 <option disabled value="">
@@ -1073,6 +1081,7 @@
 
 
 <!-- Vue.js: framework reactivo. -->
+<script th:src="@{/js/csrf.js}"></script>
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
 

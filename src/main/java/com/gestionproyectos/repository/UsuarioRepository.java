@@ -11,6 +11,8 @@ public interface UsuarioRepository
 
     boolean existsByEmailIgnoreCase(String email);
 
+    Optional<Usuario> findByEmailIgnoreCase(String email);
+
     boolean existsByEmailIgnoreCaseAndIdUsuarioNot(String email, Integer idUsuario);
 
     Optional<Usuario> findFirstByNombreIgnoreCase(String nombre);

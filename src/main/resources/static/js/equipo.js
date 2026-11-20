@@ -4,6 +4,8 @@ createApp({
     data() {
         return {
             usuario: 'Usuario',
+            idUsuarioActual: null,
+            esAdministrador: false,
             vista: 'integrantes',
             busqueda: '',
             filtroProyecto: '',
@@ -76,13 +78,17 @@ createApp({
         async cargarDatos() {
             this.cargando = true;
             try {
-                const [proyectos, usuarios, especialidades, participaciones] = await Promise.all([
+                const [proyectos, usuarios, especialidades, participaciones, cuenta] = await Promise.all([
                     this.solicitar('/api/miembro3/proyectos'),
                     this.solicitar('/api/miembro3/usuarios'),
                     this.solicitar('/api/miembro3/especialidades'),
-                    this.solicitar('/api/miembro3/participaciones')
+                    this.solicitar('/api/miembro3/participaciones'),
+                    this.solicitar('/api/auth/yo')
                 ]);
                 this.proyectos = proyectos;
+                this.idUsuarioActual = cuenta.id;
+                this.esAdministrador = cuenta.rol === 'ADMIN';
+                this.usuario = cuenta.nombre;
                 this.usuarios = usuarios;
                 this.especialidades = especialidades;
                 this.integrantes = participaciones.map(item => ({
@@ -98,6 +104,8 @@ createApp({
                 this.usuarios = [];
                 this.especialidades = [];
                 this.integrantes = [];
+                this.idUsuarioActual = null;
+                this.esAdministrador = false;
                 this.mensajeError = error.message;
                 this.errorCarga = true;
                 return false;
@@ -108,6 +116,10 @@ createApp({
 
         contarEstado(estado) {
             return this.integrantesFiltrados.filter(integrante => integrante.estado === estado).length;
+        },
+        puedeGestionar(integrante) {
+            return this.proyectos.some(proyecto => proyecto.id === integrante.idProyecto
+                && proyecto.idResponsable === this.idUsuarioActual);
         },
         iniciales(nombre) {
             return (nombre || '').trim().split(/\s+/).filter(Boolean).slice(0, 2)

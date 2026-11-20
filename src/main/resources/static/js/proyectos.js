@@ -6,6 +6,7 @@ createApp({
     data() {
         return {
             usuario: 'Usuario',
+            idUsuarioActual: null,
             busqueda: '',
             filtroEstado: '',
             filtroPrioridad: '',
@@ -65,12 +66,15 @@ createApp({
             this.errorCarga = '';
 
             try {
-                const [proyectos, usuarios] = await Promise.all([
+                const [proyectos, usuarios, cuenta] = await Promise.all([
                     this.solicitar('/api/miembro3/proyectos'),
-                    this.solicitar('/api/miembro3/usuarios')
+                    this.solicitar('/api/miembro3/usuarios'),
+                    this.solicitar('/api/auth/yo')
                 ]);
                 this.proyectos = proyectos;
                 this.equipoDisponible = usuarios;
+                this.idUsuarioActual = cuenta.id;
+                this.usuario = cuenta.nombre;
                 this.errorCarga = '';
                 this.errorOperacion = '';
 
@@ -78,6 +82,7 @@ createApp({
                 this.errorCarga = error.message;
                 this.proyectos = [];
                 this.equipoDisponible = [];
+                this.idUsuarioActual = null;
 
             } finally {
                 this.cargando = false;
@@ -97,6 +102,7 @@ createApp({
             this.modoEdicion = false;
             this.idEdicion = null;
             this.formulario = this.formularioVacio();
+            this.formulario.idResponsable = this.idUsuarioActual;
             this.errorFormulario = '';
             this.errorOperacion = '';
             this.mensajeExito = '';
@@ -167,6 +173,7 @@ createApp({
         },
 
         editarProyecto(proyecto) {
+            if (!this.puedeGestionar(proyecto)) return;
             this.modoEdicion = true;
             this.idEdicion = proyecto.id;
 
@@ -183,6 +190,7 @@ createApp({
         },
 
         async eliminarProyecto(proyecto) {
+            if (!this.puedeGestionar(proyecto)) return;
             if (!window.confirm(`¿Eliminar definitivamente "${proyecto.nombre}"? También se eliminarán `
                 + 'sus tareas, participaciones, recursos y reportes asociados. Esta acción no se puede deshacer.')) {
                 return;
@@ -197,6 +205,10 @@ createApp({
             } catch (error) {
                 this.errorOperacion = error.message;
             }
+        },
+
+        puedeGestionar(proyecto) {
+            return this.idUsuarioActual != null && proyecto.idResponsable === this.idUsuarioActual;
         },
 
         async verProyecto(proyecto) {

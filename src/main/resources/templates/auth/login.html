@@ -40,7 +40,7 @@
                     </p>
                 </div>
 
-                <form @submit.prevent="iniciarSesion" novalidate>
+                <form th:action="@{/login}" method="post">
 
                     <div class="mb-3">
                         <label for="correo" class="form-label fw-semibold">
@@ -51,7 +51,7 @@
                                 id="correo"
                                 class="form-control form-control-lg"
                                 placeholder="ejemplo@correo.com"
-                                v-model.trim="correo"
+                                name="correo"
                                 autocomplete="email"
                                 required>
                     </div>
@@ -63,20 +63,13 @@
 
                         <div class="input-group input-group-lg">
                             <input
-                                    :type="mostrarContrasena ? 'text' : 'password'"
+                                    type="password"
                                     id="contrasena"
+                                    name="contrasena"
                                     class="form-control"
                                     placeholder="Ingresa tu contraseña"
-                                    v-model="contrasena"
                                     autocomplete="current-password"
                                     required>
-
-                            <button
-                                    class="btn btn-outline-secondary"
-                                    type="button"
-                                    @click="mostrarContrasena = !mostrarContrasena">
-                                {{ mostrarContrasena ? 'Ocultar' : 'Mostrar' }}
-                            </button>
                         </div>
                     </div>
 
@@ -87,10 +80,11 @@
                         </a>
                     </div>
 
-                    <div v-if="mensaje"
-                         class="alert alert-info"
-                         role="status">
-                        {{ mensaje }}
+                    <div th:if="${param.error}" class="alert alert-danger" role="alert">
+                        Correo o contraseña incorrectos.
+                    </div>
+                    <div th:if="${param.salida}" class="alert alert-info" role="status">
+                        Has cerrado sesión.
                     </div>
 
                     <button type="submit"
@@ -119,34 +113,6 @@
         </section>
     </div>
 </main>
-
-<!-- Vue.js -->
-<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-<script>
-    const { createApp } = Vue;
-
-    createApp({
-        data() {
-            return {
-                correo: '',
-                contrasena: '',
-                mostrarContrasena: false,
-                mensaje: ''
-            };
-        },
-        methods: {
-            iniciarSesion() {
-                if (!this.correo || !this.contrasena) {
-                    this.mensaje = 'Completa todos los campos.';
-                    return;
-                }
-
-                this.mensaje =
-                    'Interfaz lista. La autenticación se conectará posteriormente con Spring Security.';
-            }
-        }
-    }).mount('#loginApp');
-</script>
 
 </body>
 </html>

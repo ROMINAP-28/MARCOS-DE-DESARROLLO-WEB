@@ -2,6 +2,8 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta name="_csrf" th:content="${_csrf?.token}">
+    <meta name="_csrf_header" th:content="${_csrf?.headerName}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -78,6 +80,9 @@
                     <span>Configuración</span>
                 </a>
             </nav>
+            <form th:action="@{/logout}" method="post" class="px-3 mt-3">
+                <button type="submit" class="btn btn-outline-secondary w-100">Cerrar sesión</button>
+            </form>
 
             <div class="sidebar-footer">
                 <i class="bi bi-info-circle me-2"></i>
@@ -433,6 +438,7 @@
 </div>
 
 <!-- Vue debe cargarse antes del archivo del módulo -->
+<script th:src="@{/js/csrf.js}"></script>
 <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 <script th:src="@{/js/reportes.js}"></script>
 

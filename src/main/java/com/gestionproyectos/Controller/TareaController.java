@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,7 +16,6 @@ import java.util.List;
 @RestController
 // http://localhost:8080/api/miembro3/tareas
 @RequestMapping("/api/miembro3")
-@CrossOrigin(value = "http://localhost:3000")
 public class TareaController {
 
     private static final Logger logger = LoggerFactory.getLogger(TareaController.class);
@@ -42,6 +42,7 @@ public class TareaController {
 
     // POST http://localhost:8080/api/miembro3/tareas
     @PostMapping("/tareas")
+    @PreAuthorize("@accesoProyecto.puedeCrearTarea(#request)")
     @ResponseStatus(HttpStatus.CREATED)
     public TareaDto agregarTarea(@Valid @RequestBody TareaRequest request) {
         logger.info("Tarea a agregar: {}", request.nombre());
@@ -50,6 +51,7 @@ public class TareaController {
 
     // PUT http://localhost:8080/api/miembro3/tareas/1
     @PutMapping("/tareas/{id}")
+    @PreAuthorize("@accesoProyecto.esResponsableDeTarea(#id) && @accesoProyecto.puedeCrearTarea(#request)")
     public TareaDto actualizarTarea(@PathVariable Integer id,
                                     @Valid @RequestBody TareaRequest request) {
         return tareaServicio.actualizarTarea(id, request);
@@ -57,12 +59,14 @@ public class TareaController {
 
     // PATCH http://localhost:8080/api/miembro3/tareas/1/estado   (lo usa el tablero Kanban)
     @PatchMapping("/tareas/{id}/estado")
+    @PreAuthorize("@accesoProyecto.puedeCambiarEstado(#id)")
     public TareaDto cambiarEstado(@PathVariable Integer id, @Valid @RequestBody EstadoRequest request) {
         return tareaServicio.cambiarEstado(id, request.estado());
     }
 
     // DELETE http://localhost:8080/api/miembro3/tareas/1
     @DeleteMapping("/tareas/{id}")
+    @PreAuthorize("@accesoProyecto.esResponsableDeTarea(#id)")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminarTarea(@PathVariable Integer id) {
         tareaServicio.eliminarTarea(id);

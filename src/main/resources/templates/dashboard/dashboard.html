@@ -2,6 +2,8 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta name="_csrf" th:content="${_csrf?.token}">
+    <meta name="_csrf_header" th:content="${_csrf?.headerName}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -85,6 +87,9 @@
                 </a>
 
             </nav>
+            <form th:action="@{/logout}" method="post" class="px-3 mt-3">
+                <button type="submit" class="btn btn-outline-secondary w-100">Cerrar sesión</button>
+            </form>
         </aside>
 
         <!-- Bootstrap + CSS: área principal flexible del dashboard. -->
@@ -317,6 +322,7 @@
 </div>
 
 <!-- Vue.js: carga el framework desde CDN. -->
+<script th:src="@{/js/csrf.js}"></script>
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
 <!-- Vue.js: carga la lógica externa del dashboard mediante Thymeleaf. -->

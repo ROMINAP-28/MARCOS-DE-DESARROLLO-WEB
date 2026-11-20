@@ -21,8 +21,11 @@ class ProyectoEdicionRestTests {
 
     @Test
     void vistaRenderizaYApiExponeIdsParaSeleccionarUsuariosSinAmbiguedad() throws Exception {
-        var mvc = MockMvcBuilders.webAppContextSetup(contexto).build();
-        mvc.perform(get("/proyectos"))
+        var mvc = MockMvcBuilders.webAppContextSetup(contexto)
+                .apply(org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity())
+                .build();
+        mvc.perform(get("/proyectos").with(
+                        org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("test")))
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Eliminar")));
 
@@ -34,11 +37,16 @@ class ProyectoEdicionRestTests {
         usuario.setRol("USUARIO");
         usuario = usuarios.save(usuario);
         try {
+            var principal = new com.gestionproyectos.config.UsuarioPrincipal(usuario);
+            var autenticacion = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                    principal, null, principal.getAuthorities());
             String cuerpo = "{\"nombre\":\"Prueba\",\"descripcion\":\"Proyecto de prueba\","
                     + "\"fechaInicio\":\"2026-11-01\",\"fechaFin\":\"2026-12-01\","
                     + "\"prioridad\":\"Alta\",\"responsable\":\"Prueba proyecto\","
                     + "\"idResponsable\":" + usuario.getIdUsuario() + ",\"idsIntegrantes\":[]}";
             String creado = mvc.perform(post("/api/miembro3/proyectos")
+                            .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication(autenticacion))
+                            .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
                             .contentType(MediaType.APPLICATION_JSON).content(cuerpo))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.idResponsable").value(usuario.getIdUsuario()))
@@ -46,6 +54,8 @@ class ProyectoEdicionRestTests {
             int id = com.jayway.jsonpath.JsonPath.read(creado, "$.id");
             try {
                 mvc.perform(put("/api/miembro3/proyectos/" + id)
+                                .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication(autenticacion))
+                                .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(cuerpo.replace("\"nombre\":\"Prueba\"",
                                         "\"nombre\":\"Actualizado\"")))
@@ -53,7 +63,9 @@ class ProyectoEdicionRestTests {
                         .andExpect(jsonPath("$.id").value(id))
                         .andExpect(jsonPath("$.nombre").value("Actualizado"));
             } finally {
-                mvc.perform(delete("/api/miembro3/proyectos/" + id))
+                mvc.perform(delete("/api/miembro3/proyectos/" + id)
+                                .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication(autenticacion))
+                                .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                         .andExpect(status().isNoContent());
             }
         } finally {

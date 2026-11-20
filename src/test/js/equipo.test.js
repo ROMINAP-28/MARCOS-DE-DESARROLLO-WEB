@@ -25,6 +25,7 @@ test('Equipo carga datos reales y solo presenta cambios confirmados por la API',
     let tareas = 0;
     const estado = crear(async (url, opciones = {}) => {
         peticiones.push(`${opciones.method || 'GET'} ${url}`);
+        if (url.endsWith('/auth/yo')) return respuesta({ id: 20, nombre: 'Ana', rol: 'ADMIN' });
         if (url.endsWith('/proyectos')) return respuesta([{ id: 10, nombre: 'Proyecto real' }]);
         if (url.endsWith('/usuarios')) return respuesta([{ id: 20, nombre: 'Ana', correo: 'ana@ejemplo.com' }]);
         if (url.endsWith('/especialidades')) {
@@ -100,6 +101,7 @@ test('Equipo carga datos reales y solo presenta cambios confirmados por la API',
 
 test('un fallo de guardado no agrega integrantes locales', async () => {
     const estado = crear(async (url, opciones = {}) => {
+        if (url.endsWith('/auth/yo')) return respuesta({ id: 20, nombre: 'Ana', rol: 'USUARIO' });
         if (opciones.method === 'POST') return { ok: false, json: async () => ({ mensaje: 'Ya pertenece al proyecto' }) };
         if (url.endsWith('/proyectos')) return respuesta([{ id: 10, nombre: 'Proyecto real' }]);
         if (url.endsWith('/usuarios')) return respuesta([{ id: 20, nombre: 'Ana' }]);
@@ -117,6 +119,7 @@ test('un fallo al recargar oculta datos anteriores y permite reintentar', async 
     let fallar = false;
     const estado = crear(async (url) => {
         if (fallar) throw new Error('Sin conexión');
+        if (url.endsWith('/auth/yo')) return respuesta({ id: 20, nombre: 'Ana', rol: 'USUARIO' });
         if (url.endsWith('/participaciones')) return respuesta([{ idProyecto: 10, idUsuario: 20,
             nombre: 'Ana', proyecto: 'Proyecto real', rol: 'Integrante', estado: 'Activo',
             tareasAsignadas: 2 }]);

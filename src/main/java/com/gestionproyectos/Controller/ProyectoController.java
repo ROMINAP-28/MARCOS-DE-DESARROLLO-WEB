@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,7 +15,6 @@ import java.util.List;
 @RestController
 // http://localhost:8080/api/miembro3/proyectos
 @RequestMapping("/api/miembro3")
-@CrossOrigin(value = "http://localhost:3000")
 public class ProyectoController {
 
     private static final Logger logger = LoggerFactory.getLogger(ProyectoController.class);
@@ -41,6 +41,7 @@ public class ProyectoController {
 
     // POST http://localhost:8080/api/miembro3/proyectos
     @PostMapping("/proyectos")
+    @PreAuthorize("@accesoProyecto.puedeCrearProyecto(#request)")
     @ResponseStatus(HttpStatus.CREATED)
     public ProyectoDto agregarProyecto(@Valid @RequestBody ProyectoRequest request) {
         logger.info("Proyecto a agregar: {}", request.nombre());
@@ -49,6 +50,7 @@ public class ProyectoController {
 
     // PUT http://localhost:8080/api/miembro3/proyectos/1
     @PutMapping("/proyectos/{id}")
+    @PreAuthorize("@accesoProyecto.esResponsable(#id)")
     public ProyectoDto actualizarProyecto(@PathVariable Integer id,
                                           @Valid @RequestBody ProyectoRequest request) {
         return proyectoServicio.actualizarProyecto(id, request);
@@ -56,6 +58,7 @@ public class ProyectoController {
 
     // DELETE http://localhost:8080/api/miembro3/proyectos/1
     @DeleteMapping("/proyectos/{id}")
+    @PreAuthorize("@accesoProyecto.esResponsable(#id)")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminarProyecto(@PathVariable Integer id) {
         proyectoServicio.eliminarProyecto(id);

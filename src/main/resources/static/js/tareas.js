@@ -6,6 +6,7 @@ createApp({
     data() {
         return {
             usuario: 'Usuario',
+            idUsuarioActual: null,
             vista: 'tabla',
             busqueda: '',
             filtroProyecto: '',
@@ -22,13 +23,10 @@ createApp({
             prioridades: ['Baja', 'Media', 'Alta', 'Urgente'],
 
             proyectos: [],
+            proyectosCatalogo: [],
+            participaciones: [],
 
-            responsables: [
-                'Ana Torres',
-                'Carlos Ruiz',
-                'María López',
-                'Juan Pérez'
-            ],
+            responsables: [],
 
             tareas: [],
 
@@ -39,6 +37,13 @@ createApp({
     },
 
     computed: {
+        proyectosGestionados() {
+            return this.proyectosCatalogo.filter(p => p.idResponsable === this.idUsuarioActual);
+        },
+        responsablesDisponibles() {
+            return this.participaciones.filter(p => p.idProyecto === this.formulario.idProyecto
+                && p.estado === 'Activo');
+        },
         tareasFiltradas() {
             const texto = this.busqueda.toLowerCase();
 
@@ -71,10 +76,12 @@ createApp({
                 nombre: '',
                 descripcion: '',
                 proyecto: '',
+                idProyecto: '',
                 prioridad: '',
                 estado: 'Pendiente',
                 fechaFin: '',
-                responsable: ''
+                responsable: '',
+                idResponsable: ''
             };
         },
 
@@ -82,18 +89,25 @@ createApp({
             this.cargando = true;
 
             try {
-                const respuesta =
-                    await fetch('/api/miembro3/tareas');
-
-                if (!respuesta.ok) {
-                    throw new Error('No se pudieron cargar las tareas.');
+                const respuestas = await Promise.all([
+                    fetch('/api/miembro3/tareas'), fetch('/api/miembro3/proyectos'),
+                    fetch('/api/miembro3/participaciones'), fetch('/api/auth/yo')
+                ]);
+                if (respuestas.some(respuesta => !respuesta.ok)) {
+                    throw new Error('No se pudieron cargar los datos de tareas.');
                 }
-
-                this.tareas = await respuesta.json();
+                const [tareas, proyectos, participaciones, cuenta] = await Promise.all(
+                    respuestas.map(respuesta => respuesta.json()));
+                this.tareas = tareas;
+                this.proyectosCatalogo = proyectos;
+                this.participaciones = participaciones;
+                this.idUsuarioActual = cuenta.id;
+                this.usuario = cuenta.nombre;
 
                 this.proyectos = [
                     ...new Set(this.tareas.map(t => t.proyecto))
                 ];
+                this.responsables = [...new Set(this.tareas.map(t => t.responsable))];
 
                 const maxId = this.tareas.reduce(
                     (max, t) => Math.max(max, Number(t.id)),
@@ -129,10 +143,19 @@ createApp({
         },
 
         editarTarea(tarea) {
+            if (!this.puedeGestionarTarea(tarea)) return;
             this.modoEdicion = true;
             this.formulario = { ...tarea };
             this.mensajeError = '';
             this.mostrarModal = true;
+        },
+
+        puedeGestionarTarea(tarea) {
+            return this.proyectosGestionados.some(p => p.id === tarea.idProyecto);
+        },
+
+        puedeCambiarEstado(tarea) {
+            return this.puedeGestionarTarea(tarea) || tarea.idResponsable === this.idUsuarioActual;
         },
 
         cerrarModal() {
@@ -143,11 +166,14 @@ createApp({
         async guardarTarea() {
             this.mensajeError = '';
 
+            const proyecto = this.proyectosGestionados.find(p => p.id === this.formulario.idProyecto);
+            const responsable = this.responsablesDisponibles.find(p => p.idUsuario === this.formulario.idResponsable);
+
             if (!this.formulario.nombre ||
-                !this.formulario.proyecto ||
+                !proyecto ||
                 !this.formulario.prioridad ||
                 !this.formulario.fechaFin ||
-                !this.formulario.responsable) {
+                !responsable) {
 
                 this.mensajeError =
                     'Completa todos los campos obligatorios.';
@@ -167,7 +193,8 @@ createApp({
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(this.formulario)
+                    body: JSON.stringify({ ...this.formulario, proyecto: proyecto.nombre,
+                        responsable: responsable.nombre })
                 });
 
                 if (!respuesta.ok) {
@@ -189,9 +216,8 @@ createApp({
                     this.tareas.unshift(guardada);
                 }
 
-                this.proyectos = [
-                    ...new Set(this.tareas.map(t => t.proyecto))
-                ];
+                this.proyectos = [...new Set(this.tareas.map(t => t.proyecto))];
+                this.responsables = [...new Set(this.tareas.map(t => t.responsable))];
 
                 this.cerrarModal();
 
@@ -201,6 +227,8 @@ createApp({
         },
 
         async eliminarTarea(id) {
+            const tarea = this.tareas.find(item => item.id === id);
+            if (!tarea || !this.puedeGestionarTarea(tarea)) return;
             if (!window.confirm(
                 '¿Estás seguro de que deseas eliminar esta tarea?'
             )) {
@@ -229,6 +257,7 @@ createApp({
         },
 
         arrastrarTarea(evento, tarea) {
+            if (!this.puedeCambiarEstado(tarea)) return;
             this.tareaArrastrada = tarea.id;
 
             evento.dataTransfer.effectAllowed = 'move';
@@ -255,6 +284,8 @@ createApp({
                 this.tareaArrastrada = null;
                 return;
             }
+
+            if (!this.puedeCambiarEstado(tarea)) return;
 
             const estadoAnterior = tarea.estado;
 

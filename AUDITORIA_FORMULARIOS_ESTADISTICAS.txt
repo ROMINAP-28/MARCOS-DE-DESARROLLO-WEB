@@ -52,10 +52,13 @@ HALLAZGOS CRÍTICOS
     Verificación: node --test src/test/js/*.test.js (11 pruebas correctas); .\mvnw.cmd -q test con Java 21 y PostgreSQL (41 pruebas correctas, incluidas edición sin duplicados, preservación de participaciones, usuarios con nombres iguales, eliminación y API REST).
     Alcance: la eliminación es irreversible y afecta los registros relacionados, como advierte la confirmación. El hallazgo medio 1 (longitud de la descripción) sigue pendiente; los errores de validación del servidor se muestran en el formulario.
 
-5. Login sin autenticación.
+5. Login sin autenticación. [COMPLETADO: 2026-11-20]
    Archivos: templates/auth/login.html:137-146; pom.xml:79-82.
    Error: El login no autentica: muestra un mensaje de interfaz pendiente. Se usa spring-security-crypto para hash, pero eso no implementa Spring Security/JWT. Por tanto, no hay usuario autenticado para atribuir con confianza reportes o cambios.
    Corrección: Implementar autenticación y autorización reales antes de presentar login, acciones de usuario o notificaciones como funcionalidades completas. No confiar en un id_usuario_generador enviado libremente por el cliente.
+   Corrección aplicada: Spring Security autentica por correo y contraseña BCrypt con sesión de servidor; login y logout son formularios reales. Las vistas privadas y /api/miembro3/** requieren autenticación. CSRF protege las escrituras, incluido el registro y el cierre de sesión; las peticiones fetch reciben el token de Thymeleaf. En el servidor, solo el responsable gestiona su proyecto, equipo y tareas (el miembro asignado puede cambiar el estado de su tarea); cada cuenta solo edita o elimina su propio perfil. Las especialidades se pueden crear por responsables y administradores; su modificación y borrado quedan reservados a administradores. Se eliminó el CORS explícito de los controladores afectados. La API /api/auth/yo obtiene la identidad autenticada, sin confiar en un ID declarado por el cliente.
+   Verificación: .\mvnw.cmd -q test con Java 21 y PostgreSQL (45 pruebas correctas, incluidas credenciales, registro, sesión, acceso anónimo, autorización entre usuarios, CSRF y logout); node --test src/test/js/*.test.js (13 pruebas correctas, incluidas CSRF y selección de tareas por IDs).
+   Alcance: el historial persistente de reportes, PDF/Excel y notificaciones no se añadieron; las cuentas de ejemplo existentes tienen contraseñas aleatorias desconocidas, por lo que hay que registrar una cuenta propia para iniciar sesión. La actualización instantánea entre clientes sigue pendiente.
 
 HALLAZGOS MEDIOS
 

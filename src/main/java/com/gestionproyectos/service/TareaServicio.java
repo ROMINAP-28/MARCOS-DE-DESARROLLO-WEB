@@ -120,6 +120,7 @@ public class TareaServicio implements ITareaServicio {
     private TareaDto aDto(Tarea t) {
         return new TareaDto(t.getIdTarea(), t.getNombre(), t.getDescripcion(),
                 t.getProyecto().getNombre(), t.getPrioridad(), t.getEstado(),
-                t.getFechaFin(), t.getResponsable().getNombre());
+                t.getFechaFin(), t.getResponsable().getNombre(),
+                t.getProyecto().getIdProyecto(), t.getResponsable().getIdUsuario());
     }
 }

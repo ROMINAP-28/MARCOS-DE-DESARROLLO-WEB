@@ -29,6 +29,7 @@ test('crear POST, editar PUT sin duplicado y eliminar DELETE confirmado', async 
     const llamadas = [];
     const estado = crear(async (url, opciones = {}) => {
         llamadas.push({ url, opciones });
+        if (url.endsWith('/auth/yo')) return respuesta({ id: 20, nombre: 'Ana', rol: 'USUARIO' });
         if (url.endsWith('/usuarios')) return respuesta([usuario]);
         if (opciones.method === 'PUT') return respuesta({ ...proyecto, ...JSON.parse(opciones.body),
             id: 10, nombre: 'Editado' });
@@ -66,6 +67,7 @@ test('un error PUT o DELETE no modifica la lista, cancelar no envía DELETE', as
     const llamadas = [];
     const estado = crear(async (url, opciones = {}) => {
         llamadas.push(opciones.method || 'GET');
+        if (url.endsWith('/auth/yo')) return respuesta({ id: 20, nombre: 'Ana', rol: 'USUARIO' });
         if (url.endsWith('/usuarios')) return respuesta([usuario]);
         if (opciones.method) return { ok: false, json: async () => ({ mensaje: 'Error de prueba' }) };
         return respuesta([proyecto]);

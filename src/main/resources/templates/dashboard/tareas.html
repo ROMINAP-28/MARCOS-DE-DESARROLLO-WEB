@@ -2,6 +2,8 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta name="_csrf" th:content="${_csrf?.token}">
+    <meta name="_csrf_header" th:content="${_csrf?.headerName}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tareas | Gestión de Proyectos</title>
@@ -72,6 +74,9 @@
                 <span>Configuración</span>
             </a>
         </nav>
+        <form th:action="@{/logout}" method="post" class="px-3 mt-3">
+            <button type="submit" class="btn btn-outline-secondary w-100">Cerrar sesión</button>
+        </form>
     </aside>
 
     <!-- Contenido principal -->
@@ -84,7 +89,7 @@
                     Consulta, organiza y supervisa las tareas de tus proyectos.
                 </p>
             </div>
-            <button class="btn btn-primary" @click="abrirNuevaTarea">
+            <button v-if="proyectosGestionados.length" class="btn btn-primary" @click="abrirNuevaTarea">
                 <i class="bi bi-plus-lg me-1"></i> Nueva tarea
             </button>
         </header>
@@ -214,10 +219,12 @@
                         </td>
                         <td class="text-end text-nowrap">
                             <button class="btn btn-sm btn-light task-action"
+                                    v-if="puedeGestionarTarea(tarea)"
                                     title="Editar" @click="editarTarea(tarea)">
                                 <i class="bi bi-pencil"></i>
                             </button>
                             <button class="btn btn-sm btn-light task-action text-danger"
+                                    v-if="puedeGestionarTarea(tarea)"
                                     title="Eliminar" @click="eliminarTarea(tarea.id)">
                                 <i class="bi bi-trash"></i>
                             </button>
@@ -246,12 +253,12 @@
                     </header>
 
                     <article v-for="tarea in tareasPorEstado(estado)" :key="tarea.id"
-                             class="kanban-card" draggable="true"
+                             class="kanban-card" :draggable="puedeCambiarEstado(tarea)"
                              @dragstart="arrastrarTarea($event, tarea)"
                              @dragend="tareaArrastrada = null">
                         <div class="d-flex justify-content-between align-items-start gap-2">
                             <strong>{{ tarea.nombre }}</strong>
-                            <div class="dropdown">
+                             <div v-if="puedeGestionarTarea(tarea)" class="dropdown">
                                 <button class="btn btn-sm task-menu-button" data-bs-toggle="dropdown"
                                         aria-label="Acciones de tarea">
                                     <i class="bi bi-three-dots"></i>
@@ -328,11 +335,12 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="proyectoTarea" class="form-label">Proyecto *</label>
-                            <select id="proyectoTarea" v-model="formulario.proyecto"
-                                    class="form-select" required>
+                             <select id="proyectoTarea" v-model.number="formulario.idProyecto"
+                                     @change="formulario.idResponsable = ''"
+                                     class="form-select" required>
                                 <option disabled value="">Seleccionar proyecto</option>
-                                <option v-for="proyecto in proyectos" :key="proyecto"
-                                        :value="proyecto">{{ proyecto }}</option>
+                                 <option v-for="proyecto in proyectosGestionados" :key="proyecto.id"
+                                         :value="proyecto.id">{{ proyecto.nombre }}</option>
                             </select>
                         </div>
                         <div class="col-md-6">
@@ -359,11 +367,11 @@
                         </div>
                         <div class="col-12">
                             <label for="responsableTarea" class="form-label">Responsable *</label>
-                            <select id="responsableTarea" v-model="formulario.responsable"
-                                    class="form-select" required>
+                             <select id="responsableTarea" v-model.number="formulario.idResponsable"
+                                     class="form-select" required>
                                 <option disabled value="">Seleccionar responsable</option>
-                                <option v-for="persona in responsables" :key="persona"
-                                        :value="persona">{{ persona }}</option>
+                                 <option v-for="persona in responsablesDisponibles" :key="persona.idUsuario"
+                                         :value="persona.idUsuario">{{ persona.nombre }} ({{ persona.correo }})</option>
                             </select>
                         </div>
                     </div>
@@ -386,6 +394,7 @@
     </div>
 </div>
 </div>
+<script th:src="@{/js/csrf.js}"></script>
 <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script th:src="@{/js/tareas.js}"></script>
