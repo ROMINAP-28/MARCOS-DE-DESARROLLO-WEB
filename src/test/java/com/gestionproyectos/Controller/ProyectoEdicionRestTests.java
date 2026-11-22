@@ -53,6 +53,21 @@ class ProyectoEdicionRestTests {
                             .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication(autenticacion))
                             .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
                             .contentType(MediaType.APPLICATION_JSON)
+                            .content(cuerpo.replace("\"prioridad\":\"Alta\"", "\"prioridad\":\"Crítica\"")))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.mensaje", org.hamcrest.Matchers.containsString("Prioridad")));
+            mvc.perform(post("/api/miembro3/proyectos")
+                            .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication(autenticacion))
+                            .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(cuerpo.replace("\"idsIntegrantes\":[]",
+                                    "\"idsIntegrantes\":[],\"estado\":\"Inexistente\"")))
+                    .andExpect(status().isBadRequest());
+            org.junit.jupiter.api.Assertions.assertEquals(antes, proyectos.count());
+            mvc.perform(post("/api/miembro3/proyectos")
+                            .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication(autenticacion))
+                            .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
                             .content(cuerpo.replace("Proyecto de prueba", "x".repeat(256))))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.mensaje", org.hamcrest.Matchers.containsString("descripcion")));
@@ -66,6 +81,23 @@ class ProyectoEdicionRestTests {
                     .andReturn().getResponse().getContentAsString();
             int id = com.jayway.jsonpath.JsonPath.read(creado, "$.id");
             try {
+                mvc.perform(put("/api/miembro3/proyectos/" + id)
+                                .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication(autenticacion))
+                                .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(cuerpo.replace("\"prioridad\":\"Alta\"", "\"prioridad\":\"Crítica\"")))
+                        .andExpect(status().isBadRequest());
+                mvc.perform(put("/api/miembro3/proyectos/" + id)
+                                .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication(autenticacion))
+                                .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(cuerpo.replace("\"idsIntegrantes\":[]",
+                                        "\"idsIntegrantes\":[],\"estado\":\"Inexistente\"")))
+                        .andExpect(status().isBadRequest());
+                org.junit.jupiter.api.Assertions.assertEquals("Alta",
+                        proyectos.findById(id).orElseThrow().getPrioridad());
+                org.junit.jupiter.api.Assertions.assertEquals("Planificado",
+                        proyectos.findById(id).orElseThrow().getEstado());
                 mvc.perform(put("/api/miembro3/proyectos/" + id)
                                 .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication(autenticacion))
                                 .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())

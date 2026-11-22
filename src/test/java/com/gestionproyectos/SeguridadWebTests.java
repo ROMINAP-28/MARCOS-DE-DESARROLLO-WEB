@@ -165,6 +165,14 @@ class SeguridadWebTests {
                     + "\"fechaFin\":\"2026-12-01\"}";
             mvc.perform(post("/api/miembro3/tareas").session(sesionResponsable).with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
+                            .content(tarea.replace("\"prioridad\":\"Alta\"", "\"prioridad\":\"Crítica\"")))
+                    .andExpect(status().isBadRequest());
+            mvc.perform(post("/api/miembro3/tareas").session(sesionResponsable).with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(tarea.replace("\"fechaFin\"", "\"estado\":\"Inexistente\",\"fechaFin\"")))
+                    .andExpect(status().isBadRequest());
+            mvc.perform(post("/api/miembro3/tareas").session(sesionResponsable).with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
                             .content(tarea.replace("\"idResponsable\":" + ajeno.getIdUsuario() + ",", "")))
                     .andExpect(status().isBadRequest());
             mvc.perform(post("/api/miembro3/tareas").session(sesionAjeno).with(csrf())
@@ -174,6 +182,22 @@ class SeguridadWebTests {
                             .contentType(MediaType.APPLICATION_JSON).content(tarea))
                     .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
             int idTarea = com.jayway.jsonpath.JsonPath.read(creada, "$.id");
+            mvc.perform(put("/api/miembro3/tareas/" + idTarea).session(sesionResponsable).with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(tarea.replace("\"prioridad\":\"Alta\"", "\"prioridad\":\"Crítica\"")))
+                    .andExpect(status().isBadRequest());
+            mvc.perform(put("/api/miembro3/tareas/" + idTarea).session(sesionResponsable).with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(tarea.replace("\"fechaFin\"", "\"estado\":\"Inexistente\",\"fechaFin\"")))
+                    .andExpect(status().isBadRequest());
+            mvc.perform(patch("/api/miembro3/tareas/" + idTarea + "/estado")
+                            .session(sesionResponsable).with(csrf()).contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"estado\":\"Inexistente\"}"))
+                    .andExpect(status().isBadRequest());
+            mvc.perform(get("/api/miembro3/tareas/" + idTarea).session(sesionResponsable))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.prioridad").value("Alta"))
+                    .andExpect(jsonPath("$.estado").value("Pendiente"));
             mvc.perform(delete("/api/miembro3/tareas/" + idTarea).session(sesionAjeno).with(csrf()))
                     .andExpect(status().isForbidden());
             mvc.perform(patch("/api/miembro3/tareas/" + idTarea + "/estado")

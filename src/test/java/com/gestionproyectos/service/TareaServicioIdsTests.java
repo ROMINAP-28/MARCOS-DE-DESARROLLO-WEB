@@ -52,6 +52,36 @@ class TareaServicioIdsTests {
     }
 
     @Test
+    void aceptaPrioridadesYEstadosPermitidosEnTareas() {
+        var tareas = mock(TareaRepository.class);
+        var proyectos = mock(ProyectoRepository.class);
+        var usuarios = mock(UsuarioRepository.class);
+        var servicio = new TareaServicio(tareas, proyectos, usuarios);
+        Proyecto proyecto = new Proyecto();
+        proyecto.setIdProyecto(10);
+        proyecto.setNombre("Proyecto");
+        Usuario responsable = new Usuario();
+        responsable.setIdUsuario(20);
+        responsable.setNombre("Ana");
+        when(proyectos.findById(10)).thenReturn(Optional.of(proyecto));
+        when(usuarios.findById(20)).thenReturn(Optional.of(responsable));
+        when(tareas.save(any(Tarea.class))).thenAnswer(invocacion -> {
+            Tarea guardada = invocacion.getArgument(0);
+            guardada.setIdTarea(30);
+            return guardada;
+        });
+
+        String[] prioridades = {"Baja", "Media", "Alta", "Urgente"};
+        String[] estados = {"Pendiente", "En progreso", "Completada", "Pendiente"};
+        for (int i = 0; i < prioridades.length; i++) {
+            var guardada = servicio.guardarTarea(new TareaRequest("Trabajo", "", null,
+                    prioridades[i], estados[i], LocalDate.of(2026, 12, 1), null, 10, 20));
+            assertEquals(prioridades[i], guardada.prioridad());
+            assertEquals(estados[i], guardada.estado());
+        }
+    }
+
+    @Test
     void rechazaNombresSinIdsSinConsultarPorNombre() {
         var tareas = mock(TareaRepository.class);
         var proyectos = mock(ProyectoRepository.class);

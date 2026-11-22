@@ -28,6 +28,7 @@ public class ProyectoServicio implements IProyectoServicio {
     static final String ROL_INTEGRANTE = "Integrante";
     private static final List<String> ESTADOS =
             List.of("Planificado", "En progreso", "Completado", "Atrasado");
+    private static final List<String> PRIORIDADES = List.of("Alta", "Media", "Baja");
 
     private final ProyectoRepository proyectoRepositorio;
     private final ProyectoUsuarioRepository proyectoUsuarioRepositorio;
@@ -190,11 +191,14 @@ public class ProyectoServicio implements IProyectoServicio {
     }
 
     private void copiarDatos(Proyecto proyecto, ProyectoRequest r) {
+        if (r.prioridad() == null || !PRIORIDADES.contains(r.prioridad())) {
+            throw new SolicitudInvalidaException("Prioridad de proyecto no válida.");
+        }
         proyecto.setNombre(r.nombre().trim());
         proyecto.setDescripcion(r.descripcion().trim());
         proyecto.setFechaInicio(r.fechaInicio());
         proyecto.setFechaFin(r.fechaFin());
-        proyecto.setPrioridad(r.prioridad().trim());
+        proyecto.setPrioridad(r.prioridad());
     }
 
     private void validarPeriodo(ProyectoRequest r) {

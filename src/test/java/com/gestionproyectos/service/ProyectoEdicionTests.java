@@ -104,6 +104,20 @@ class ProyectoEdicionTests {
     }
 
     @Test
+    void aceptaPrioridadesYEstadosPermitidosEnProyectos() {
+        Usuario responsable = usuario("Responsable valores");
+        String[] prioridades = {"Alta", "Media", "Baja", "Alta"};
+        String[] estados = {"Planificado", "En progreso", "Completado", "Atrasado"};
+        for (int i = 0; i < estados.length; i++) {
+            var guardado = servicio.guardarProyecto(new ProyectoRequest("Valores " + i, "Descripción",
+                    LocalDate.of(2026, 11, 1), LocalDate.of(2026, 12, 31), prioridades[i],
+                    null, null, estados[i], null, responsable.getIdUsuario(), List.of()));
+            assertEquals(prioridades[i], guardado.prioridad());
+            assertEquals(estados[i], guardado.estado());
+        }
+    }
+
+    @Test
     void rechazaIntegrantesPorNombreAunqueElResponsableTengaId() {
         Usuario responsable = usuario("Responsable");
         assertThrows(SolicitudInvalidaException.class, () -> servicio.guardarProyecto(

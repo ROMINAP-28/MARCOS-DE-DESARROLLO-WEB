@@ -91,10 +91,12 @@ HALLAZGOS MEDIOS
    Error: Proyectos y Tareas cargan la API solo al montar sus respectivas páginas. No hay sincronización automática entre vistas, pestañas o usuarios. Los GET existentes pueden devolver datos actuales cuando se invocan, pero no existe un endpoint de métricas ni emisión de eventos que actualice el dashboard.
    Corrección: Crear, por ejemplo, GET /api/dashboard/resumen con agregados de repositorio; refrescarlo después de mutaciones y al volver a la página. Si se exige tiempo real entre clientes, añadir eventos WebSocket tras la confirmación de la transacción.
 
-6. Validación de valores permitidos incompleta.
+6. Validación de valores permitidos incompleta. [COMPLETADO: 2026-11-22]
    Archivos: dto/ProyectoRequest.java:12-21; dto/TareaRequest.java:11-18; Controller/ProyectoController.java:45-54; Controller/TareaController.java:46-60.
    Error: Sí existe @Valid para POST/PUT y campos obligatorios principales. Sin embargo, prioridad y estado no tienen validación declarativa completa en los DTO: Tarea los comprueba en servicio; Proyecto valida el estado y rango de progreso en servicio, pero no restringe sus valores de prioridad.
-   Corrección: Centralizar valores permitidos mediante enum o validación explícita también en ProyectoServicio; conservar validación de servidor aunque HTML use <select>.
+    Corrección: Centralizar valores permitidos mediante enum o validación explícita también en ProyectoServicio; conservar validación de servidor aunque HTML use <select>.
+    Corrección aplicada: ProyectoServicio ahora acepta únicamente las prioridades Alta, Media y Baja, igual que el selector; rechaza valores ajenos antes de modificar el proyecto. Se mantienen las validaciones del servidor para estados de proyecto (Planificado, En progreso, Completado, Atrasado) y para prioridad/estado de tarea (Baja, Media, Alta, Urgente; Pendiente, En progreso, Completada), tanto al crear como al actualizar y al cambiar el estado desde Kanban. Las solicitudes inválidas responden 400 y no persisten cambios.
+    Verificación: .\mvnw.cmd -q test con Java 21 y PostgreSQL (36 pruebas correctas: POST/PUT de proyectos y tareas, PATCH de tarea, ausencia de persistencia ante errores y aceptación de los valores válidos); node --test src/test/js/*.test.js (14 pruebas correctas).
 
 7. Actualización de equipos mediante borrado masivo.
    Archivos: service/ProyectoServicio.java:23,59-92; repository/ProyectoUsuarioRepository.java:19-21.
