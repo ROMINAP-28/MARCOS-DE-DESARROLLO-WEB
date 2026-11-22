@@ -149,9 +149,7 @@ createApp({
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ ...this.formulario,
-                        responsable: responsable.nombre,
-                        integrantes: integrantes.map(usuario => usuario.nombre) })
+                    body: JSON.stringify(this.formulario)
                 });
                 if (edicion) {
                     const indice = this.proyectos.findIndex(item => item.id === this.idEdicion);

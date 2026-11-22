@@ -12,10 +12,10 @@ import java.time.LocalDate;
 public record TareaRequest(
         @NotBlank @Size(max = 150) String nombre,
         @Size(max = 500) String descripcion,
-        @NotBlank String proyecto,
+        String proyecto,
         @NotBlank String prioridad,
         String estado,
         @NotNull LocalDate fechaFin,
-        @NotBlank String responsable,
-        @Positive Integer idProyecto,
-        @Positive Integer idResponsable) {}
+        String responsable,
+        @NotNull @Positive Integer idProyecto,
+        @NotNull @Positive Integer idResponsable) {}

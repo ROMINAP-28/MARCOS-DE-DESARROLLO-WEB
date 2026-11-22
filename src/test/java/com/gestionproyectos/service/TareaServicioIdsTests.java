@@ -1,6 +1,7 @@
 package com.gestionproyectos.service;
 
 import com.gestionproyectos.dto.TareaRequest;
+import com.gestionproyectos.exception.SolicitudInvalidaException;
 import com.gestionproyectos.model.Proyecto;
 import com.gestionproyectos.model.Tarea;
 import com.gestionproyectos.model.Usuario;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -38,12 +40,27 @@ class TareaServicioIdsTests {
             return tarea;
         });
 
-        var resultado = servicio.guardarTarea(new TareaRequest("Verificar", "", "Proyecto real",
-                "Alta", "Pendiente", LocalDate.of(2026, 12, 1), "Ana", 10, 20));
+        var resultado = servicio.guardarTarea(new TareaRequest("Verificar", "", "Proyecto equivocado",
+                "Alta", "Pendiente", LocalDate.of(2026, 12, 1), "Otra persona", 10, 20));
 
         assertEquals(30, resultado.id());
         assertEquals("Ana", resultado.responsable());
-        verify(proyectos, never()).findFirstByNombreIgnoreCase(any());
+        assertEquals("Proyecto real", resultado.proyecto());
+        verify(proyectos).findById(10);
+        verifyNoMoreInteractions(proyectos);
         verify(usuarios, never()).findFirstByNombreIgnoreCase(any());
+    }
+
+    @Test
+    void rechazaNombresSinIdsSinConsultarPorNombre() {
+        var tareas = mock(TareaRepository.class);
+        var proyectos = mock(ProyectoRepository.class);
+        var usuarios = mock(UsuarioRepository.class);
+        var servicio = new TareaServicio(tareas, proyectos, usuarios);
+
+        assertThrows(SolicitudInvalidaException.class, () -> servicio.guardarTarea(
+                new TareaRequest("Verificar", "", "Proyecto real", "Alta", "Pendiente",
+                        LocalDate.of(2026, 12, 1), "Ana", null, null)));
+        verifyNoInteractions(proyectos, usuarios, tareas);
     }
 }

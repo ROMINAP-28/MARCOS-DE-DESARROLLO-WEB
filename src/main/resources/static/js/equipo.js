@@ -211,9 +211,7 @@ createApp({
                 await this.solicitar('/api/miembro3/tareas', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ ...this.formularioTarea,
-                        proyecto: this.tareaAsignada.proyecto,
                         idProyecto: this.tareaAsignada.idProyecto,
-                        responsable: this.tareaAsignada.nombre,
                         idResponsable: this.tareaAsignada.idUsuario, estado: 'Pendiente' })
                 });
                 const recargado = await this.cargarDatos();

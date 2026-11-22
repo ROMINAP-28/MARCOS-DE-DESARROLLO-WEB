@@ -50,6 +50,6 @@ test('tareas usa proyecto y miembro activo por IDs y oculta gestión ajena', asy
     await estado.guardarTarea();
     assert.equal(cuerpo.idProyecto, 10);
     assert.equal(cuerpo.idResponsable, 4);
-    assert.equal(cuerpo.proyecto, 'Propio');
-    assert.equal(cuerpo.responsable, 'Miembro');
+    assert.equal(cuerpo.proyecto, undefined);
+    assert.equal(cuerpo.responsable, undefined);
 });

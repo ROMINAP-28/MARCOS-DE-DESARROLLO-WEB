@@ -47,7 +47,8 @@ test('crear POST, editar PUT sin duplicado y eliminar DELETE confirmado', async 
     const edicion = llamadas.find(llamada => llamada.opciones.method === 'PUT');
     assert.equal(edicion.url, '/api/miembro3/proyectos/10');
     assert.equal(JSON.parse(edicion.opciones.body).idResponsable, 20);
-    assert.equal(JSON.parse(edicion.opciones.body).responsable, 'Ana');
+    assert.equal(JSON.parse(edicion.opciones.body).responsable, undefined);
+    assert.deepEqual(JSON.parse(edicion.opciones.body).idsIntegrantes, [20]);
 
     estado.abrirModal();
     Object.assign(estado.formulario, { ...proyecto, idResponsable: 20,

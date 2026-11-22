@@ -127,7 +127,7 @@ class SeguridadWebTests {
         try {
             String cuerpo = "{\"nombre\":\"Privado\",\"descripcion\":\"Proyecto privado\","
                     + "\"fechaInicio\":\"2026-11-01\",\"fechaFin\":\"2026-12-01\","
-                    + "\"prioridad\":\"Alta\",\"responsable\":\"Responsable\","
+                    + "\"prioridad\":\"Alta\","
                     + "\"idResponsable\":" + responsable.getIdUsuario() + ",\"idsIntegrantes\":[]}";
             mvc.perform(post("/api/miembro3/proyectos").session(sesionAjeno).with(csrf())
                     .contentType(MediaType.APPLICATION_JSON).content(cuerpo))
@@ -136,6 +136,10 @@ class SeguridadWebTests {
                             .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(cuerpo))
                     .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
             idProyecto = com.jayway.jsonpath.JsonPath.read(creado, "$.id");
+            mvc.perform(post("/api/miembro3/proyectos").session(sesionResponsable).with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(cuerpo.replace("\"idsIntegrantes\":[]", "\"integrantes\":[\"Ajeno\"]")))
+                    .andExpect(status().isBadRequest());
             mvc.perform(put("/api/miembro3/proyectos/" + idProyecto).session(sesionAjeno).with(csrf())
                             .contentType(MediaType.APPLICATION_JSON).content(cuerpo))
                     .andExpect(status().isForbidden());
@@ -159,6 +163,10 @@ class SeguridadWebTests {
                     + "\"idProyecto\":" + idProyecto + ",\"responsable\":\"Ajeno\","
                     + "\"idResponsable\":" + ajeno.getIdUsuario() + ",\"prioridad\":\"Alta\","
                     + "\"fechaFin\":\"2026-12-01\"}";
+            mvc.perform(post("/api/miembro3/tareas").session(sesionResponsable).with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(tarea.replace("\"idResponsable\":" + ajeno.getIdUsuario() + ",", "")))
+                    .andExpect(status().isBadRequest());
             mvc.perform(post("/api/miembro3/tareas").session(sesionAjeno).with(csrf())
                     .contentType(MediaType.APPLICATION_JSON).content(tarea))
                     .andExpect(status().isForbidden());

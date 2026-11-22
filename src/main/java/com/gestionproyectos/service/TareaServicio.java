@@ -93,16 +93,13 @@ public class TareaServicio implements ITareaServicio {
         if (!ESTADOS.contains(estado)) {
             throw new SolicitudInvalidaException("Estado no válido");
         }
-        Proyecto proyecto = (r.idProyecto() == null
-                ? proyectoRepositorio.findFirstByNombreIgnoreCase(r.proyecto().trim())
-                : proyectoRepositorio.findById(r.idProyecto()))
-                .orElseThrow(() -> new SolicitudInvalidaException(
-                        "No existe el proyecto \"" + r.proyecto() + "\"."));
-        Usuario responsable = (r.idResponsable() == null
-                ? usuarioRepositorio.findFirstByNombreIgnoreCase(r.responsable().trim())
-                : usuarioRepositorio.findById(r.idResponsable()))
-                .orElseThrow(() -> new SolicitudInvalidaException(
-                        "No existe el usuario \"" + r.responsable() + "\"."));
+        if (r.idProyecto() == null || r.idResponsable() == null) {
+            throw new SolicitudInvalidaException("Indica los IDs del proyecto y del responsable.");
+        }
+        Proyecto proyecto = proyectoRepositorio.findById(r.idProyecto())
+                .orElseThrow(() -> new SolicitudInvalidaException("No existe el proyecto indicado."));
+        Usuario responsable = usuarioRepositorio.findById(r.idResponsable())
+                .orElseThrow(() -> new SolicitudInvalidaException("No existe el usuario indicado."));
 
         tarea.setNombre(r.nombre().trim());
         tarea.setDescripcion(r.descripcion());

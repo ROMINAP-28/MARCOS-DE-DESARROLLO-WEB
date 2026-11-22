@@ -31,7 +31,7 @@ class ProyectoServicioTests {
         Usuario responsable = new Usuario();
         responsable.setIdUsuario(7);
         responsable.setNombre("Ana");
-        when(usuarios.findFirstByNombreIgnoreCase("Ana")).thenReturn(Optional.of(responsable));
+        when(usuarios.findById(7)).thenReturn(Optional.of(responsable));
         when(proyectos.save(any(Proyecto.class))).thenAnswer(invocacion -> {
             Proyecto proyecto = invocacion.getArgument(0);
             proyecto.setIdProyecto(3);
@@ -47,7 +47,7 @@ class ProyectoServicioTests {
 
         ProyectoRequest solicitud = new ProyectoRequest("Proyecto", "Descripción",
                 LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31),
-                "Alta", "Ana", List.of(), null, null);
+                "Alta", "Ana", List.of(), null, null, 7, List.of());
         var respuesta = servicio.guardarProyecto(solicitud);
 
         assertEquals("Ana", respuesta.responsable());
@@ -55,5 +55,6 @@ class ProyectoServicioTests {
         assertEquals(1, miembros.size());
         assertEquals("Responsable", miembros.getFirst().getRol());
         assertSame(responsable, miembros.getFirst().getProyecto().getResponsable());
+        verify(usuarios, never()).findFirstByNombreIgnoreCase(any());
     }
 }

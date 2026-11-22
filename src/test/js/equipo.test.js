@@ -34,8 +34,8 @@ test('Equipo carga datos reales y solo presenta cambios confirmados por la API',
         }
         if (url.endsWith('/tareas')) {
             const guardada = JSON.parse(opciones.body);
-            assert.equal(guardada.proyecto, 'Proyecto real');
-            assert.equal(guardada.responsable, 'Ana');
+            assert.equal(guardada.proyecto, undefined);
+            assert.equal(guardada.responsable, undefined);
             assert.equal(guardada.idProyecto, 10);
             assert.equal(guardada.idResponsable, 20);
             tareas++;

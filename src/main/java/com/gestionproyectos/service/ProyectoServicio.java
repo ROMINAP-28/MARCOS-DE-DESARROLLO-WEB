@@ -136,15 +136,11 @@ public class ProyectoServicio implements IProyectoServicio {
                 .orElseThrow(() -> new RecursoNoEncontradoException("Proyecto no encontrado"));
     }
 
-    private Usuario buscarUsuario(String nombre) {
-        return usuarioRepositorio.findFirstByNombreIgnoreCase(nombre.trim())
-                .orElseThrow(() -> new SolicitudInvalidaException(
-                        "No existe el usuario \"" + nombre + "\"."));
-    }
-
     private Usuario buscarResponsable(ProyectoRequest request) {
-        return request.idResponsable() == null ? buscarUsuario(request.responsable())
-                : buscarUsuarioPorId(request.idResponsable());
+        if (request.idResponsable() == null) {
+            throw new SolicitudInvalidaException("Indica el ID del responsable.");
+        }
+        return buscarUsuarioPorId(request.idResponsable());
     }
 
     private Usuario buscarUsuarioPorId(Integer id) {
@@ -154,19 +150,14 @@ public class ProyectoServicio implements IProyectoServicio {
 
     /** Responsable primero, luego integrantes sin repetir. */
     private Map<Integer, Usuario> armarEquipo(Usuario responsable, ProyectoRequest request) {
+        if (request.idsIntegrantes() == null) {
+            throw new SolicitudInvalidaException("Indica los IDs de los integrantes (puede ser una lista vacía).");
+        }
         Map<Integer, Usuario> equipo = new LinkedHashMap<>();
         equipo.put(responsable.getIdUsuario(), responsable);
-        if (request.idsIntegrantes() != null) {
-            for (Integer id : request.idsIntegrantes()) {
-                Usuario u = buscarUsuarioPorId(id);
-                equipo.putIfAbsent(u.getIdUsuario(), u);
-            }
-        } else if (request.integrantes() != null) {
-            for (String nombre : request.integrantes()) {
-                if (nombre == null || nombre.isBlank()) continue;
-                Usuario u = buscarUsuario(nombre);
-                equipo.putIfAbsent(u.getIdUsuario(), u);
-            }
+        for (Integer id : request.idsIntegrantes()) {
+            Usuario u = buscarUsuarioPorId(id);
+            equipo.putIfAbsent(u.getIdUsuario(), u);
         }
         return equipo;
     }

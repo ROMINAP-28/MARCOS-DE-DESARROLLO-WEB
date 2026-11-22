@@ -67,10 +67,12 @@ HALLAZGOS MEDIOS
    Error: La descripción permite 500 caracteres en HTML, pero el DTO y PostgreSQL admiten 255. Una entrada de 256–500 supera la validación del servidor.
    Corrección: Alinear maxlength="255" y mostrar el mensaje 400, o ampliar conjuntamente DTO, entidad y columna mediante migración. No basta con cambiar solo HTML.
 
-2. Selectores incompletos y asociaciones ambiguas por nombre.
+2. Selectores incompletos y asociaciones ambiguas por nombre. [COMPLETADO: 2026-11-22]
    Archivos: static/js/proyectos.js:20,720-757; static/js/tareas.js:24-31,92-96; service/ProyectoServicio.java:106-123; service/TareaServicio.java:95-101.
    Error: Los responsables de proyectos y tareas están precargados o derivados de las tareas existentes. Un usuario o proyecto nuevo puede no aparecer en los selectores; un proyecto sin tareas no aparece en el selector de tareas. Además, el backend busca por nombre con findFirst...: si hay nombres repetidos, puede vincular la solicitud al registro equivocado.
-   Corrección: Poblar selectores con GET /usuarios y GET /proyectos; enviar IDs y resolver con findById. Validar en servicio la pertenencia del responsable al proyecto si esa es la regla de negocio.
+    Corrección: Poblar selectores con GET /usuarios y GET /proyectos; enviar IDs y resolver con findById. Validar en servicio la pertenencia del responsable al proyecto si esa es la regla de negocio.
+    Corrección aplicada: los formularios de proyectos obtienen usuarios registrados y los de tareas cargan proyectos y participaciones activas; ambos envían IDs para las asociaciones. ProyectoRequest exige idResponsable e idsIntegrantes (se permite lista vacía), y TareaRequest exige idProyecto e idResponsable. ProyectoServicio, TareaServicio y AccesoProyecto ya no buscan asociaciones por nombres ni aceptan nombres como sustitutos de IDs; para tareas, la autorización verifica que el responsable seleccionado sea integrante activo del proyecto. Las etiquetas de nombre heredadas en los DTO son opcionales y se ignoran para vincular registros.
+    Verificación: .\mvnw.cmd -q test con Java 21 y PostgreSQL (34 pruebas correctas); node --test src/test/js/*.test.js (13 pruebas correctas). Se probaron nombres duplicados o contradictorios, solicitudes sin IDs y la selección de miembros activos.
 
 3. Campos de tarea limitados o ausentes.
    Archivos: static/js/tareas.js:143-200; templates/dashboard/tareas.html:316-325; dto/TareaRequest.java:12-18.

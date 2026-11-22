@@ -92,13 +92,24 @@ class ProyectoEdicionTests {
     void seleccionaUsuariosPorIdAunqueCoincidanSusNombres() {
         Usuario primero = usuario("Nombre repetido");
         Usuario segundo = usuario("Nombre repetido");
-        int id = servicio.guardarProyecto(solicitud("Con nombres iguales", segundo,
-                List.of(primero.getIdUsuario()))).id();
+        int id = servicio.guardarProyecto(new ProyectoRequest("Con nombres iguales", "Descripción",
+                LocalDate.of(2026, 11, 1), LocalDate.of(2026, 12, 31), "Alta",
+                "Nombre que no existe", List.of("Integrante inexistente"), "Planificado", 0,
+                segundo.getIdUsuario(), List.of(primero.getIdUsuario()))).id();
         assertEquals(segundo.getIdUsuario(), proyectos.findById(id).orElseThrow()
                 .getResponsable().getIdUsuario());
         assertEquals(2, participaciones.buscarPorProyecto(id).size());
         assertTrue(participaciones.buscarPorProyecto(id).stream().anyMatch(p ->
                 p.getUsuario().getIdUsuario().equals(primero.getIdUsuario())));
+    }
+
+    @Test
+    void rechazaIntegrantesPorNombreAunqueElResponsableTengaId() {
+        Usuario responsable = usuario("Responsable");
+        assertThrows(SolicitudInvalidaException.class, () -> servicio.guardarProyecto(
+                new ProyectoRequest("Sin IDs", "Descripción", LocalDate.of(2026, 11, 1),
+                        LocalDate.of(2026, 12, 31), "Alta", responsable.getNombre(),
+                        List.of("Integrante"), "Planificado", 0, responsable.getIdUsuario(), null)));
     }
 
     private ProyectoRequest solicitud(String nombre, Usuario responsable, List<Integer> integrantes) {

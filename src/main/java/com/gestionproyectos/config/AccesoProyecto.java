@@ -49,14 +49,10 @@ public class AccesoProyecto {
     }
 
     public boolean puedeCrearTarea(TareaRequest request) {
-        if (request == null) return false;
-        Proyecto proyecto = request.idProyecto() == null
-                ? proyectos.findFirstByNombreIgnoreCase(request.proyecto()).orElse(null)
-                : proyectos.findById(request.idProyecto()).orElse(null);
+        if (request == null || request.idProyecto() == null || request.idResponsable() == null) return false;
+        Proyecto proyecto = proyectos.findById(request.idProyecto()).orElse(null);
         if (proyecto == null || !esResponsable(proyecto.getIdProyecto())) return false;
-        Usuario responsable = request.idResponsable() == null
-                ? usuarios.findFirstByNombreIgnoreCase(request.responsable()).orElse(null)
-                : usuarios.findById(request.idResponsable()).orElse(null);
+        Usuario responsable = usuarios.findById(request.idResponsable()).orElse(null);
         return responsable != null && participaciones.buscarPorProyecto(proyecto.getIdProyecto()).stream()
                 .anyMatch(p -> p.getUsuario().getIdUsuario().equals(responsable.getIdUsuario())
                         && "Activo".equals(p.getEstado()));

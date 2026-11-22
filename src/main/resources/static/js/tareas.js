@@ -193,8 +193,13 @@ createApp({
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ ...this.formulario, proyecto: proyecto.nombre,
-                        responsable: responsable.nombre })
+                    body: JSON.stringify({ nombre: this.formulario.nombre,
+                        descripcion: this.formulario.descripcion,
+                        idProyecto: this.formulario.idProyecto,
+                        prioridad: this.formulario.prioridad,
+                        estado: this.formulario.estado,
+                        fechaFin: this.formulario.fechaFin,
+                        idResponsable: this.formulario.idResponsable })
                 });
 
                 if (!respuesta.ok) {

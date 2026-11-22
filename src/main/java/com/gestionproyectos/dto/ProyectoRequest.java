@@ -16,16 +16,9 @@ public record ProyectoRequest(
         @NotNull LocalDate fechaInicio,
         @NotNull LocalDate fechaFin,
         @NotBlank String prioridad,
-        @NotBlank String responsable,
+        String responsable,
         List<String> integrantes,
         String estado,
         Integer progreso,
-        @Positive Integer idResponsable,
-        List<@Positive Integer> idsIntegrantes) {
-    public ProyectoRequest(String nombre, String descripcion, LocalDate fechaInicio, LocalDate fechaFin,
-                           String prioridad, String responsable, List<String> integrantes,
-                           String estado, Integer progreso) {
-        this(nombre, descripcion, fechaInicio, fechaFin, prioridad, responsable, integrantes,
-                estado, progreso, null, null);
-    }
-}
+        @NotNull @Positive Integer idResponsable,
+        @NotNull List<@NotNull @Positive Integer> idsIntegrantes) {}
