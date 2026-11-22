@@ -5,6 +5,7 @@ const { join } = require('node:path');
 const vm = require('node:vm');
 
 const codigo = readFileSync(join(__dirname, '../../main/resources/static/js/proyectos.js'), 'utf8');
+const plantilla = readFileSync(join(__dirname, '../../main/resources/templates/dashboard/proyectos.html'), 'utf8');
 
 function crear(fetch, confirmar = () => true) {
     let componente;
@@ -101,4 +102,36 @@ test('el formulario presenta el mensaje 400 por descripción excesiva sin anunci
     assert.equal(estado.mostrarModal, true);
     assert.equal(estado.proyectos[0].descripcion, 'Descripción');
     assert.equal(estado.mensajeExito, '');
+});
+
+test('los indicadores de proyectos son globales y el listado conserva sus filtros', async () => {
+    const estado = crear(async url => {
+        if (url.endsWith('/auth/yo')) return respuesta({ id: 20, nombre: 'Ana' });
+        if (url.endsWith('/usuarios')) return respuesta([usuario]);
+        return respuesta([proyecto,
+            { ...proyecto, id: 11, nombre: 'Segundo', estado: 'En progreso', prioridad: 'Media' },
+            { ...proyecto, id: 12, nombre: 'Tercero', estado: 'Completado', prioridad: 'Baja' }]);
+    });
+    await estado.cargarProyectos();
+    assert.equal(estado.proyectos.length, 3);
+    estado.busqueda = 'Segundo';
+    estado.filtroEstado = 'En progreso';
+    estado.filtroPrioridad = 'Media';
+    assert.equal(estado.proyectosFiltrados.length, 1);
+    assert.equal(estado.contarEstado('Planificado'), 1);
+    assert.equal(estado.contarEstado('En progreso'), 1);
+    assert.equal(estado.contarEstado('Completado'), 1);
+    estado.busqueda = 'No existe';
+    assert.equal(estado.proyectosFiltrados.length, 0);
+    assert.equal(estado.proyectos.length, 3);
+    assert.equal(estado.contarEstado('En progreso'), 1);
+    estado.proyectos.push({ ...proyecto, id: 13, estado: 'Planificado' });
+    assert.equal(estado.proyectos.length, 4);
+    assert.equal(estado.contarEstado('Planificado'), 2);
+
+    const resumen = plantilla.match(/class="row g-3 projects-summary"[\s\S]*?<\/section>/)?.[0];
+    assert.ok(resumen);
+    assert.match(resumen, /\{\{ proyectos\.length \}\}/);
+    assert.doesNotMatch(resumen, /proyectosFiltrados\.length/);
+    assert.match(plantilla, /\{\{ proyectosFiltrados\.length \}\} resultado\(s\)/);
 });

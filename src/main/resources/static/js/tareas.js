@@ -126,7 +126,7 @@ createApp({
         },
 
         contarEstado(estado) {
-            return this.tareasFiltradas
+            return this.tareas
                 .filter(t => t.estado === estado)
                 .length;
         },

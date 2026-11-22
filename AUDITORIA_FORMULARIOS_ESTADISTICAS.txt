@@ -83,10 +83,12 @@ HALLAZGOS MEDIOS
     Corrección aplicada: la descripción del formulario de tareas se limita a 500 caracteres, como el DTO y la columna. La fecha de inicio es opcional y editable en los formularios de Tareas y Equipo; TareaRequest la acepta, TareaServicio la guarda y TareaDto la devuelve para volver a mostrarla al editar. Puede modificarse o dejarse vacía; la fecha de fin continúa siendo obligatoria. El DTO y el servicio rechazan intervalos con fin anterior al inicio y la vista de Tareas muestra el mensaje 400 del servidor sin alterar la tarea local.
     Verificación: .\mvnw.cmd -q test con Java 21 y PostgreSQL (38 pruebas correctas, incluidas creación/edición con y sin fecha de inicio, descripción de 500/501 caracteres, rechazo de intervalos inválidos sin cambios persistidos y validación directa del servicio); node --test src/test/js/*.test.js (15 pruebas correctas).
 
-4. Los contadores «totales» dependen de los filtros.
+4. Los contadores «totales» dependen de los filtros. [COMPLETADO: 2026-11-22]
    Archivos: static/js/proyectos.js:176-179; static/js/tareas.js:113-116; templates/dashboard/proyectos.html:132-207; templates/dashboard/tareas.html:93-119.
    Error: Los indicadores etiquetados como totales o estados se calculan sobre listas filtradas. Al escribir en búsqueda pueden cambiar aunque no haya cambiado ningún dato en BD. En estas dos vistas sí se actualiza el estado Vue después de operaciones exitosas realizadas en la misma vista.
-   Corrección: Separar «total global» (this.proyectos.length, this.tareas.length) de «resultados filtrados»; calcular indicadores globales desde el conjunto completo o desde un endpoint agregado.
+    Corrección: Separar «total global» (this.proyectos.length, this.tareas.length) de «resultados filtrados»; calcular indicadores globales desde el conjunto completo o desde un endpoint agregado.
+    Corrección aplicada: las tarjetas «Total de proyectos» y «Total de tareas» usan la colección completa cargada desde la API, y los contadores por estado se calculan sobre esas mismas colecciones. La búsqueda, los filtros, el número de resultados y las columnas Kanban siguen usando únicamente los registros filtrados. Las tarjetas se actualizan cuando cambia la colección tras operaciones confirmadas por la API; los filtros no alteran los totales.
+    Verificación: node --test src/test/js/*.test.js (17 pruebas correctas; se comprobaron filtros combinados, búsquedas sin coincidencias, totales independientes del filtro, actualización de contadores al cambiar los datos y enlaces de las plantillas); .\mvnw.cmd -q test con Java 21 y PostgreSQL (38 pruebas correctas).
 
 5. No hay sincronización automática entre vistas.
    Archivos: static/js/proyectos.js:43-77; static/js/tareas.js:63-110; static/js/dashboard.js:5-47.

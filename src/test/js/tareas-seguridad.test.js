@@ -5,6 +5,7 @@ const { join } = require('node:path');
 const vm = require('node:vm');
 
 const codigo = readFileSync(join(__dirname, '../../main/resources/static/js/tareas.js'), 'utf8');
+const plantilla = readFileSync(join(__dirname, '../../main/resources/templates/dashboard/tareas.html'), 'utf8');
 
 function crear(fetch) {
     let componente;
@@ -92,4 +93,49 @@ test('editar fecha de inicio conserva su valor y muestra errores 400 sin alterar
     assert.equal(enviado.fechaInicio, '2026-11-20');
     assert.equal(estado.tareas[0].fechaInicio, '2026-11-20');
     assert.equal(estado.mostrarModal, false);
+});
+
+test('resumen de tareas no cambia con filtros, pero resultados y Kanban sí', async () => {
+    const tareas = [
+        { id: 1, nombre: 'Uno', descripcion: '', proyecto: 'A', responsable: 'Ana',
+            prioridad: 'Alta', estado: 'Pendiente' },
+        { id: 2, nombre: 'Dos', descripcion: '', proyecto: 'B', responsable: 'Luis',
+            prioridad: 'Media', estado: 'En progreso' },
+        { id: 3, nombre: 'Tres', descripcion: '', proyecto: 'A', responsable: 'Ana',
+            prioridad: 'Baja', estado: 'Completada' }
+    ];
+    const estado = crear(async url => {
+        if (url.endsWith('/auth/yo')) return respuesta({ id: 2, nombre: 'Responsable' });
+        if (url.endsWith('/participaciones')) return respuesta([]);
+        if (url.endsWith('/proyectos')) return respuesta([]);
+        if (url.endsWith('/tareas')) return respuesta(tareas);
+        throw new Error(url);
+    });
+    await estado.cargarTareas();
+    assert.equal(estado.tareas.length, 3);
+    estado.busqueda = 'Dos';
+    estado.filtroProyecto = 'B';
+    estado.filtroPrioridad = 'Media';
+    estado.filtroEstado = 'En progreso';
+    estado.filtroResponsable = 'Luis';
+    assert.equal(estado.tareasFiltradas.length, 1);
+    assert.equal(estado.tareasPorEstado('En progreso').length, 1);
+    for (const estadoTarea of ['Pendiente', 'En progreso', 'Completada']) {
+        assert.equal(estado.contarEstado(estadoTarea), 1);
+    }
+    estado.busqueda = 'No existe';
+    assert.equal(estado.tareasFiltradas.length, 0);
+    assert.equal(estado.tareasPorEstado('En progreso').length, 0);
+    assert.equal(estado.tareas.length, 3);
+    assert.equal(estado.contarEstado('En progreso'), 1);
+    estado.tareas[0].estado = 'Completada';
+    assert.equal(estado.contarEstado('Pendiente'), 0);
+    assert.equal(estado.contarEstado('Completada'), 2);
+
+    const resumen = plantilla.match(/<section class="task-stats">[\s\S]*?<\/section>/)?.[0];
+    assert.ok(resumen);
+    assert.match(resumen, /\{\{ tareas\.length \}\}/);
+    assert.doesNotMatch(resumen, /tareasFiltradas\.length/);
+    assert.match(plantilla, /\{\{ tareasFiltradas\.length \}\} resultado\(s\)/);
+    assert.match(plantilla, /\{\{ tareasPorEstado\(estado\)\.length \}\}/);
 });

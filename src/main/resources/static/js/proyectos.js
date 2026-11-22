@@ -233,7 +233,7 @@ createApp({
         },
 
         contarEstado(estado) {
-            return this.proyectosFiltrados
+            return this.proyectos
                 .filter(p => p.estado === estado)
                 .length;
         },
