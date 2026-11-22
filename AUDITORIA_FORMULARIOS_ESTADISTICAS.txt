@@ -62,10 +62,12 @@ HALLAZGOS CRÍTICOS
 
 HALLAZGOS MEDIOS
 
-1. Longitud incompatible de descripción de proyecto.
+1. Longitud incompatible de descripción de proyecto. [COMPLETADO: 2026-11-22]
    Archivos: templates/dashboard/proyectos.html:613-619; dto/ProyectoRequest.java:14; model/Proyecto.java:33-35.
    Error: La descripción permite 500 caracteres en HTML, pero el DTO y PostgreSQL admiten 255. Una entrada de 256–500 supera la validación del servidor.
    Corrección: Alinear maxlength="255" y mostrar el mensaje 400, o ampliar conjuntamente DTO, entidad y columna mediante migración. No basta con cambiar solo HTML.
+   Corrección aplicada: el textarea de proyectos limita la descripción a 255 caracteres, igual que ProyectoRequest y la entidad. Ante una solicitud externa con más caracteres, la API responde 400 con el mensaje de validación, que el formulario presenta sin anunciar un guardado exitoso ni alterar la lista local.
+   Verificación: .\mvnw.cmd -q test con Java 21 y PostgreSQL (34 pruebas correctas, incluidos POST/PUT con 256 caracteres rechazados sin persistir y PUT con 255 aceptado); node --test src/test/js/*.test.js (14 pruebas correctas, incluida presentación del error 400).
 
 2. Selectores incompletos y asociaciones ambiguas por nombre. [COMPLETADO: 2026-11-22]
    Archivos: static/js/proyectos.js:20,720-757; static/js/tareas.js:24-31,92-96; service/ProyectoServicio.java:106-123; service/TareaServicio.java:95-101.

@@ -82,3 +82,23 @@ test('un error PUT o DELETE no modifica la lista, cancelar no envía DELETE', as
     await estado.eliminarProyecto(proyecto);
     assert.equal(llamadas.includes('DELETE'), false);
 });
+
+test('el formulario presenta el mensaje 400 por descripción excesiva sin anunciar guardado', async () => {
+    const estado = crear(async (url, opciones = {}) => {
+        if (url.endsWith('/auth/yo')) return respuesta({ id: 20, nombre: 'Ana' });
+        if (url.endsWith('/usuarios')) return respuesta([usuario]);
+        if (opciones.method === 'PUT') return {
+            ok: false, status: 400,
+            json: async () => ({ mensaje: 'descripcion: el tamaño debe estar entre 0 y 255' })
+        };
+        return respuesta([proyecto]);
+    });
+    await estado.cargarProyectos();
+    estado.editarProyecto(estado.proyectos[0]);
+    estado.formulario.descripcion = 'x'.repeat(256);
+    await estado.guardarProyecto();
+    assert.match(estado.errorFormulario, /descripcion.*255/);
+    assert.equal(estado.mostrarModal, true);
+    assert.equal(estado.proyectos[0].descripcion, 'Descripción');
+    assert.equal(estado.mensajeExito, '');
+});

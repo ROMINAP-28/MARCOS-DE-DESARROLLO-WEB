@@ -1,6 +1,7 @@
 package com.gestionproyectos.Controller;
 
 import com.gestionproyectos.model.Usuario;
+import com.gestionproyectos.repository.ProyectoRepository;
 import com.gestionproyectos.repository.UsuarioRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ProyectoEdicionRestTests {
     @Autowired WebApplicationContext contexto;
     @Autowired UsuarioRepository usuarios;
+    @Autowired ProyectoRepository proyectos;
 
     @Test
     void vistaRenderizaYApiExponeIdsParaSeleccionarUsuariosSinAmbiguedad() throws Exception {
@@ -27,7 +29,9 @@ class ProyectoEdicionRestTests {
         mvc.perform(get("/proyectos").with(
                         org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("test")))
                 .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Eliminar")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Eliminar")))
+                .andExpect(content().string(org.hamcrest.Matchers.matchesPattern(
+                        "(?s).*<textarea id=\"descripcionProyecto\"[^>]*maxlength=\"255\".*")));
 
         // La respuesta incluye los IDs necesarios para usar usuarios con el mismo nombre.
         Usuario usuario = new Usuario();
@@ -44,6 +48,15 @@ class ProyectoEdicionRestTests {
                     + "\"fechaInicio\":\"2026-11-01\",\"fechaFin\":\"2026-12-01\","
                     + "\"prioridad\":\"Alta\",\"responsable\":\"Prueba proyecto\","
                     + "\"idResponsable\":" + usuario.getIdUsuario() + ",\"idsIntegrantes\":[]}";
+            long antes = proyectos.count();
+            mvc.perform(post("/api/miembro3/proyectos")
+                            .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication(autenticacion))
+                            .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(cuerpo.replace("Proyecto de prueba", "x".repeat(256))))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.mensaje", org.hamcrest.Matchers.containsString("descripcion")));
+            org.junit.jupiter.api.Assertions.assertEquals(antes, proyectos.count());
             String creado = mvc.perform(post("/api/miembro3/proyectos")
                             .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication(autenticacion))
                             .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
@@ -57,11 +70,27 @@ class ProyectoEdicionRestTests {
                                 .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication(autenticacion))
                                 .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
+                                .content(cuerpo.replace("Proyecto de prueba", "x".repeat(256))))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.mensaje", org.hamcrest.Matchers.containsString("descripcion")));
+                org.junit.jupiter.api.Assertions.assertEquals("Proyecto de prueba",
+                        proyectos.findById(id).orElseThrow().getDescripcion());
+                mvc.perform(put("/api/miembro3/proyectos/" + id)
+                                .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication(autenticacion))
+                                .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(cuerpo.replace("\"nombre\":\"Prueba\"",
                                         "\"nombre\":\"Actualizado\"")))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.id").value(id))
                         .andExpect(jsonPath("$.nombre").value("Actualizado"));
+                mvc.perform(put("/api/miembro3/proyectos/" + id)
+                                .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication(autenticacion))
+                                .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(cuerpo.replace("Proyecto de prueba", "x".repeat(255))))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.descripcion").value("x".repeat(255)));
             } finally {
                 mvc.perform(delete("/api/miembro3/proyectos/" + id)
                                 .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication(autenticacion))
