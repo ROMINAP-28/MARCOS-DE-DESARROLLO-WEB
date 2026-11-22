@@ -16,7 +16,7 @@ createApp({
             modoEdicion: false,
             integranteSeleccionado: null,
             tareaAsignada: null,
-            formularioTarea: { nombre: '', descripcion: '', prioridad: 'Media', fechaFin: '' },
+            formularioTarea: { nombre: '', descripcion: '', prioridad: 'Media', fechaInicio: '', fechaFin: '' },
             mensajeError: '',
             mensajeExito: '',
             errorCarga: false,
@@ -197,7 +197,7 @@ createApp({
 
         asignarTarea(integrante) {
             this.tareaAsignada = integrante;
-            this.formularioTarea = { nombre: '', descripcion: '', prioridad: 'Media', fechaFin: '' };
+            this.formularioTarea = { nombre: '', descripcion: '', prioridad: 'Media', fechaInicio: '', fechaFin: '' };
             this.mensajeError = '';
             this.mensajeExito = '';
         },
@@ -211,6 +211,7 @@ createApp({
                 await this.solicitar('/api/miembro3/tareas', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ ...this.formularioTarea,
+                        fechaInicio: this.formularioTarea.fechaInicio || null,
                         idProyecto: this.tareaAsignada.idProyecto,
                         idResponsable: this.tareaAsignada.idUsuario, estado: 'Pendiente' })
                 });

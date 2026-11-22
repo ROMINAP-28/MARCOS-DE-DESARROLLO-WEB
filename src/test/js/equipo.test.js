@@ -38,6 +38,7 @@ test('Equipo carga datos reales y solo presenta cambios confirmados por la API',
             assert.equal(guardada.responsable, undefined);
             assert.equal(guardada.idProyecto, 10);
             assert.equal(guardada.idResponsable, 20);
+            assert.equal(guardada.fechaInicio, '2026-11-20');
             tareas++;
             participaciones[0].tareasAsignadas = tareas;
             return respuesta({ id: tareas });
@@ -85,7 +86,8 @@ test('Equipo carga datos reales y solo presenta cambios confirmados por la API',
     await estado.guardarIntegrante();
 
     estado.asignarTarea(estado.integrantes[0]);
-    estado.formularioTarea = { nombre: 'Verificar', descripcion: '', prioridad: 'Alta', fechaFin: '2026-12-01' };
+    estado.formularioTarea = { nombre: 'Verificar', descripcion: '', prioridad: 'Alta',
+        fechaInicio: '2026-11-20', fechaFin: '2026-12-01' };
     await estado.guardarTareaAsignada();
     assert.equal(estado.integrantes[0].tareasAsignadas, 1);
 

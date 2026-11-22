@@ -662,6 +662,9 @@
                             <option value="Baja">Baja</option><option value="Media">Media</option>
                             <option value="Alta">Alta</option><option value="Urgente">Urgente</option>
                         </select>
+                        <label for="fechaInicioTareaEquipo" class="form-label">Fecha de inicio (opcional)</label>
+                        <input id="fechaInicioTareaEquipo" type="date" v-model="formularioTarea.fechaInicio"
+                               class="form-control mb-3">
                         <label for="fechaFinTareaEquipo" class="form-label">Fecha de fin *</label>
                         <input id="fechaFinTareaEquipo" type="date" v-model="formularioTarea.fechaFin"
                                class="form-control" required>

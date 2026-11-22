@@ -79,6 +79,7 @@ createApp({
                 idProyecto: '',
                 prioridad: '',
                 estado: 'Pendiente',
+                fechaInicio: '',
                 fechaFin: '',
                 responsable: '',
                 idResponsable: ''
@@ -145,7 +146,7 @@ createApp({
         editarTarea(tarea) {
             if (!this.puedeGestionarTarea(tarea)) return;
             this.modoEdicion = true;
-            this.formulario = { ...tarea };
+            this.formulario = { ...tarea, fechaInicio: tarea.fechaInicio || '' };
             this.mensajeError = '';
             this.mostrarModal = true;
         },
@@ -198,12 +199,14 @@ createApp({
                         idProyecto: this.formulario.idProyecto,
                         prioridad: this.formulario.prioridad,
                         estado: this.formulario.estado,
+                        fechaInicio: this.formulario.fechaInicio || null,
                         fechaFin: this.formulario.fechaFin,
                         idResponsable: this.formulario.idResponsable })
                 });
 
                 if (!respuesta.ok) {
-                    throw new Error('No se pudo guardar la tarea.');
+                    const error = await respuesta.json().catch(() => ({}));
+                    throw new Error(error.mensaje || 'No se pudo guardar la tarea.');
                 }
 
                 const guardada = await respuesta.json();

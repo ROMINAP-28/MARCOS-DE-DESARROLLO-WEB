@@ -86,6 +86,10 @@ public class TareaServicio implements ITareaServicio {
     }
 
     private void copiarDatos(Tarea tarea, TareaRequest r, String estadoPorDefecto) {
+        if (r.fechaInicio() != null && r.fechaFin() != null
+                && r.fechaFin().isBefore(r.fechaInicio())) {
+            throw new SolicitudInvalidaException("La fecha de fin no puede ser anterior a la fecha de inicio.");
+        }
         if (!PRIORIDADES.contains(r.prioridad())) {
             throw new SolicitudInvalidaException("Prioridad no válida");
         }
@@ -105,6 +109,7 @@ public class TareaServicio implements ITareaServicio {
         tarea.setDescripcion(r.descripcion());
         tarea.setPrioridad(r.prioridad());
         tarea.setEstado(estado);
+        tarea.setFechaInicio(r.fechaInicio());
         tarea.setFechaFin(r.fechaFin());
         tarea.setProyecto(proyecto);
         if (tarea.getResponsable() == null
@@ -118,6 +123,7 @@ public class TareaServicio implements ITareaServicio {
         return new TareaDto(t.getIdTarea(), t.getNombre(), t.getDescripcion(),
                 t.getProyecto().getNombre(), t.getPrioridad(), t.getEstado(),
                 t.getFechaFin(), t.getResponsable().getNombre(),
-                t.getProyecto().getIdProyecto(), t.getResponsable().getIdUsuario());
+                t.getProyecto().getIdProyecto(), t.getResponsable().getIdUsuario(),
+                t.getFechaInicio());
     }
 }

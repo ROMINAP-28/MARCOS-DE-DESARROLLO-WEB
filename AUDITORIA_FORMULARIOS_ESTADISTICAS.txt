@@ -76,10 +76,12 @@ HALLAZGOS MEDIOS
     Corrección aplicada: los formularios de proyectos obtienen usuarios registrados y los de tareas cargan proyectos y participaciones activas; ambos envían IDs para las asociaciones. ProyectoRequest exige idResponsable e idsIntegrantes (se permite lista vacía), y TareaRequest exige idProyecto e idResponsable. ProyectoServicio, TareaServicio y AccesoProyecto ya no buscan asociaciones por nombres ni aceptan nombres como sustitutos de IDs; para tareas, la autorización verifica que el responsable seleccionado sea integrante activo del proyecto. Las etiquetas de nombre heredadas en los DTO son opcionales y se ignoran para vincular registros.
     Verificación: .\mvnw.cmd -q test con Java 21 y PostgreSQL (34 pruebas correctas); node --test src/test/js/*.test.js (13 pruebas correctas). Se probaron nombres duplicados o contradictorios, solicitudes sin IDs y la selección de miembros activos.
 
-3. Campos de tarea limitados o ausentes.
+3. Campos de tarea limitados o ausentes. [COMPLETADO: 2026-11-22]
    Archivos: static/js/tareas.js:143-200; templates/dashboard/tareas.html:316-325; dto/TareaRequest.java:12-18.
    Error: Crear y editar tareas persiste los campos enviados, pero la descripción no tiene límite HTML aunque DTO/BD admiten 500. La vista no ofrece fechaInicio, pese a existir en Tarea; TareaServicio.copiarDatos() tampoco la asigna.
-   Corrección: Añadir maxlength="500". Si fechaInicio debe poder editarse, incorporarla a formulario, DTO y copiarDatos(), y validar el intervalo.
+    Corrección: Añadir maxlength="500". Si fechaInicio debe poder editarse, incorporarla a formulario, DTO y copiarDatos(), y validar el intervalo.
+    Corrección aplicada: la descripción del formulario de tareas se limita a 500 caracteres, como el DTO y la columna. La fecha de inicio es opcional y editable en los formularios de Tareas y Equipo; TareaRequest la acepta, TareaServicio la guarda y TareaDto la devuelve para volver a mostrarla al editar. Puede modificarse o dejarse vacía; la fecha de fin continúa siendo obligatoria. El DTO y el servicio rechazan intervalos con fin anterior al inicio y la vista de Tareas muestra el mensaje 400 del servidor sin alterar la tarea local.
+    Verificación: .\mvnw.cmd -q test con Java 21 y PostgreSQL (38 pruebas correctas, incluidas creación/edición con y sin fecha de inicio, descripción de 500/501 caracteres, rechazo de intervalos inválidos sin cambios persistidos y validación directa del servicio); node --test src/test/js/*.test.js (15 pruebas correctas).
 
 4. Los contadores «totales» dependen de los filtros.
    Archivos: static/js/proyectos.js:176-179; static/js/tareas.js:113-116; templates/dashboard/proyectos.html:132-207; templates/dashboard/tareas.html:93-119.

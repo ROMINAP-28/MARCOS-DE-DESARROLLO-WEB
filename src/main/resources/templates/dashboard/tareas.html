@@ -327,9 +327,9 @@
 
                     <div class="mb-3">
                         <label for="descripcionTarea" class="form-label">Descripción</label>
-                        <textarea id="descripcionTarea" v-model.trim="formulario.descripcion"
-                                  class="form-control" rows="3"
-                                  placeholder="Describe brevemente la tarea"></textarea>
+                         <textarea id="descripcionTarea" v-model.trim="formulario.descripcion"
+                                   class="form-control" rows="3" maxlength="500"
+                                   placeholder="Describe brevemente la tarea"></textarea>
                     </div>
 
                     <div class="row g-3">
@@ -342,6 +342,11 @@
                                  <option v-for="proyecto in proyectosGestionados" :key="proyecto.id"
                                          :value="proyecto.id">{{ proyecto.nombre }}</option>
                             </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="fechaInicioTarea" class="form-label">Fecha de inicio (opcional)</label>
+                            <input id="fechaInicioTarea" v-model="formulario.fechaInicio"
+                                   type="date" class="form-control">
                         </div>
                         <div class="col-md-6">
                             <label for="fechaFinTarea" class="form-label">Fecha de fin *</label>

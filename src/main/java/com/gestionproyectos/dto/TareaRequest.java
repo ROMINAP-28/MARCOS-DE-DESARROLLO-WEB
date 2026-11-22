@@ -1,6 +1,7 @@
 package com.gestionproyectos.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -18,4 +19,10 @@ public record TareaRequest(
         @NotNull LocalDate fechaFin,
         String responsable,
         @NotNull @Positive Integer idProyecto,
-        @NotNull @Positive Integer idResponsable) {}
+        @NotNull @Positive Integer idResponsable,
+        LocalDate fechaInicio) {
+    @AssertTrue(message = "La fecha de fin no puede ser anterior a la fecha de inicio")
+    public boolean isPeriodoValido() {
+        return fechaInicio == null || fechaFin == null || !fechaFin.isBefore(fechaInicio);
+    }
+}

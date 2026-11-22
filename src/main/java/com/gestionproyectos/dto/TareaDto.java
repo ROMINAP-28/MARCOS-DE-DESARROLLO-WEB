@@ -6,4 +6,5 @@ import java.time.LocalDate;
 public record TareaDto(Integer id, String nombre, String descripcion,
                        String proyecto, String prioridad, String estado,
                        LocalDate fechaFin, String responsable,
-                       Integer idProyecto, Integer idResponsable) {}
+                       Integer idProyecto, Integer idResponsable,
+                       LocalDate fechaInicio) {}
