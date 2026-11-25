@@ -4,6 +4,7 @@ import com.gestionproyectos.dto.EstadoParticipacionRequest;
 import com.gestionproyectos.dto.ParticipacionDto;
 import com.gestionproyectos.dto.ParticipacionRequest;
 import com.gestionproyectos.service.ParticipacionServicio;
+import com.gestionproyectos.service.AvisosTiempoReal;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,9 +16,11 @@ import java.util.List;
 @RequestMapping("/api/miembro3/participaciones")
 public class ParticipacionController {
     private final ParticipacionServicio servicio;
+    private final AvisosTiempoReal avisos;
 
-    public ParticipacionController(ParticipacionServicio servicio) {
+    public ParticipacionController(ParticipacionServicio servicio, AvisosTiempoReal avisos) {
         this.servicio = servicio;
+        this.avisos = avisos;
     }
 
     @GetMapping
@@ -29,14 +32,18 @@ public class ParticipacionController {
     @PreAuthorize("@accesoProyecto.esResponsable(#request.idProyecto())")
     @ResponseStatus(HttpStatus.CREATED)
     public ParticipacionDto agregar(@Valid @RequestBody ParticipacionRequest request) {
-        return servicio.agregar(request);
+        ParticipacionDto participacion = servicio.agregar(request);
+        avisos.equipoCambiado();
+        return participacion;
     }
 
     @PutMapping("/{idProyecto}/{idUsuario}")
     @PreAuthorize("@accesoProyecto.esResponsable(#idProyecto)")
     public ParticipacionDto cambiarEstado(@PathVariable Integer idProyecto, @PathVariable Integer idUsuario,
                                           @Valid @RequestBody EstadoParticipacionRequest request) {
-        return servicio.cambiarEstado(idProyecto, idUsuario, request);
+        ParticipacionDto participacion = servicio.cambiarEstado(idProyecto, idUsuario, request);
+        avisos.equipoCambiado();
+        return participacion;
     }
 
     @DeleteMapping("/{idProyecto}/{idUsuario}")
@@ -44,5 +51,6 @@ public class ParticipacionController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void retirar(@PathVariable Integer idProyecto, @PathVariable Integer idUsuario) {
         servicio.retirar(idProyecto, idUsuario);
+        avisos.equipoCambiado();
     }
 }

@@ -46,6 +46,16 @@ createApp({
 
     mounted() {
         this.cargarProyectos();
+        this.alActualizar = evento => {
+            if (['todos', 'proyectos', 'equipo'].includes(evento.detail?.recurso)) {
+                this.cargarProyectos();
+            }
+        };
+        window.addEventListener('gestion:actualizado', this.alActualizar);
+    },
+
+    beforeUnmount() {
+        window.removeEventListener('gestion:actualizado', this.alActualizar);
     },
 
     methods: {

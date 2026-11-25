@@ -15,6 +15,16 @@ createApp({
 
     mounted() {
         this.cargarResumen();
+        this.alActualizar = evento => {
+            if (['todos', 'proyectos', 'tareas'].includes(evento.detail?.recurso)) {
+                this.cargarResumen();
+            }
+        };
+        window.addEventListener('gestion:actualizado', this.alActualizar);
+    },
+
+    beforeUnmount() {
+        window.removeEventListener('gestion:actualizado', this.alActualizar);
     },
 
     computed: {

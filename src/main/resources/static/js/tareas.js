@@ -67,6 +67,16 @@ createApp({
 
     mounted() {
         this.cargarTareas();
+        this.alActualizar = evento => {
+            if (['todos', 'proyectos', 'tareas', 'equipo'].includes(evento.detail?.recurso)) {
+                this.cargarTareas();
+            }
+        };
+        window.addEventListener('gestion:actualizado', this.alActualizar);
+    },
+
+    beforeUnmount() {
+        window.removeEventListener('gestion:actualizado', this.alActualizar);
     },
 
     methods: {

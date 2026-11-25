@@ -3,6 +3,7 @@ package com.gestionproyectos.Controller;
 import com.gestionproyectos.dto.ProyectoDto;
 import com.gestionproyectos.dto.ProyectoRequest;
 import com.gestionproyectos.service.IProyectoServicio;
+import com.gestionproyectos.service.AvisosTiempoReal;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +21,11 @@ public class ProyectoController {
     private static final Logger logger = LoggerFactory.getLogger(ProyectoController.class);
 
     private final IProyectoServicio proyectoServicio;
+    private final AvisosTiempoReal avisos;
 
-    public ProyectoController(IProyectoServicio proyectoServicio) {
+    public ProyectoController(IProyectoServicio proyectoServicio, AvisosTiempoReal avisos) {
         this.proyectoServicio = proyectoServicio;
+        this.avisos = avisos;
     }
 
     // GET http://localhost:8080/api/miembro3/proyectos?q=texto
@@ -45,7 +48,10 @@ public class ProyectoController {
     @ResponseStatus(HttpStatus.CREATED)
     public ProyectoDto agregarProyecto(@Valid @RequestBody ProyectoRequest request) {
         logger.info("Proyecto a agregar: {}", request.nombre());
-        return proyectoServicio.guardarProyecto(request);
+        ProyectoDto proyecto = proyectoServicio.guardarProyecto(request);
+        avisos.proyectoCambiado();
+        avisos.equipoCambiado();
+        return proyecto;
     }
 
     // PUT http://localhost:8080/api/miembro3/proyectos/1
@@ -53,7 +59,10 @@ public class ProyectoController {
     @PreAuthorize("@accesoProyecto.esResponsable(#id)")
     public ProyectoDto actualizarProyecto(@PathVariable Integer id,
                                           @Valid @RequestBody ProyectoRequest request) {
-        return proyectoServicio.actualizarProyecto(id, request);
+        ProyectoDto proyecto = proyectoServicio.actualizarProyecto(id, request);
+        avisos.proyectoCambiado();
+        avisos.equipoCambiado();
+        return proyecto;
     }
 
     // DELETE http://localhost:8080/api/miembro3/proyectos/1
@@ -62,5 +71,8 @@ public class ProyectoController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminarProyecto(@PathVariable Integer id) {
         proyectoServicio.eliminarProyecto(id);
+        avisos.proyectoCambiado();
+        avisos.tareaCambiada();
+        avisos.equipoCambiado();
     }
 }

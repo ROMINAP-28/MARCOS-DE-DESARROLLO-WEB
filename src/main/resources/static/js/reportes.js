@@ -34,7 +34,19 @@ createApp({
             return this.tiposReporte.find(tipo => tipo.id === this.tipoSeleccionado)?.nombre || '';
         }
     },
-    mounted() { this.cargarDatos(); },
+    mounted() {
+        this.cargarDatos();
+        this.alActualizar = evento => {
+            if (['todos', 'proyectos', 'tareas', 'equipo'].includes(evento.detail?.recurso)) {
+                this.reporteActual = null;
+                this.cargarDatos();
+            }
+        };
+        window.addEventListener('gestion:actualizado', this.alActualizar);
+    },
+    beforeUnmount() {
+        window.removeEventListener('gestion:actualizado', this.alActualizar);
+    },
     methods: {
         async solicitar(url, opciones) {
             const respuesta = await fetch(url, opciones);

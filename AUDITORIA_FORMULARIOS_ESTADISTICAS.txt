@@ -1,8 +1,8 @@
 RESULTADO DE LA AUDITORÍA
 
-La persistencia es parcial y las estadísticas no están sincronizadas en tiempo real entre clientes. Los formularios de registro, creación de proyectos y CRUD de tareas llegan a PostgreSQL; los de Equipo y Reportes operan principalmente sobre datos locales del navegador. El dashboard ya consulta proyectos y tareas reales al cargar o recargar la página (hallazgo crítico 1 corregido).
+Estado actual: dashboard, proyectos, tareas, equipo y reportes consultan datos reales. Los cambios de proyectos, tareas y equipo disparan avisos WebSocket a las vistas abiertas para releer la API; las asignaciones de tareas se notifican solo al usuario asignado. No se guardan avisos para cuentas desconectadas.
 
-Alcance verificado: código fuente y esquema de PostgreSQL mediante consultas de solo lectura. No ejecuté formularios en un navegador ni modifiqué archivos o datos durante la auditoría. Además, el proyecto usa Spring Boot 4.1.1, no 3.x (pom.xml:5-9); no encontré implementación de JWT, WebSocket ni Scheduler en el código y dependencias revisados.
+Alcance de la auditoría original: código fuente y esquema PostgreSQL. Las correcciones posteriores se probaron con Java 21, PostgreSQL y pruebas JavaScript; no se realizó una prueba manual en navegador. El proyecto aún usa Spring Boot 4.1.1 y autenticación por sesión, no Spring Boot 3.x ni JWT; Scheduler tampoco está implementado. WebSocket sí se implementó después de la auditoría original (hallazgo medio 5).
 
 INVENTARIO DE FORMULARIOS
 
@@ -23,7 +23,7 @@ HALLAZGOS CRÍTICOS
    Error original: Los proyectos, tareas y contadores procedían de arrays fijos. No reflejaban altas, bajas ni cambios en PostgreSQL, ni siquiera al recargar la página.
    Corrección aplicada: dashboard.js obtiene /api/miembro3/proyectos y /api/miembro3/tareas al montar la vista; los indicadores se derivan de las respuestas. La plantilla usa tarea.fechaFin y muestra como próximas a vencer únicamente tareas no completadas con vencimiento desde hoy hasta dentro de 7 días. Se muestra carga/error y se permite reintentar; no se presentan cifras ficticias si falla la API.
    Verificación: node --test src/test/js/dashboard.test.js (3 pruebas correctas); .\mvnw.cmd test con Java 21 (16 pruebas correctas, incluido el arranque con PostgreSQL).
-   Alcance: cifras reales al abrir o recargar el dashboard. La actualización instantánea entre clientes todavía no está implementada; sigue pendiente el hallazgo medio 5.
+   Alcance inicial: cifras reales al abrir o recargar el dashboard; la sincronización posterior se documenta en el hallazgo medio 5.
 
 2. Equipo sin persistencia. [COMPLETADO: 2026-11-17]
    Archivos: static/js/equipo.js:22-127,264-337,344-426; templates/dashboard/equipo.html:557-710.
@@ -58,7 +58,7 @@ HALLAZGOS CRÍTICOS
    Corrección: Implementar autenticación y autorización reales antes de presentar login, acciones de usuario o notificaciones como funcionalidades completas. No confiar en un id_usuario_generador enviado libremente por el cliente.
    Corrección aplicada: Spring Security autentica por correo y contraseña BCrypt con sesión de servidor; login y logout son formularios reales. Las vistas privadas y /api/miembro3/** requieren autenticación. CSRF protege las escrituras, incluido el registro y el cierre de sesión; las peticiones fetch reciben el token de Thymeleaf. En el servidor, solo el responsable gestiona su proyecto, equipo y tareas (el miembro asignado puede cambiar el estado de su tarea); cada cuenta solo edita o elimina su propio perfil. Las especialidades se pueden crear por responsables y administradores; su modificación y borrado quedan reservados a administradores. Se eliminó el CORS explícito de los controladores afectados. La API /api/auth/yo obtiene la identidad autenticada, sin confiar en un ID declarado por el cliente.
    Verificación: .\mvnw.cmd -q test con Java 21 y PostgreSQL (45 pruebas correctas, incluidas credenciales, registro, sesión, acceso anónimo, autorización entre usuarios, CSRF y logout); node --test src/test/js/*.test.js (13 pruebas correctas, incluidas CSRF y selección de tareas por IDs).
-   Alcance: el historial persistente de reportes, PDF/Excel y notificaciones no se añadieron; las cuentas de ejemplo existentes tienen contraseñas aleatorias desconocidas, por lo que hay que registrar una cuenta propia para iniciar sesión. La actualización instantánea entre clientes sigue pendiente.
+    Alcance inicial: el historial persistente de reportes, PDF/Excel y notificaciones no se añadieron; las cuentas de ejemplo existentes tienen contraseñas aleatorias desconocidas, por lo que hay que registrar una cuenta propia para iniciar sesión. La actualización instantánea posterior se documenta en el hallazgo medio 5.
 
 HALLAZGOS MEDIOS
 
@@ -90,10 +90,13 @@ HALLAZGOS MEDIOS
     Corrección aplicada: las tarjetas «Total de proyectos» y «Total de tareas» usan la colección completa cargada desde la API, y los contadores por estado se calculan sobre esas mismas colecciones. La búsqueda, los filtros, el número de resultados y las columnas Kanban siguen usando únicamente los registros filtrados. Las tarjetas se actualizan cuando cambia la colección tras operaciones confirmadas por la API; los filtros no alteran los totales.
     Verificación: node --test src/test/js/*.test.js (17 pruebas correctas; se comprobaron filtros combinados, búsquedas sin coincidencias, totales independientes del filtro, actualización de contadores al cambiar los datos y enlaces de las plantillas); .\mvnw.cmd -q test con Java 21 y PostgreSQL (38 pruebas correctas).
 
-5. No hay sincronización automática entre vistas.
+5. No hay sincronización automática entre vistas. [COMPLETADO: 2026-11-22]
    Archivos: static/js/proyectos.js:43-77; static/js/tareas.js:63-110; static/js/dashboard.js:5-47.
    Error: Proyectos y Tareas cargan la API solo al montar sus respectivas páginas. No hay sincronización automática entre vistas, pestañas o usuarios. Los GET existentes pueden devolver datos actuales cuando se invocan, pero no existe un endpoint de métricas ni emisión de eventos que actualice el dashboard.
    Corrección: Crear, por ejemplo, GET /api/dashboard/resumen con agregados de repositorio; refrescarlo después de mutaciones y al volver a la página. Si se exige tiempo real entre clientes, añadir eventos WebSocket tras la confirmación de la transacción.
+   Corrección aplicada: /ws/avisos acepta conexiones del mismo origen con sesión autenticada; comprueba que la sesión HTTP siga vigente antes de entregar cada aviso. Las operaciones confirmadas de proyectos, tareas y participaciones emiten señales sin datos privados para que dashboard, proyectos, tareas, equipo y reportes relean sus endpoints actuales. Las asignaciones nuevas o reasignaciones de tareas emiten además un aviso únicamente a las conexiones del usuario asignado, determinado por el servidor. No se aceptan mensajes entrantes del cliente. Al reconectar o volver a una pestaña visible, la vista consulta la API para recuperar cambios perdidos. No se agregó un endpoint agregado: las métricas ya se derivan de datos reales.
+   Verificación: .\mvnw.cmd -q test con Java 21 y PostgreSQL (56 pruebas correctas: conexión real de dos cuentas, mismo origen, autenticación, entrega dirigida, logout, error sin emisión, commit/rollback); node --test src/test/js/*.test.js (18 pruebas correctas, incluida reconexión y visibilidad). No se realizó prueba manual en navegador.
+   Alcance: canal efímero de avisos; los clientes desconectados no reciben historial ni notificaciones persistentes y recuperan el estado actual al reconectar. JWT, Spring Boot 3.x y Scheduler siguen siendo decisiones y requisitos separados, no resueltos por WebSocket.
 
 6. Validación de valores permitidos incompleta. [COMPLETADO: 2026-11-22]
    Archivos: dto/ProyectoRequest.java:12-21; dto/TareaRequest.java:11-18; Controller/ProyectoController.java:45-54; Controller/TareaController.java:46-60.
@@ -134,6 +137,6 @@ Sin afirmar que esto sea WebSocket, se sustituyeron los arrays fijos de dashboar
         this.tareas = await tareas.json();
     }
 
-Ya se usa tarea.fechaFin —no el campo ficticio fecha— y «Próximas a vencer» se define por fecha y estado, no como todas las no completadas. Hay cifras reales al cargar la página; la actualización instantánea entre clientes sigue pendiente.
+Ya se usa tarea.fechaFin —no el campo ficticio fecha— y «Próximas a vencer» se define por fecha y estado, no como todas las no completadas. Las cifras reales se cargan al abrir la página y se vuelven a consultar cuando llega un aviso WebSocket o se recupera la conexión.
 
-Prioridad recomendada: corregir primero la edición de proyectos y las pantallas Equipo/Reportes que aparentan guardar; después conectar el dashboard a datos reales y decidir si el requisito pide refresco al navegar o tiempo real mediante WebSocket.
+Pendientes de la rúbrica: decidir la migración a JWT y Spring Boot 3.x e implementar recordatorios con Spring Scheduler; revisar los hallazgos medios 7 y 8 por separado.

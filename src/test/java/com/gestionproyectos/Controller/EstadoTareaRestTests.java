@@ -17,7 +17,8 @@ class EstadoTareaRestTests {
         ITareaServicio servicio = mock(ITareaServicio.class);
         var validador = new LocalValidatorFactoryBean();
         validador.afterPropertiesSet();
-        var mvc = MockMvcBuilders.standaloneSetup(new TareaController(servicio))
+        var mvc = MockMvcBuilders.standaloneSetup(new TareaController(servicio,
+                        mock(com.gestionproyectos.service.AvisosTiempoReal.class)))
                 .setControllerAdvice(new ManejadorGlobalExcepciones())
                 .setValidator(validador)
                 .build();
