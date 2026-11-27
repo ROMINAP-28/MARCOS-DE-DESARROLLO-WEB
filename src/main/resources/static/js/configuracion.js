@@ -4,10 +4,39 @@
         return respuesta.json();
     }).then(cuenta => {
         document.getElementById('nombreSidebar').textContent = cuenta.nombre;
+        const avatar = document.querySelector('.user-avatar');
+        if (avatar) {
+            avatar.textContent = cuenta.nombre.trim().split(/\s+/).slice(0, 2)
+                .map(parte => parte.charAt(0).toUpperCase()).join('');
+        }
         document.getElementById('datosCuenta').textContent = `${cuenta.nombre} · ${cuenta.correo}`;
     }).catch(() => {
         document.getElementById('datosCuenta').textContent = 'No se pudieron cargar los datos de la cuenta.';
     });
+    // Tema claro / oscuro / automático (aplicado en todas las pantallas por tema.js).
+    const opcionesTema = document.querySelectorAll('input[name="tema"]');
+    const ayudaTema = document.getElementById('temaAyuda');
+    const mensajesTema = {
+        claro: 'Tema claro activado.',
+        oscuro: 'Tema oscuro activado.',
+        sistema: 'La plataforma seguirá el tema de tu dispositivo.'
+    };
+
+    if (window.GestionTema) {
+        const temaActual = window.GestionTema.leer();
+        opcionesTema.forEach(opcion => {
+            opcion.checked = opcion.value === temaActual;
+            opcion.addEventListener('change', () => {
+                if (!opcion.checked) return;
+                window.GestionTema.aplicar(opcion.value);
+                const guardado = window.GestionTema.guardar(opcion.value);
+                ayudaTema.textContent = guardado
+                    ? mensajesTema[opcion.value]
+                    : 'El tema se aplicó, pero no se pudo guardar en este navegador.';
+            });
+        });
+    }
+
     const interruptor = document.getElementById('vistaCompacta');
     const contenido = document.querySelector('.config-main');
     const estado = document.getElementById('estadoPreferencia');
@@ -16,7 +45,6 @@
     try {
         interruptor.checked = localStorage.getItem(clave) === 'true';
     } catch (error) {
-        // La página sigue funcionando cuando el almacenamiento está bloqueado.
     }
 
     const aplicarPreferencia = () => {
