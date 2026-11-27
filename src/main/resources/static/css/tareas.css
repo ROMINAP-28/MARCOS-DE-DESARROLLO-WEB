@@ -805,3 +805,237 @@ body {
         padding: 12px 0 0;
     }
 }
+
+/* ==========================================
+   CALENDARIO - DISTRIBUCIÓN Y RESPONSIVE
+   ========================================== */
+
+.calendar-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 24px;
+    gap: 24px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* Encabezado: mes y navegación */
+
+.calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.calendar-header h3 {
+    margin: 0;
+    min-width: 220px;
+    text-align: center;
+    font-size: 1.35rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.calendar-header button {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Cuadrícula de siete columnas */
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    width: 100%;
+    min-width: 0;
+    border-top: 1px solid #e2e8f0;
+    border-left: 1px solid #e2e8f0;
+    background: #fff;
+}
+
+/* Encabezados de los días */
+
+.calendar-weekday {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 48px;
+    padding: 10px 4px;
+    background: #f8fafc;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    color: #475569;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Celdas de cada día */
+
+.calendar-day {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 110px;
+    padding: 10px;
+    background: #fff;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* Número del día */
+
+.calendar-day-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin-bottom: 8px;
+    border-radius: 50%;
+    color: #334155;
+    font-size: 0.85rem;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+/* Días que pertenecen a otro mes */
+
+.calendar-day.other-month {
+    background: #f8fafc;
+}
+
+.calendar-day.other-month .calendar-day-number {
+    color: #a0aec0;
+}
+
+/* Día actual */
+
+.calendar-day.today .calendar-day-number {
+    background: #2563eb;
+    color: #fff;
+    font-weight: 600;
+}
+
+/* Tareas dentro del calendario */
+
+.calendar-events {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+.calendar-event {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    padding: 5px 7px;
+    border-radius: 5px;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.calendar-event:hover {
+    filter: brightness(0.96);
+}
+
+/* Colores según el estado de la tarea */
+
+.calendar-event.status-pending {
+    background: #fff4d6;
+    color: #946200;
+}
+
+.calendar-event.status-progress {
+    background: #e8f0ff;
+    color: #245ed3;
+}
+
+.calendar-event.status-done {
+    background: #dcfce7;
+    color: #166534;
+}
+
+/* Adaptación para pantallas pequeñas */
+
+@media (max-width: 768px) {
+    .calendar-container {
+        padding: 12px;
+        gap: 16px;
+    }
+
+    .calendar-header {
+        gap: 12px;
+    }
+
+    .calendar-header h3 {
+        min-width: 0;
+        font-size: 1.1rem;
+    }
+
+    .calendar-day {
+        min-height: 85px;
+        padding: 5px;
+    }
+
+    .calendar-day-number {
+        width: 24px;
+        height: 24px;
+        font-size: 0.75rem;
+    }
+
+    .calendar-event {
+        padding: 4px;
+        font-size: 0.65rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .calendar-container {
+        padding: 8px;
+    }
+
+    .calendar-weekday {
+        min-height: 36px;
+        font-size: 0.7rem;
+    }
+
+    .calendar-day {
+        min-height: 70px;
+        padding: 3px;
+    }
+
+    .calendar-header h3 {
+        font-size: 1rem;
+    }
+
+    .calendar-header button {
+        width: 32px;
+        height: 32px;
+    }
+
+    .calendar-event {
+        font-size: 0.6rem;
+    }
+}
