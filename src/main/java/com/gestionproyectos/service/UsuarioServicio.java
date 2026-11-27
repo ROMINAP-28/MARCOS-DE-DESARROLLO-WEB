@@ -5,6 +5,7 @@ import com.gestionproyectos.dto.RegistroRequest;
 import com.gestionproyectos.dto.UsuarioActualizarRequest;
 import com.gestionproyectos.exception.RecursoDuplicadoException;
 import com.gestionproyectos.exception.RecursoNoEncontradoException;
+import com.gestionproyectos.exception.SolicitudInvalidaException;
 import com.gestionproyectos.model.Usuario;
 import com.gestionproyectos.repository.EspecialidadRepository;
 import com.gestionproyectos.repository.UsuarioRepository;
@@ -55,6 +56,9 @@ public class UsuarioServicio implements IUsuarioServicio {
         usuario.setEmail(correo);
         usuario.setPassword(passwordEncoder.encode(request.contrasena()));
         usuario.setRol("USUARIO");
+        usuario.setEspecialidad(request.idEspecialidad() == null ? null
+                : especialidadRepositorio.findById(request.idEspecialidad())
+                        .orElseThrow(() -> new SolicitudInvalidaException("La especialidad seleccionada no existe.")));
         usuarioRepositorio.save(usuario);
     }
 
