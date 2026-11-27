@@ -1,0 +1,481 @@
+/* =========================================================
+   TEMA OSCURO
+   Se activa con data-bs-theme="dark" en <html> (ver tema.js).
+   En tema claro este archivo no cambia nada.
+   ========================================================= */
+
+:root[data-bs-theme="dark"] {
+    --dash-primary: #60a5fa;
+    --dash-primary-light: rgba(96, 165, 250, 0.16);
+    --dash-text: #e2e8f0;
+    --dash-muted: #94a3b8;
+    --dash-border: #334155;
+    --dash-background: #0f172a;
+    --dash-card: #1e293b;
+
+    --tema-superficie-2: #172033;
+    --tema-hover: #273449;
+    --tema-fuerte: #f1f5f9;
+    --tema-suave: rgba(96, 165, 250, 0.16);
+
+    --bs-body-bg: #0f172a;
+    --bs-body-bg-rgb: 15, 23, 42;
+    --bs-body-color: #e2e8f0;
+    --bs-body-color-rgb: 226, 232, 240;
+    --bs-secondary-color: #94a3b8;
+    --bs-secondary-bg: #1e293b;
+    --bs-tertiary-bg: #172033;
+    --bs-border-color: #334155;
+    --bs-emphasis-color: #f8fafc;
+}
+
+/* ---------- Base y utilidades de Bootstrap con color fijo ---------- */
+[data-bs-theme="dark"] body,
+[data-bs-theme="dark"] .bg-light,
+[data-bs-theme="dark"] #dashboardApp {
+    background: var(--dash-background) !important;
+    color: var(--dash-text);
+}
+
+[data-bs-theme="dark"] .bg-white {
+    background-color: var(--dash-card) !important;
+}
+
+[data-bs-theme="dark"] .card {
+    --bs-card-bg: var(--dash-card);
+    --bs-card-cap-bg: rgba(255, 255, 255, 0.03);
+    --bs-card-border-color: var(--dash-border);
+}
+
+[data-bs-theme="dark"] .modal-content {
+    --bs-modal-bg: var(--dash-card);
+}
+
+[data-bs-theme="dark"] .alert-info {
+    --bs-alert-bg: rgba(56, 189, 248, 0.12);
+    --bs-alert-border-color: rgba(56, 189, 248, 0.35);
+    --bs-alert-color: #bae6fd;
+}
+
+[data-bs-theme="dark"] .btn-light {
+    --bs-btn-color: #e2e8f0;
+    --bs-btn-bg: #273449;
+    --bs-btn-border-color: #475569;
+    --bs-btn-hover-color: #f8fafc;
+    --bs-btn-hover-bg: #334155;
+    --bs-btn-hover-border-color: #475569;
+    --bs-btn-active-color: #f8fafc;
+    --bs-btn-active-bg: #334155;
+    --bs-btn-active-border-color: #475569;
+    --bs-btn-disabled-color: #94a3b8;
+    --bs-btn-disabled-bg: #273449;
+    --bs-btn-disabled-border-color: #334155;
+}
+
+[data-bs-theme="dark"] .text-bg-light {
+    color: #e2e8f0 !important;
+    background-color: #334155 !important;
+}
+
+/* ---------- Menú lateral (Dashboard, Proyectos, Reportes, Configuración) ---------- */
+
+/* Permite que los nombres largos se recorten con "..." en lugar de salirse del menú. */
+.sidebar-profile .min-w-0 {
+    min-width: 0;
+}
+
+[data-bs-theme="dark"] .user-avatar {
+    background: rgba(96, 165, 250, 0.2);
+    color: #93c5fd;
+}
+
+[data-bs-theme="dark"] .dashboard-nav .nav-link {
+    color: #cbd5e1;
+}
+
+[data-bs-theme="dark"] .dashboard-nav .nav-link:hover {
+    background: var(--tema-hover);
+    color: var(--dash-primary);
+}
+
+[data-bs-theme="dark"] .btn-outline-secondary {
+    --bs-btn-color: #cbd5e1;
+    --bs-btn-border-color: #475569;
+    --bs-btn-hover-bg: #334155;
+    --bs-btn-hover-border-color: #475569;
+    --bs-btn-hover-color: #f8fafc;
+}
+
+/* ---------- Dashboard ---------- */
+[data-bs-theme="dark"] .dashboard-panel .project-row {
+    border-bottom-color: var(--dash-border);
+}
+
+[data-bs-theme="dark"] .dashboard-panel .project-name,
+[data-bs-theme="dark"] .dashboard-panel .project-percentage,
+[data-bs-theme="dark"] .dashboard-task-table {
+    color: var(--dash-text);
+}
+
+[data-bs-theme="dark"] .dashboard-panel .project-progress,
+[data-bs-theme="dark"] .project-progress {
+    background: #334155;
+}
+
+[data-bs-theme="dark"] .dashboard-task-table thead th {
+    background: var(--tema-superficie-2);
+    color: #cbd5e1;
+    border-bottom-color: var(--dash-border);
+}
+
+[data-bs-theme="dark"] .dashboard-task-table tbody td {
+    border-color: var(--dash-border);
+}
+
+[data-bs-theme="dark"] .dashboard-task-table.table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: var(--tema-superficie-2);
+    color: var(--dash-text);
+}
+
+/* ---------- Proyectos ---------- */
+[data-bs-theme="dark"] .projects-toolbar,
+[data-bs-theme="dark"] .project-card,
+[data-bs-theme="dark"] .project-modal {
+    border-color: var(--dash-border);
+}
+
+[data-bs-theme="dark"] .project-card,
+[data-bs-theme="dark"] .projects-toolbar,
+[data-bs-theme="dark"] .projects-empty,
+[data-bs-theme="dark"] .project-modal {
+    background: var(--dash-card);
+    color: var(--dash-text);
+}
+
+[data-bs-theme="dark"] .project-meta {
+    color: var(--dash-muted);
+}
+
+[data-bs-theme="dark"] .projects-empty {
+    border-color: #475569;
+}
+
+[data-bs-theme="dark"] .project-modal-header {
+    border-bottom-color: var(--dash-border);
+}
+
+[data-bs-theme="dark"] .project-modal-footer {
+    border-top-color: var(--dash-border);
+    background: var(--tema-superficie-2);
+}
+
+[data-bs-theme="dark"] .project-modal .form-label {
+    color: #cbd5e1;
+}
+
+[data-bs-theme="dark"] .project-modal .form-control,
+[data-bs-theme="dark"] .project-modal .form-select {
+    border-color: #475569;
+}
+
+/* ---------- Tareas ---------- */
+[data-bs-theme="dark"] .tasks-main {
+    background: var(--dash-background);
+}
+
+[data-bs-theme="dark"] .tasks-title,
+[data-bs-theme="dark"] .task-stat-card strong,
+[data-bs-theme="dark"] .task-name,
+[data-bs-theme="dark"] .task-modal-header h2,
+[data-bs-theme="dark"] .kanban-card strong,
+[data-bs-theme="dark"] .task-viewbar > div:first-child > strong,
+[data-bs-theme="dark"] .kanban-column-header,
+[data-bs-theme="dark"] .task-modal-body .form-label {
+    color: var(--tema-fuerte);
+}
+
+[data-bs-theme="dark"] .task-stat-card,
+[data-bs-theme="dark"] .task-panel,
+[data-bs-theme="dark"] .kanban-card,
+[data-bs-theme="dark"] .task-modal {
+    background: var(--dash-card);
+    border-color: var(--dash-border);
+}
+
+[data-bs-theme="dark"] .task-stat-card span,
+[data-bs-theme="dark"] .kanban-description,
+[data-bs-theme="dark"] .kanban-project,
+[data-bs-theme="dark"] .kanban-date,
+[data-bs-theme="dark"] .kanban-assignee,
+[data-bs-theme="dark"] .task-menu-button,
+[data-bs-theme="dark"] .kanban-empty,
+[data-bs-theme="dark"] .task-table tbody td {
+    color: var(--dash-muted);
+}
+
+[data-bs-theme="dark"] .task-toolbar,
+[data-bs-theme="dark"] .task-table tbody td,
+[data-bs-theme="dark"] .task-modal-header,
+[data-bs-theme="dark"] .task-modal-footer,
+[data-bs-theme="dark"] .kanban-assignee {
+    border-color: var(--dash-border);
+}
+
+[data-bs-theme="dark"] .task-search,
+[data-bs-theme="dark"] .task-filter,
+[data-bs-theme="dark"] .task-modal-body .form-control,
+[data-bs-theme="dark"] .task-modal-body .form-select,
+[data-bs-theme="dark"] .task-action {
+    border-color: #475569;
+}
+
+[data-bs-theme="dark"] .task-search input {
+    color: var(--dash-text);
+    background: transparent;
+}
+
+[data-bs-theme="dark"] .task-view-switch {
+    background: var(--tema-superficie-2);
+}
+
+[data-bs-theme="dark"] .task-view-switch button {
+    color: var(--dash-muted);
+}
+
+[data-bs-theme="dark"] .task-view-switch button.active {
+    color: #93c5fd;
+    background: #334155;
+    box-shadow: none;
+}
+
+[data-bs-theme="dark"] .task-table thead th {
+    background: var(--tema-superficie-2);
+    color: #cbd5e1;
+    border-bottom-color: var(--dash-border);
+}
+
+[data-bs-theme="dark"] .task-action {
+    color: var(--dash-muted);
+}
+
+[data-bs-theme="dark"] .task-action:hover {
+    background: var(--tema-hover);
+    color: #93c5fd;
+}
+
+[data-bs-theme="dark"] .kanban-column {
+    background: var(--tema-superficie-2);
+    border-color: var(--dash-border);
+}
+
+[data-bs-theme="dark"] .kanban-count {
+    background: #334155;
+    color: #cbd5e1;
+}
+
+[data-bs-theme="dark"] .kanban-empty {
+    border-color: #475569;
+}
+
+/* Etiquetas de prioridad y estado (texto claro sobre fondo translúcido) */
+[data-bs-theme="dark"] .priority-low { color: #cbd5e1; background: rgba(148, 163, 184, 0.18); }
+[data-bs-theme="dark"] .priority-medium,
+[data-bs-theme="dark"] .status-pending { color: #fcd34d; background: rgba(245, 158, 11, 0.18); }
+[data-bs-theme="dark"] .priority-high { color: #fdba74; background: rgba(249, 115, 22, 0.18); }
+[data-bs-theme="dark"] .priority-urgent { color: #fca5a5; background: rgba(239, 68, 68, 0.2); }
+[data-bs-theme="dark"] .status-progress { color: #93c5fd; background: rgba(96, 165, 250, 0.18); }
+[data-bs-theme="dark"] .status-done { color: #86efac; background: rgba(34, 197, 94, 0.18); }
+[data-bs-theme="dark"] .responsible-avatar { color: #93c5fd; background: rgba(96, 165, 250, 0.2); }
+
+[data-bs-theme="dark"] .stat-total,
+[data-bs-theme="dark"] .stat-progress { color: #93c5fd; background: rgba(96, 165, 250, 0.18); }
+[data-bs-theme="dark"] .stat-pending { color: #fcd34d; background: rgba(245, 158, 11, 0.18); }
+[data-bs-theme="dark"] .stat-done { color: #86efac; background: rgba(34, 197, 94, 0.18); }
+
+/* Menú lateral propio de la pantalla de tareas */
+[data-bs-theme="dark"] #app .dashboard-sidebar {
+    background: var(--dash-card);
+    border-right-color: var(--dash-border);
+    color: #cbd5e1;
+}
+
+[data-bs-theme="dark"] #app .sidebar-brand,
+[data-bs-theme="dark"] #app .sidebar-profile strong {
+    color: var(--tema-fuerte);
+}
+
+[data-bs-theme="dark"] #app .brand-icon,
+[data-bs-theme="dark"] #app .profile-avatar {
+    background: rgba(96, 165, 250, 0.2);
+    color: #93c5fd;
+}
+
+[data-bs-theme="dark"] #app .sidebar-profile {
+    background: var(--tema-superficie-2);
+}
+
+[data-bs-theme="dark"] #app .sidebar-profile small,
+[data-bs-theme="dark"] #app .sidebar-bottom {
+    color: var(--dash-muted);
+}
+
+[data-bs-theme="dark"] #app .sidebar-bottom {
+    border-top-color: var(--dash-border);
+}
+
+[data-bs-theme="dark"] #app .sidebar-nav .sidebar-link {
+    color: #cbd5e1;
+}
+
+[data-bs-theme="dark"] #app .sidebar-nav .sidebar-link:hover {
+    color: #93c5fd;
+    background: var(--tema-hover);
+}
+
+[data-bs-theme="dark"] #app .sidebar-nav .sidebar-link.active {
+    color: #93c5fd;
+    background: var(--tema-suave);
+}
+
+/* ---------- Equipo ---------- */
+[data-bs-theme="dark"] .equipo-main {
+    background: var(--dash-background);
+}
+
+[data-bs-theme="dark"] .equipo-header h1,
+[data-bs-theme="dark"] .integrante-card h3,
+[data-bs-theme="dark"] .especialidad-card h3,
+[data-bs-theme="dark"] #equipoApp .modal-title {
+    color: var(--tema-fuerte);
+}
+
+[data-bs-theme="dark"] .equipo-panel,
+[data-bs-theme="dark"] .equipo-stat-card,
+[data-bs-theme="dark"] .integrante-card,
+[data-bs-theme="dark"] .especialidad-card {
+    background: var(--dash-card);
+    border-color: var(--dash-border);
+}
+
+[data-bs-theme="dark"] .equipo-panel .form-label,
+[data-bs-theme="dark"] #equipoApp .modal .form-label {
+    color: #cbd5e1;
+}
+
+[data-bs-theme="dark"] .equipo-panel .form-control,
+[data-bs-theme="dark"] .equipo-panel .form-select,
+[data-bs-theme="dark"] .equipo-panel .input-group-text,
+[data-bs-theme="dark"] #equipoApp .modal .form-control,
+[data-bs-theme="dark"] #equipoApp .modal .form-select {
+    border-color: #475569;
+}
+
+[data-bs-theme="dark"] .equipo-panel .input-group .input-group-text {
+    color: var(--dash-muted);
+    background: var(--tema-superficie-2);
+}
+
+[data-bs-theme="dark"] .equipo-tabs {
+    border-bottom-color: var(--dash-border);
+}
+
+[data-bs-theme="dark"] .equipo-tabs .nav-link {
+    color: var(--dash-muted);
+}
+
+[data-bs-theme="dark"] .equipo-tabs .nav-link:hover {
+    color: #93c5fd;
+    background: var(--tema-hover);
+}
+
+[data-bs-theme="dark"] .equipo-tabs .nav-link.active {
+    color: #93c5fd;
+    background: var(--dash-card);
+    border-color: var(--dash-border) var(--dash-border) var(--dash-card);
+}
+
+[data-bs-theme="dark"] .equipo-table thead th {
+    background: var(--tema-superficie-2);
+    color: #cbd5e1;
+    border-bottom-color: var(--dash-border);
+}
+
+[data-bs-theme="dark"] .equipo-table tbody td {
+    color: var(--dash-text);
+    border-color: var(--dash-border);
+}
+
+[data-bs-theme="dark"] .actividad-item,
+[data-bs-theme="dark"] #equipoApp .modal-header,
+[data-bs-theme="dark"] #equipoApp .modal-footer {
+    border-color: var(--dash-border);
+}
+
+[data-bs-theme="dark"] .integrante-avatar,
+[data-bs-theme="dark"] .perfil-avatar,
+[data-bs-theme="dark"] .actividad-icon {
+    background: rgba(96, 165, 250, 0.2);
+    color: #93c5fd;
+}
+
+/* ---------- Íconos de colores (Equipo y Reportes) ---------- */
+[data-bs-theme="dark"] .icon-blue { color: #93c5fd; background: rgba(96, 165, 250, 0.18); }
+[data-bs-theme="dark"] .icon-green { color: #86efac; background: rgba(34, 197, 94, 0.18); }
+[data-bs-theme="dark"] .icon-orange { color: #fdba74; background: rgba(249, 115, 22, 0.18); }
+[data-bs-theme="dark"] .icon-purple { color: #c4b5fd; background: rgba(139, 92, 246, 0.2); }
+
+/* ---------- Reportes ---------- */
+[data-bs-theme="dark"] .reportes-main {
+    background: var(--dash-background);
+    color: var(--dash-text);
+}
+
+[data-bs-theme="dark"] .reportes-header h1,
+[data-bs-theme="dark"] .reportes-stat-card .h3,
+[data-bs-theme="dark"] .tipo-reporte-card h3,
+[data-bs-theme="dark"] .preview-stat .h4 {
+    color: var(--tema-fuerte);
+}
+
+[data-bs-theme="dark"] .reportes-panel,
+[data-bs-theme="dark"] .reportes-stat-card,
+[data-bs-theme="dark"] .tipo-reporte-card {
+    background: var(--dash-card);
+    border-color: var(--dash-border);
+}
+
+[data-bs-theme="dark"] .tipo-reporte-card:hover {
+    border-color: #3b82f6;
+}
+
+[data-bs-theme="dark"] .tipo-reporte-card.tipo-reporte-seleccionado {
+    background: rgba(37, 99, 235, 0.14);
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+}
+
+[data-bs-theme="dark"] .reportes-panel .form-label {
+    color: #cbd5e1;
+}
+
+[data-bs-theme="dark"] .reportes-panel .form-control,
+[data-bs-theme="dark"] .reportes-panel .form-select {
+    border-color: #475569;
+    color: var(--dash-text);
+}
+
+[data-bs-theme="dark"] .preview-stat {
+    background: var(--tema-superficie-2);
+    border-color: var(--dash-border);
+}
+
+/* ---------- Configuración ---------- */
+[data-bs-theme="dark"] .config-card,
+[data-bs-theme="dark"] .config-option {
+    border-color: var(--dash-border);
+}
+
+[data-bs-theme="dark"] .config-icon {
+    background: rgba(96, 165, 250, 0.18);
+    color: #93c5fd;
+}
