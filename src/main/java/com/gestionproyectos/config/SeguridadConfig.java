@@ -4,6 +4,7 @@ import com.gestionproyectos.repository.UsuarioRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -28,6 +29,7 @@ public class SeguridadConfig {
                 .requestMatchers("/", "/login", "/registro", "/recuperar-password",
                         "/css/**", "/js/**", "/images/**", "/img/**", "/favicon.ico").permitAll()
                 .requestMatchers("/api/auth/registro").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/miembro3/especialidades").permitAll()
                 .anyRequest().authenticated())
             .formLogin(login -> login.loginPage("/login").usernameParameter("correo")
                     .passwordParameter("contrasena").defaultSuccessUrl("/dashboard", true)
@@ -55,3 +57,4 @@ public class SeguridadConfig {
         return http.build();
     }
 }
+
