@@ -9,6 +9,15 @@ import java.util.List;
 
 public interface ProyectoRepository extends JpaRepository<Proyecto, Integer> {
 
+    @Query("""
+            select p.idProyecto from Proyecto p
+            where p.responsable.idUsuario = :idUsuario
+               or exists (select 1 from ProyectoUsuario pu
+                          where pu.proyecto = p and pu.usuario.idUsuario = :idUsuario
+                            and pu.estado = 'Activo')
+            """)
+    List<Integer> idsVisibles(@Param("idUsuario") Integer idUsuario);
+
     List<Proyecto> findAllByOrderByIdProyectoDesc();
 
     @Query("""

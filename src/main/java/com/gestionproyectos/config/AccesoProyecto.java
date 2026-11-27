@@ -20,13 +20,16 @@ public class AccesoProyecto {
     private final TareaRepository tareas;
     private final UsuarioRepository usuarios;
     private final ProyectoUsuarioRepository participaciones;
+    private final AlcanceLectura alcance;
 
     public AccesoProyecto(ProyectoRepository proyectos, TareaRepository tareas,
-                          UsuarioRepository usuarios, ProyectoUsuarioRepository participaciones) {
+                           UsuarioRepository usuarios, ProyectoUsuarioRepository participaciones,
+                           AlcanceLectura alcance) {
         this.proyectos = proyectos;
         this.tareas = tareas;
         this.usuarios = usuarios;
         this.participaciones = participaciones;
+        this.alcance = alcance;
     }
 
     public boolean esUsuario(Integer id) {
@@ -66,7 +69,13 @@ public class AccesoProyecto {
     public boolean puedeCambiarEstado(Integer idTarea) {
         Tarea tarea = tarea(idTarea);
         return tarea != null && (esResponsable(tarea.getProyecto().getIdProyecto())
-                || esUsuario(tarea.getResponsable().getIdUsuario()));
+                || (esUsuario(tarea.getResponsable().getIdUsuario())
+                    && alcance.puedeVerProyecto(tarea.getProyecto().getIdProyecto())));
+    }
+
+    public boolean puedeVerTarea(Integer idTarea) {
+        Tarea tarea = tarea(idTarea);
+        return tarea != null && alcance.puedeVerProyecto(tarea.getProyecto().getIdProyecto());
     }
 
     private Tarea tarea(Integer id) {

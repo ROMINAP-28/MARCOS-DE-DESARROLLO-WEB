@@ -1,5 +1,6 @@
 package com.gestionproyectos.Controller;
 
+import com.gestionproyectos.config.AlcanceLectura;
 import com.gestionproyectos.dto.IndicadoresReportesDto;
 import com.gestionproyectos.dto.ReporteConsultaDto;
 import com.gestionproyectos.dto.ReporteConsultaRequest;
@@ -15,18 +16,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/miembro3/reportes")
 public class ConsultaReportesController {
     private final ConsultaReportesServicio servicio;
+    private final AlcanceLectura alcance;
 
-    public ConsultaReportesController(ConsultaReportesServicio servicio) {
+    public ConsultaReportesController(ConsultaReportesServicio servicio, AlcanceLectura alcance) {
         this.servicio = servicio;
+        this.alcance = alcance;
     }
 
     @GetMapping("/indicadores")
     public IndicadoresReportesDto indicadores() {
-        return servicio.indicadores();
+        return servicio.indicadores(alcance.idsProyectosVisibles());
     }
 
     @PostMapping("/consulta")
     public ReporteConsultaDto consultar(@Valid @RequestBody ReporteConsultaRequest request) {
-        return servicio.consultar(request);
+        return servicio.consultar(request, alcance.idsProyectosVisibles());
     }
 }

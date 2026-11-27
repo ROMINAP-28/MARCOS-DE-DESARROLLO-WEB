@@ -15,11 +15,13 @@ import com.gestionproyectos.repository.RecursoRepository;
 import com.gestionproyectos.repository.TareaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 @Transactional(readOnly = true)
@@ -38,14 +40,32 @@ public class ConsultaReportesServicio {
     }
 
     public IndicadoresReportesDto indicadores() {
-        long activos = proyectos.findAll().stream()
+        return indicadores(null);
+    }
+
+    // El controlador pasa siempre el conjunto de proyectos accesibles para la sesión.
+    public IndicadoresReportesDto indicadores(Set<Integer> visibles) {
+        var proyectosVisibles = proyectos.findAll().stream()
+                .filter(p -> visible(visibles, p.getIdProyecto())).toList();
+        var tareasVisibles = tareas.findAll().stream()
+                .filter(t -> visible(visibles, t.getProyecto().getIdProyecto())).toList();
+        long activos = proyectosVisibles.stream()
                 .filter(p -> "En progreso".equals(p.getEstado())).count();
-        long completadas = tareas.findAll().stream()
+        long completadas = tareasVisibles.stream()
                 .filter(t -> "Completada".equals(t.getEstado())).count();
-        return new IndicadoresReportesDto(activos, completadas, proyectos.count(), tareas.count());
+        return new IndicadoresReportesDto(activos, completadas,
+                proyectosVisibles.size(), tareasVisibles.size());
     }
 
     public ReporteConsultaDto consultar(ReporteConsultaRequest request) {
+        return consultar(request, null);
+    }
+
+    public ReporteConsultaDto consultar(ReporteConsultaRequest request, Set<Integer> visibles) {
+        if (visibles != null && request.idProyecto() != null
+                && !visibles.contains(request.idProyecto())) {
+            throw new AccessDeniedException("No tienes acceso al proyecto indicado.");
+        }
         if (request.fechaDesde() != null && request.fechaHasta() != null
                 && request.fechaDesde().isAfter(request.fechaHasta())) {
             throw new SolicitudInvalidaException("La fecha inicial no puede ser posterior a la final.");
@@ -64,18 +84,19 @@ public class ConsultaReportesServicio {
                 .orElseThrow(() -> new RecursoNoEncontradoException("Proyecto no encontrado"));
 
         List<IndicadorDto> resumen = switch (request.tipo()) {
-            case "avance" -> avance(request);
-            case "tareas" -> tareas(request);
-            case "equipo" -> equipo(request);
-            case "recursos" -> recursos(request);
+            case "avance" -> avance(request, visibles);
+            case "tareas" -> tareas(request, visibles);
+            case "equipo" -> equipo(request, visibles);
+            case "recursos" -> recursos(request, visibles);
             default -> throw new IllegalStateException("Tipo no validado");
         };
         return new ReporteConsultaDto(request.tipo(), proyecto, LocalDateTime.now(),
                 request.fechaDesde(), request.fechaHasta(), resumen);
     }
 
-    private List<IndicadorDto> avance(ReporteConsultaRequest request) {
+    private List<IndicadorDto> avance(ReporteConsultaRequest request, Set<Integer> visibles) {
         var datos = proyectos.findAll().stream()
+                .filter(p -> visible(visibles, p.getIdProyecto()))
                 .filter(p -> coincide(request.idProyecto(), p.getIdProyecto()))
                 .filter(p -> enPeriodo(p.getFechaInicio(), request)).toList();
         double progreso = datos.stream().mapToDouble(p -> p.getPorcentajeAvance() == null
@@ -86,8 +107,9 @@ public class ConsultaReportesServicio {
                 indicador("Completados", datos.stream().filter(p -> "Completado".equals(p.getEstado())).count()));
     }
 
-    private List<IndicadorDto> tareas(ReporteConsultaRequest request) {
+    private List<IndicadorDto> tareas(ReporteConsultaRequest request, Set<Integer> visibles) {
         List<Tarea> datos = tareas.findAll().stream()
+                .filter(t -> visible(visibles, t.getProyecto().getIdProyecto()))
                 .filter(t -> coincide(request.idProyecto(), t.getProyecto().getIdProyecto()))
                 .filter(t -> enPeriodo(t.getFechaFin(), request)).toList();
         return List.of(indicador("Total de tareas", datos.size()),
@@ -96,8 +118,9 @@ public class ConsultaReportesServicio {
                 indicador("Completadas", datos.stream().filter(t -> "Completada".equals(t.getEstado())).count()));
     }
 
-    private List<IndicadorDto> equipo(ReporteConsultaRequest request) {
+    private List<IndicadorDto> equipo(ReporteConsultaRequest request, Set<Integer> visibles) {
         var datos = participaciones.listarParticipaciones().stream()
+                .filter(p -> visible(visibles, p.getId().getIdProyecto()))
                 .filter(p -> coincide(request.idProyecto(), p.getId().getIdProyecto()))
                 .filter(p -> enPeriodo(p.getFechaAsignacion() == null
                         ? null : p.getFechaAsignacion().toLocalDate(), request)).toList();
@@ -107,8 +130,9 @@ public class ConsultaReportesServicio {
                 indicador("Pendientes", datos.stream().filter(p -> "Pendiente".equals(p.getEstado())).count()));
     }
 
-    private List<IndicadorDto> recursos(ReporteConsultaRequest request) {
+    private List<IndicadorDto> recursos(ReporteConsultaRequest request, Set<Integer> visibles) {
         List<Recurso> datos = recursos.findAll().stream()
+                .filter(r -> visible(visibles, r.getProyecto().getIdProyecto()))
                 .filter(r -> coincide(request.idProyecto(), r.getProyecto().getIdProyecto())).toList();
         return List.of(indicador("Recursos registrados", datos.size()),
                 indicador("Unidades registradas", datos.stream().mapToLong(Recurso::getCantidad).sum()),
@@ -117,6 +141,10 @@ public class ConsultaReportesServicio {
 
     private boolean coincide(Integer solicitado, Integer real) {
         return solicitado == null || Objects.equals(solicitado, real);
+    }
+
+    private boolean visible(Set<Integer> visibles, Integer idProyecto) {
+        return visibles == null || visibles.contains(idProyecto);
     }
 
     // Los registros sin fecha no se incluyen cuando hay un filtro temporal.

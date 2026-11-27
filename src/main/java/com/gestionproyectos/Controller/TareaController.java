@@ -1,5 +1,6 @@
 package com.gestionproyectos.Controller;
 
+import com.gestionproyectos.config.AlcanceLectura;
 import com.gestionproyectos.dto.EstadoRequest;
 import com.gestionproyectos.dto.TareaDto;
 import com.gestionproyectos.dto.TareaRequest;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @RestController
 // http://localhost:8080/api/miembro3/tareas
@@ -24,22 +26,28 @@ public class TareaController {
 
     private final ITareaServicio tareaServicio;
     private final AvisosTiempoReal avisos;
+    private final AlcanceLectura alcance;
 
-    public TareaController(ITareaServicio tareaServicio, AvisosTiempoReal avisos) {
+    public TareaController(ITareaServicio tareaServicio, AvisosTiempoReal avisos,
+                           AlcanceLectura alcance) {
         this.tareaServicio = tareaServicio;
         this.avisos = avisos;
+        this.alcance = alcance;
     }
 
     // GET http://localhost:8080/api/miembro3/tareas
     @GetMapping("/tareas")
     public List<TareaDto> obtenerTareas() {
-        List<TareaDto> tareas = tareaServicio.listarTareas();
+        Set<Integer> visibles = alcance.idsProyectosVisibles();
+        List<TareaDto> tareas = tareaServicio.listarTareas().stream()
+                .filter(t -> visibles.contains(t.idProyecto())).toList();
         logger.info("Tareas encontradas: {}", tareas.size());
         return tareas;
     }
 
     // GET http://localhost:8080/api/miembro3/tareas/1
     @GetMapping("/tareas/{id}")
+    @PreAuthorize("@accesoProyecto.puedeVerTarea(#id)")
     public TareaDto obtenerTareaPorId(@PathVariable Integer id) {
         return tareaServicio.buscarTareaPorId(id);
     }

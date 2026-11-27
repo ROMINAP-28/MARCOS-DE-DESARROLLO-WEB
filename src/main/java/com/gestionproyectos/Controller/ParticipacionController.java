@@ -1,5 +1,6 @@
 package com.gestionproyectos.Controller;
 
+import com.gestionproyectos.config.AlcanceLectura;
 import com.gestionproyectos.dto.EstadoParticipacionRequest;
 import com.gestionproyectos.dto.ParticipacionDto;
 import com.gestionproyectos.dto.ParticipacionRequest;
@@ -11,21 +12,26 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/miembro3/participaciones")
 public class ParticipacionController {
     private final ParticipacionServicio servicio;
     private final AvisosTiempoReal avisos;
+    private final AlcanceLectura alcance;
 
-    public ParticipacionController(ParticipacionServicio servicio, AvisosTiempoReal avisos) {
+    public ParticipacionController(ParticipacionServicio servicio, AvisosTiempoReal avisos,
+                                   AlcanceLectura alcance) {
         this.servicio = servicio;
         this.avisos = avisos;
+        this.alcance = alcance;
     }
 
     @GetMapping
     public List<ParticipacionDto> listar() {
-        return servicio.listar();
+        Set<Integer> visibles = alcance.idsProyectosVisibles();
+        return servicio.listar().stream().filter(p -> visibles.contains(p.idProyecto())).toList();
     }
 
     @PostMapping
