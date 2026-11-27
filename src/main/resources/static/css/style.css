@@ -738,6 +738,19 @@ body {
     box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.12);
 }
 
+#registroApp .form-control-lg,
+#registroApp .form-select-lg {
+    font-size: 1rem;
+    height: 48px;
+    padding: 10px 14px;
+    font-family: inherit;
+}
+
+/* Texto de la especialidad */
+#registroApp .form-select-lg option {
+    font-size: 1rem;
+}
+
 /* Proyectos: adaptación para móviles. */
 @media (max-width: 767.98px) {
     .projects-heading {
