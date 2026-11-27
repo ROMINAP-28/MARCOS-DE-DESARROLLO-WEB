@@ -26,7 +26,7 @@ public class SeguridadConfig {
     @Bean
     SecurityFilterChain seguridad(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(reglas -> reglas
-                .requestMatchers("/", "/login", "/registro", "/recuperar-password",
+                .requestMatchers("/", "/login", "/registro", "/recuperar-password", "/restablecer-password",
                         "/css/**", "/js/**", "/images/**", "/img/**", "/favicon.ico").permitAll()
                 .requestMatchers("/api/auth/registro").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/miembro3/especialidades").permitAll()

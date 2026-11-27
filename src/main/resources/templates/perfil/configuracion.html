@@ -114,8 +114,23 @@
                                     <p class="text-secondary small mb-0">Información personal y de acceso.</p>
                                 </div>
                             </div>
-                            <p id="datosCuenta" class="text-secondary mb-0">Cargando cuenta autenticada...</p>
-                            <p class="small text-secondary mt-2 mb-0">La edición del perfil se realiza desde la API de usuario.</p>
+                            <p id="datosCuenta" class="text-secondary mb-3">Cargando cuenta autenticada...</p>
+                            <div id="perfilError" class="alert alert-danger d-none" role="alert"></div>
+                            <div id="perfilExito" class="alert alert-success d-none" role="status"></div>
+                            <form id="formularioPerfil" class="d-none">
+                                <label for="perfilNombre" class="form-label">Nombre completo</label>
+                                <input id="perfilNombre" name="nombre" class="form-control mb-3" maxlength="100" required>
+                                <label for="perfilCorreo" class="form-label">Correo electrónico</label>
+                                <input id="perfilCorreo" name="correo" type="email" class="form-control mb-3"
+                                       autocomplete="email" maxlength="150" required>
+                                <label for="perfilTelefono" class="form-label">Teléfono (opcional)</label>
+                                <input id="perfilTelefono" name="telefono" type="tel" class="form-control mb-3" maxlength="20">
+                                <label for="perfilEspecialidad" class="form-label">Especialidad (opcional)</label>
+                                <select id="perfilEspecialidad" name="especialidad" class="form-select mb-3">
+                                    <option value="">Sin especialidad</option>
+                                </select>
+                                <button type="submit" class="btn btn-primary">Guardar perfil</button>
+                            </form>
                         </div>
                     </section>
                 </div>
@@ -130,7 +145,7 @@
                                     <p class="text-secondary small mb-0">Protección y acceso a tu cuenta.</p>
                                 </div>
                             </div>
-                            <p class="text-secondary mb-0">El cambio de contraseña y la gestión de sesiones requieren conectar esta vista con el servicio de autenticación. Todavía no están disponibles.</p>
+                            <p class="text-secondary mb-0">La gestión de sesiones no está disponible. Si olvidaste tu contraseña, puedes solicitar un enlace de recuperación desde el inicio de sesión.</p>
                         </div>
                     </section>
                 </div>
@@ -156,6 +171,7 @@
         </main>
     </div>
 </div>
+<script th:src="@{/js/csrf.js}"></script>
 <script th:src="@{/js/configuracion.js}"></script>
 </body>
 </html>

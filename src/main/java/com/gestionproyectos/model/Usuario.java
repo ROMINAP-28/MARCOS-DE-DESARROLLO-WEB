@@ -79,6 +79,9 @@ public class Usuario {
     @OneToMany(mappedBy = "usuario")
     private List<Notificacion> notificaciones;
 
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<RecuperacionPassword> recuperacionesPassword;
+
     @OneToMany(mappedBy = "usuario")
     private List<Comentario> comentarios;
 
