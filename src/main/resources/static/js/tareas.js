@@ -1,4 +1,3 @@
-
 /* Tareas + Kanban + drag-and-drop + API REST. */
 const { createApp } = Vue;
 
@@ -204,14 +203,16 @@ createApp({
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ nombre: this.formulario.nombre,
+                    body: JSON.stringify({
+                        nombre: this.formulario.nombre,
                         descripcion: this.formulario.descripcion,
                         idProyecto: this.formulario.idProyecto,
                         prioridad: this.formulario.prioridad,
                         estado: this.formulario.estado,
                         fechaInicio: this.formulario.fechaInicio || null,
                         fechaFin: this.formulario.fechaFin,
-                        idResponsable: this.formulario.idResponsable })
+                        idResponsable: this.formulario.idResponsable
+                    })
                 });
 
                 if (!respuesta.ok) {
