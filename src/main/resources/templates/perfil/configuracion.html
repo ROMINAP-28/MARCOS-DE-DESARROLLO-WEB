@@ -10,6 +10,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/dashboar.css}">
     <link rel="stylesheet" th:href="@{/css/configuracion.css}">
+    <link rel="stylesheet" th:href="@{/css/tema.css}">
+    <script th:src="@{/js/tema.js}"></script>
 </head>
 <body>
 <div class="container-fluid p-0">
@@ -48,12 +50,44 @@
                     <section class="card config-card h-100" aria-labelledby="preferencias-titulo">
                         <div class="card-body">
                             <div class="config-heading">
-                                <span class="config-icon"><i class="bi bi-sliders" aria-hidden="true"></i></span>
+                                <span class="config-icon"><i class="bi bi-palette" aria-hidden="true"></i></span>
                                 <div>
-                                    <h2 id="preferencias-titulo" class="h5 fw-semibold mb-1">Preferencias de visualización</h2>
-                                    <p class="text-secondary small mb-0">Personaliza cómo se muestra esta página.</p>
+                                    <h2 id="preferencias-titulo" class="h5 fw-semibold mb-1">Personalización</h2>
+                                    <p class="text-secondary small mb-0">Elige cómo quieres ver la plataforma.</p>
                                 </div>
                             </div>
+
+                            <fieldset class="mb-4">
+                                <legend class="fw-semibold fs-6 mb-2">Tema de la interfaz</legend>
+                                <div class="theme-options" role="radiogroup" aria-label="Tema de la interfaz">
+                                    <label class="theme-option" for="temaClaro">
+                                        <input type="radio" name="tema" id="temaClaro" value="claro" class="visually-hidden">
+                                        <span class="theme-preview theme-preview-claro" aria-hidden="true">
+                                            <span class="theme-preview-side"></span>
+                                            <span class="theme-preview-body"><i></i><i></i><i></i></span>
+                                        </span>
+                                        <span class="theme-option-label"><i class="bi bi-sun" aria-hidden="true"></i> Claro</span>
+                                    </label>
+                                    <label class="theme-option" for="temaOscuro">
+                                        <input type="radio" name="tema" id="temaOscuro" value="oscuro" class="visually-hidden">
+                                        <span class="theme-preview theme-preview-oscuro" aria-hidden="true">
+                                            <span class="theme-preview-side"></span>
+                                            <span class="theme-preview-body"><i></i><i></i><i></i></span>
+                                        </span>
+                                        <span class="theme-option-label"><i class="bi bi-moon-stars" aria-hidden="true"></i> Oscuro</span>
+                                    </label>
+                                    <label class="theme-option" for="temaSistema">
+                                        <input type="radio" name="tema" id="temaSistema" value="sistema" class="visually-hidden">
+                                        <span class="theme-preview theme-preview-sistema" aria-hidden="true">
+                                            <span class="theme-preview-side"></span>
+                                            <span class="theme-preview-body"><i></i><i></i><i></i></span>
+                                        </span>
+                                        <span class="theme-option-label"><i class="bi bi-circle-half" aria-hidden="true"></i> Automático</span>
+                                    </label>
+                                </div>
+                                <p id="temaAyuda" class="small text-secondary mb-0 mt-2">El tema se aplica a todas las pantallas de la plataforma.</p>
+                            </fieldset>
+
                             <div class="config-option d-flex justify-content-between align-items-start gap-3">
                                 <div>
                                     <label for="vistaCompacta" class="fw-semibold">Vista compacta</label>
@@ -64,7 +98,7 @@
                                            role="switch" aria-describedby="vistaCompactaAyuda">
                                 </div>
                             </div>
-                            <p class="small text-secondary mb-0 mt-3">Esta preferencia se guarda únicamente en tu navegador y no modifica la cuenta ni otras páginas.</p>
+                            <p class="small text-secondary mb-0 mt-3">Estas preferencias se guardan únicamente en tu navegador y no modifican tu cuenta.</p>
                             <p id="estadoPreferencia" class="visually-hidden" role="status" aria-live="polite"></p>
                         </div>
                     </section>
