@@ -5,7 +5,8 @@ const { createApp } = Vue;
 createApp({
     data() {
         return {
-            usuario: 'Usuario',
+            usuario: '',
+            errorIdentidad: '',
             proyectos: [],
             tareas: [],
             cargando: true,
@@ -14,6 +15,7 @@ createApp({
     },
 
     mounted() {
+        this.cargarIdentidad();
         this.cargarResumen();
         this.alActualizar = evento => {
             if (['todos', 'proyectos', 'tareas'].includes(evento.detail?.recurso)) {
@@ -70,6 +72,19 @@ createApp({
     },
 
     methods: {
+        async cargarIdentidad() {
+            this.usuario = '';
+            this.errorIdentidad = '';
+            try {
+                const respuesta = await fetch('/api/auth/yo');
+                if (!respuesta.ok) throw new Error();
+                const cuenta = await respuesta.json();
+                if (typeof cuenta.nombre !== 'string' || !cuenta.nombre.trim()) throw new Error();
+                this.usuario = cuenta.nombre.trim();
+            } catch (_) {
+                this.errorIdentidad = 'No se pudo cargar tu nombre.';
+            }
+        },
         async cargarResumen() {
             this.cargando = true;
             this.errorCarga = '';

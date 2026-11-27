@@ -31,9 +31,9 @@
                         <a class="nav-link" th:href="@{/}">Inicio</a>
                     </li>
 
-                    <!-- Enlace de navegación preparado para el módulo de proyectos. -->
+                    <!-- La ruta privada muestra proyectos al iniciar sesión; de lo contrario pide autenticación. -->
                     <li class="nav-item">
-                        <a class="nav-link" th:href="@{/login}">Proyectos</a>
+                        <a class="nav-link" th:href="@{/proyectos}" title="Inicia sesión para ver tus proyectos">Mis proyectos</a>
                     </li>
 
                     <!-- Thymeleaf: acceso a la interfaz de autenticación. -->

@@ -67,6 +67,27 @@ test('errores de carga y consulta no muestran cifras ni vista previa ficticias',
     assert.equal(estado.reporteActual, null);
 });
 
+test('obtiene la identidad actual y no muestra un nombre anterior cuando falla la consulta', async () => {
+    let nombre = 'Carlos Vega';
+    const rutas = [];
+    const estado = crear(async ruta => {
+        rutas.push(ruta);
+        return nombre === null ? { ok: false, json: async () => ({}) } : respuesta({ nombre });
+    });
+    await estado.cargarIdentidad();
+    assert.equal(estado.usuario, 'Carlos Vega');
+    assert.equal(estado.inicialesUsuario, 'CV');
+    nombre = null;
+    await estado.cargarIdentidad();
+    assert.equal(estado.usuario, '');
+    assert.match(estado.errorIdentidad, /No se pudo cargar/);
+    nombre = 'Dana Flores';
+    await estado.cargarIdentidad();
+    assert.equal(estado.usuario, 'Dana Flores');
+    assert.equal(estado.errorIdentidad, '');
+    assert.deepEqual(rutas, Array(3).fill('/api/auth/yo'));
+});
+
 test('CSV exporta resumen recibido del servidor y neutraliza fórmulas', async () => {
     let archivo;
     let click = false;

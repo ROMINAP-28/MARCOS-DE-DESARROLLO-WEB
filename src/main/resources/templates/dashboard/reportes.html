@@ -31,11 +31,16 @@
         <aside class="dashboard-sidebar bg-white border-end">
 
             <div class="sidebar-profile">
-                <div class="user-avatar">{{ iniciales(usuario) }}</div>
+                <div class="user-avatar">{{ usuario ? inicialesUsuario : '—' }}</div>
                 <div class="min-w-0">
-                    <div class="fw-semibold text-truncate">{{ usuario }}</div>
+                    <div class="fw-semibold text-truncate">{{ usuario || 'Nombre no disponible' }}</div>
                     <small class="text-secondary">Usuario</small>
                 </div>
+            </div>
+
+            <div v-if="errorIdentidad" class="px-3 small text-danger" role="alert">
+                {{ errorIdentidad }}
+                <button type="button" class="btn btn-sm btn-link" @click="cargarIdentidad">Reintentar</button>
             </div>
 
 

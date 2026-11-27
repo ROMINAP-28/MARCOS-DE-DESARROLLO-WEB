@@ -38,15 +38,20 @@
             <!-- Vue.js: muestra el avatar y el nombre del usuario. -->
             <div class="sidebar-profile">
                 <div class="user-avatar">
-                    {{ iniciales }}
+                    {{ usuario ? iniciales : '—' }}
                 </div>
 
                 <div class="min-w-0">
                     <div class="fw-semibold text-truncate">
-                        {{ usuario }}
+                        {{ usuario || 'Nombre no disponible' }}
                     </div>
                     <small class="text-secondary">Usuario</small>
                 </div>
+            </div>
+
+            <div v-if="errorIdentidad" class="px-3 small text-danger" role="alert">
+                {{ errorIdentidad }}
+                <button type="button" class="btn btn-sm btn-link" @click="cargarIdentidad">Reintentar</button>
             </div>
 
             <hr>
@@ -99,7 +104,7 @@
             <!-- Vue.js: muestra el saludo personalizado. -->
             <section class="dashboard-welcome mb-4">
                 <h1 class="h3 fw-semibold mb-1">
-                    {{ saludo }}, {{ usuario }}
+                    {{ saludo }}{{ usuario ? ', ' + usuario : '' }}
                 </h1>
 
                 <p class="text-secondary mb-0">

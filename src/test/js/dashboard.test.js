@@ -87,3 +87,25 @@ test('un error no presenta contadores engañosos y permite reintentar', async ()
     assert.equal(estado.proyectos.length, 1);
     assert.equal(estado.errorCarga, '');
 });
+
+test('muestra nombre de la sesión actual y borra identidad previa ante fallo o cambio de cuenta', async () => {
+    let nombre = 'Ana Ruiz';
+    const rutas = [];
+    const { componente, estado } = crearDashboard(async ruta => {
+        rutas.push(ruta);
+        return nombre === null ? { ok: false } : respuesta({ nombre });
+    });
+    assert.equal(estado.usuario, '');
+    await estado.cargarIdentidad();
+    assert.equal(estado.usuario, 'Ana Ruiz');
+    assert.equal(componente.computed.iniciales.call(estado), 'AR');
+    nombre = null;
+    await estado.cargarIdentidad();
+    assert.equal(estado.usuario, '');
+    assert.match(estado.errorIdentidad, /No se pudo cargar/);
+    nombre = 'Beatriz Luna';
+    await estado.cargarIdentidad();
+    assert.equal(estado.usuario, 'Beatriz Luna');
+    assert.equal(estado.errorIdentidad, '');
+    assert.deepEqual(rutas, Array(3).fill('/api/auth/yo'));
+});

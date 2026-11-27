@@ -3,7 +3,8 @@ const { createApp } = Vue;
 createApp({
     data() {
         return {
-            usuario: 'Usuario',
+            usuario: '',
+            errorIdentidad: '',
             tipoSeleccionado: 'avance',
             mensajeError: '',
             cargando: true,
@@ -35,6 +36,7 @@ createApp({
         }
     },
     mounted() {
+        this.cargarIdentidad();
         this.cargarDatos();
         this.alActualizar = evento => {
             if (['todos', 'proyectos', 'tareas', 'equipo'].includes(evento.detail?.recurso)) {
@@ -48,6 +50,17 @@ createApp({
         window.removeEventListener('gestion:actualizado', this.alActualizar);
     },
     methods: {
+        async cargarIdentidad() {
+            this.usuario = '';
+            this.errorIdentidad = '';
+            try {
+                const cuenta = await this.solicitar('/api/auth/yo');
+                if (typeof cuenta.nombre !== 'string' || !cuenta.nombre.trim()) throw new Error();
+                this.usuario = cuenta.nombre.trim();
+            } catch (_) {
+                this.errorIdentidad = 'No se pudo cargar tu nombre.';
+            }
+        },
         async solicitar(url, opciones) {
             const respuesta = await fetch(url, opciones);
             if (!respuesta.ok) {

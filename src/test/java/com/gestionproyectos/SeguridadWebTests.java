@@ -27,6 +27,36 @@ class SeguridadWebTests {
     @Autowired PasswordEncoder encoder;
 
     @Test
+    void enlacePublicoAbreProyectosConSesionYPideLoginSinSesionYVistaUsaIdentidadActual() throws Exception {
+        var mvc = MockMvcBuilders.webAppContextSetup(contexto)
+                .apply(SecurityMockMvcConfigurers.springSecurity()).build();
+        Usuario primera = usuario("Ana Ruiz", "clave-segura-123");
+        Usuario segunda = usuario("Beatriz Luna", "clave-segura-456");
+        try {
+            mvc.perform(get("/"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(org.hamcrest.Matchers.containsString("href=\"/proyectos\"")))
+                    .andExpect(content().string(org.hamcrest.Matchers.containsString("Mis proyectos")));
+            mvc.perform(get("/proyectos")).andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/login"));
+            for (Usuario cuenta : new Usuario[] { primera, segunda }) {
+                MockHttpSession sesion = sesion(mvc, cuenta,
+                        cuenta == primera ? "clave-segura-123" : "clave-segura-456");
+                mvc.perform(get("/proyectos").session(sesion)).andExpect(status().isOk());
+                mvc.perform(get("/dashboard").session(sesion)).andExpect(status().isOk())
+                        .andExpect(content().string(org.hamcrest.Matchers.containsString("cargarIdentidad")));
+                mvc.perform(get("/reportes").session(sesion)).andExpect(status().isOk())
+                        .andExpect(content().string(org.hamcrest.Matchers.containsString("cargarIdentidad")));
+                mvc.perform(get("/api/auth/yo").session(sesion)).andExpect(status().isOk())
+                        .andExpect(jsonPath("$.nombre").value(cuenta.getNombre()));
+            }
+        } finally {
+            usuarios.delete(primera);
+            usuarios.delete(segunda);
+        }
+    }
+
+    @Test
     void loginConBcryptSesionCsrfYLogoutProtegenVistasYApi() throws Exception {
         var mvc = MockMvcBuilders.webAppContextSetup(contexto)
                 .apply(SecurityMockMvcConfigurers.springSecurity()).build();
