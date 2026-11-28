@@ -44,12 +44,12 @@ createApp({
     },
 
     computed: {
+
         proyectosGestionados() {
-            return this.proyectosCatalogo.filter(
-                p => p.idResponsable === this.idUsuarioActual
+            return this.proyectosCatalogo.filter(p =>
+                Number(p.idResponsable) === Number(this.idUsuarioActual)
             );
         },
-
         responsablesDisponibles() {
             return this.participaciones.filter(
                 p => p.idProyecto === this.formulario.idProyecto &&
@@ -163,6 +163,7 @@ createApp({
     },
 
     methods: {
+
         formularioVacio() {
             return {
                 id: null,
@@ -211,6 +212,18 @@ createApp({
                 this.participaciones = participaciones;
                 this.idUsuarioActual = cuenta.id;
                 this.usuario = cuenta.nombre;
+
+                console.log("Usuario actual:", this.idUsuarioActual);
+
+                console.log("Proyectos recibidos:", this.proyectosCatalogo);
+
+                console.log("Responsables de proyectos:",
+                    this.proyectosCatalogo.map(p => ({
+                        id: p.id,
+                        idResponsable: p.idResponsable,
+                        tipo: typeof p.idResponsable
+                    }))
+                );
 
                 this.proyectos = [
                     ...new Set(this.tareas.map(t => t.proyecto))

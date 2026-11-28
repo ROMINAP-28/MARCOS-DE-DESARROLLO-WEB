@@ -1,5 +1,13 @@
 package com.gestionproyectos.Controller;
 
+import com.gestionproyectos.Reportes.ExportadorExcel;
+import com.gestionproyectos.Reportes.ExportadorPdf;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+
+import java.io.IOException;
+import java.util.Arrays;
 import com.gestionproyectos.config.AlcanceLectura;
 import com.gestionproyectos.dto.EstadoRequest;
 import com.gestionproyectos.dto.TareaDto;
@@ -29,7 +37,7 @@ public class TareaController {
     private final AlcanceLectura alcance;
 
     public TareaController(ITareaServicio tareaServicio, AvisosTiempoReal avisos,
-                           AlcanceLectura alcance) {
+            AlcanceLectura alcance) {
         this.tareaServicio = tareaServicio;
         this.avisos = avisos;
         this.alcance = alcance;
@@ -68,7 +76,7 @@ public class TareaController {
     @PutMapping("/tareas/{id}")
     @PreAuthorize("@accesoProyecto.esResponsableDeTarea(#id) && @accesoProyecto.puedeCrearTarea(#request)")
     public TareaDto actualizarTarea(@PathVariable Integer id,
-                                    @Valid @RequestBody TareaRequest request) {
+            @Valid @RequestBody TareaRequest request) {
         Integer responsableAnterior = tareaServicio.buscarTareaPorId(id).idResponsable();
         TareaDto tarea = tareaServicio.actualizarTarea(id, request);
         avisos.tareaCambiada();
@@ -94,5 +102,70 @@ public class TareaController {
     public void eliminarTarea(@PathVariable Integer id) {
         tareaServicio.eliminarTarea(id);
         avisos.tareaCambiada();
+    }
+
+    @GetMapping("/tareas/excel")
+    public ResponseEntity<byte[]> exportarTareasExcel() throws IOException {
+        Set<Integer> visibles = alcance.idsProyectosVisibles();
+
+        List<TareaDto> tareas = tareaServicio.listarTareas().stream()
+                .filter(t -> visibles.contains(t.idProyecto()))
+                .toList();
+
+        List<String> encabezados = Arrays.asList(
+                "ID", "Tarea", "Descripción", "Proyecto",
+                "Prioridad", "Estado", "Fecha de inicio",
+                "Fecha de fin", "Responsable"
+        );
+
+        List<List<Object>> filas = tareas.stream()
+                .map(t -> Arrays.<Object>asList(
+                        t.id(), t.nombre(), t.descripcion(), t.proyecto(),
+                        t.prioridad(), t.estado(), t.fechaInicio(),
+                        t.fechaFin(), t.responsable()
+                ))
+                .toList();
+
+        byte[] archivo = new ExportadorExcel()
+                .generar("Tareas", encabezados, filas);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"tareas.xlsx\"")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(archivo);
+    }
+
+    @GetMapping("/tareas/pdf")
+    public ResponseEntity<byte[]> exportarTareasPdf() {
+        Set<Integer> visibles = alcance.idsProyectosVisibles();
+
+        List<TareaDto> tareas = tareaServicio.listarTareas().stream()
+                .filter(t -> visibles.contains(t.idProyecto()))
+                .toList();
+
+        List<String> encabezados = Arrays.asList(
+                "ID", "Tarea", "Descripción", "Proyecto",
+                "Prioridad", "Estado", "Fecha de inicio",
+                "Fecha de fin", "Responsable"
+        );
+
+        List<List<Object>> filas = tareas.stream()
+                .map(t -> Arrays.<Object>asList(
+                        t.id(), t.nombre(), t.descripcion(), t.proyecto(),
+                        t.prioridad(), t.estado(), t.fechaInicio(),
+                        t.fechaFin(), t.responsable()
+                ))
+                .toList();
+
+        byte[] archivo = new ExportadorPdf()
+                .generar("Reporte de tareas", encabezados, filas);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"tareas.pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(archivo);
     }
 }

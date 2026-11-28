@@ -1,5 +1,11 @@
 package com.gestionproyectos.Controller;
 
+import com.gestionproyectos.Reportes.ProyectoExcel;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+
+import java.io.IOException;
 import com.gestionproyectos.config.AlcanceLectura;
 import com.gestionproyectos.dto.ProyectoDto;
 import com.gestionproyectos.dto.ProyectoRequest;
@@ -27,7 +33,7 @@ public class ProyectoController {
     private final AlcanceLectura alcance;
 
     public ProyectoController(IProyectoServicio proyectoServicio, AvisosTiempoReal avisos,
-                              AlcanceLectura alcance) {
+            AlcanceLectura alcance) {
         this.proyectoServicio = proyectoServicio;
         this.avisos = avisos;
         this.alcance = alcance;
@@ -66,7 +72,7 @@ public class ProyectoController {
     @PutMapping("/proyectos/{id}")
     @PreAuthorize("@accesoProyecto.esResponsable(#id)")
     public ProyectoDto actualizarProyecto(@PathVariable Integer id,
-                                          @Valid @RequestBody ProyectoRequest request) {
+            @Valid @RequestBody ProyectoRequest request) {
         ProyectoDto proyecto = proyectoServicio.actualizarProyecto(id, request);
         avisos.proyectoCambiado();
         avisos.equipoCambiado();
@@ -82,5 +88,28 @@ public class ProyectoController {
         avisos.proyectoCambiado();
         avisos.tareaCambiada();
         avisos.equipoCambiado();
+    }
+
+    @GetMapping("/proyectos/excel")
+    public ResponseEntity<byte[]> exportarProyectosExcel(
+            @RequestParam(required = false) String q) throws IOException {
+
+        Set<Integer> visibles = alcance.idsProyectosVisibles();
+
+        List<ProyectoDto> proyectos = proyectoServicio.listarProyectos(q).stream()
+                .filter(p -> visibles.contains(p.id()))
+                .toList();
+
+        byte[] archivo = new ProyectoExcel().exportar(proyectos);
+
+        return ResponseEntity.ok()
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"proyectos.xlsx\""
+                )
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ))
+                .body(archivo);
     }
 }
